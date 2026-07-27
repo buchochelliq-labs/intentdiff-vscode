@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/record-release-demo.ps1",
+  "required_surfaces": [
+    "dashboard",
+    "review",
+    "intent",
+    "risk",
+    "evidence",
+    "notes",
+    "release-notes",
+    "binary-image",
+    "schema",
+    "guardrails",
+    "language-sweep",
+    "narrow",
+    "light-theme"
+  ],
+  "allowed_statuses": [
+    "approved",
+    "needs_polish",
+    "post_beta"
+  ],
+  "screenshots": [
+    {
+      "surface": "binary-image",
+      "screenshot_path": "intentdiff-vscode-binary-image.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene binary-image -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-binary-image.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:36:43.4228563Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "dashboard",
+      "screenshot_path": "intentdiff-vscode-dashboard.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene dashboard -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-dashboard.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:31:29.1045749Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "evidence",
+      "screenshot_path": "intentdiff-vscode-evidence.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene evidence -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-evidence.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:34:29.0527533Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "guardrails",
+      "screenshot_path": "intentdiff-vscode-guardrails.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene guardrails -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-guardrails.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:38:10.1493157Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "intent",
+      "screenshot_path": "intentdiff-vscode-intent.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene intent -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-intent.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:32:58.9463810Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "language-sweep",
+      "screenshot_path": "intentdiff-vscode-language-sweep.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene language-sweep -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-language-sweep.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:38:55.0159420Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "light-theme",
+      "screenshot_path": "intentdiff-vscode-light-theme.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene light-theme -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-light-theme.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:48:50.2998885Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "notes",
+      "screenshot_path": "intentdiff-vscode-notes.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene notes -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-notes.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:35:13.5364181Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "release-notes",
+      "screenshot_path": "intentdiff-vscode-release-notes.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene release-notes -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-release-notes.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:35:58.4023017Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "review",
+      "screenshot_path": "intentdiff-vscode-review.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene review -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-review.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:32:13.9809407Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "risk",
+      "screenshot_path": "intentdiff-vscode-risk.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene risk -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-risk.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:33:44.0183383Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "schema",
+      "screenshot_path": "intentdiff-vscode-schema.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene schema -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-schema.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,1280,720",
+      "captured_width": 1280,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:37:27.0023574Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    },
+    {
+      "surface": "narrow",
+      "screenshot_path": "intentdiff-vscode-narrow.png",
+      "status": "approved",
+      "capture_command": "powershell -ExecutionPolicy Bypass -File scripts/record-release-demo.ps1 -Demo vscode -Scene narrow -CaptureMode screenshot -OutputScreenshot \"intentdiff-vscode-narrow.png\" -ManifestPath \"manifest.json\"",
+      "capture_region": "80,80,760,720",
+      "captured_width": 760,
+      "captured_height": 720,
+      "captured_at": "2026-06-10T20:49:35.2996872Z",
+      "notes": "Captured for review; user approval is required before refreshing curated media."
+    }
+  ]
+}

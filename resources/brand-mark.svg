@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">IntentDiff brand mark</title>
+  <desc id="desc">Gradient IntentDiff I pillar with segmented semantic diff trails.</desc>
+  <defs>
+    <linearGradient id="intentdiff-mark-gradient" x1="66" y1="26" x2="143" y2="226" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#19e6c6"/>
+      <stop offset=".52" stop-color="#27bdf4"/>
+      <stop offset="1" stop-color="#6f62ff"/>
+    </linearGradient>
+    <linearGradient id="intentdiff-mark-trail" x1="129" y1="66" x2="229" y2="176" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#10e5bf" stop-opacity=".22"/>
+      <stop offset=".48" stop-color="#2eb7ff"/>
+      <stop offset="1" stop-color="#7d57ff"/>
+    </linearGradient>
+    <filter id="intentdiff-mark-glow" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.02 0 0 0 0 0.65 0 0 0 0 1 0 0 0 .45 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g filter="url(#intentdiff-mark-glow)">
+    <path
+      fill="url(#intentdiff-mark-gradient)"
+      d="M82 27h50c10 0 18 8 18 18v166c0 10-8 18-18 18H82c-10 0-18-8-18-18v-28c0-10 8-18 18-18h17V91H82c-10 0-18-8-18-18V45c0-10 8-18 18-18Z"
+    />
+    <path stroke="url(#intentdiff-mark-trail)" stroke-linecap="round" stroke-width="15" d="M145 75h73"/>
+    <path stroke="url(#intentdiff-mark-trail)" stroke-linecap="round" stroke-width="15" d="M145 111h52"/>
+    <path stroke="url(#intentdiff-mark-trail)" stroke-linecap="round" stroke-width="15" d="M219 111h28"/>
+    <path stroke="url(#intentdiff-mark-trail)" stroke-linecap="round" stroke-width="15" d="M145 147h77"/>
+    <path stroke="url(#intentdiff-mark-trail)" stroke-linecap="round" stroke-width="15" d="M145 183h45"/>
+    <path stroke="url(#intentdiff-mark-trail)" stroke-linecap="round" stroke-width="15" d="M212 183h24"/>
+    <circle cx="238" cy="75" r="8" fill="#3f8cff"/>
+    <circle cx="219" cy="147" r="8" fill="#7764ff"/>
+    <circle cx="241" cy="147" r="7" fill="#8057ff"/>
+  </g>
+</svg>

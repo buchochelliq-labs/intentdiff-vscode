@@ -1,0 +1,38 @@
+name: release-media-manifest-gate
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/record-release-demo.ps1'
+      - 'scripts/validate-release-media-manifest.ps1'
+      - 'scripts/validate_release_media_manifest.py'
+      - '.github/workflows/release-media-manifest-gate.yml'
+      - 'release-media/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/record-release-demo.ps1'
+      - 'scripts/validate-release-media-manifest.ps1'
+      - 'scripts/validate_release_media_manifest.py'
+      - '.github/workflows/release-media-manifest-gate.yml'
+      - 'release-media/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-release-media-manifest:
+    name: Validate release media manifest
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Validate release media manifest
+        shell: pwsh
+        run: |
+          python scripts/validate_release_media_manifest.py

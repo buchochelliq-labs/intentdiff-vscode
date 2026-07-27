@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "out",
+    "rootDir": "src",
+    // Stop the upward node_modules walk: nested inside intentdiff-vscode, tsc would
+    // otherwise pick up the extension's @types (jsdom/parse5 clash the standalone
+    // monorepo layout never had).
+    "typeRoots": ["./node_modules/@types"]
+  },
+  "include": ["src/**/*.ts"]
+}

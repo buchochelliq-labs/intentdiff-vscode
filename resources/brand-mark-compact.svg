@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="title desc">
+  <title id="title">IntentDiff compact brand mark</title>
+  <desc id="desc">Compact IntentDiff I pillar with segmented semantic diff trails.</desc>
+  <defs>
+    <linearGradient id="intentdiff-compact-gradient" x1="5" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#18e8c7"/>
+      <stop offset=".55" stop-color="#28bdf6"/>
+      <stop offset="1" stop-color="#7b5cff"/>
+    </linearGradient>
+    <linearGradient id="intentdiff-compact-trail" x1="11" y1="6" x2="22" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#11f1bd" stop-opacity=".28"/>
+      <stop offset=".55" stop-color="#2eb7ff"/>
+      <stop offset="1" stop-color="#8b5cff"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#intentdiff-compact-gradient)" d="M6.5 2.5h5a1.8 1.8 0 0 1 1.8 1.8v15.4a1.8 1.8 0 0 1-1.8 1.8h-5a1.8 1.8 0 0 1-1.8-1.8v-2.4a1.8 1.8 0 0 1 1.8-1.8h1.2v-7H6.5a1.8 1.8 0 0 1-1.8-1.8V4.3a1.8 1.8 0 0 1 1.8-1.8Z"/>
+  <path stroke="url(#intentdiff-compact-trail)" stroke-linecap="round" stroke-width="1.7" d="M12.6 6.2h6.5M12.6 10.1h4.7M19.2 10.1h2.8M12.6 14h7.2M12.6 17.9h4.2M19 17.9h2.4"/>
+  <circle cx="20.9" cy="6.2" r=".9" fill="#3b8cff"/>
+  <circle cx="20.9" cy="14" r=".85" fill="#8060ff"/>
+  <circle cx="22.7" cy="14" r=".75" fill="#8b5cff"/>
+</svg>

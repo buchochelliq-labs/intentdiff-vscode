@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" role="img" aria-labelledby="title desc">
+  <title id="title">IntentDiff process icons</title>
+  <desc id="desc">Code changes, semantic analysis, intent comparison, and IntentDiff output icons.</desc>
+  <defs>
+    <linearGradient id="process-cyan-purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18e8c7"/>
+      <stop offset=".52" stop-color="#28bdf6"/>
+      <stop offset="1" stop-color="#8b5cff"/>
+    </linearGradient>
+    <linearGradient id="process-green-blue" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2fe879"/>
+      <stop offset="1" stop-color="#4d75ff"/>
+    </linearGradient>
+    <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.03 0 0 0 0 0.68 0 0 0 0 1 0 0 0 .34 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="code-changes" transform="translate(8 12)" filter="url(#soft-glow)">
+    <rect width="92" height="76" rx="8" fill="#0b1524" stroke="#38465d" stroke-width="2"/>
+    <circle cx="12" cy="12" r="3" fill="#ff5f57"/>
+    <circle cx="23" cy="12" r="3" fill="#f7c14d"/>
+    <circle cx="34" cy="12" r="3" fill="#2fe879"/>
+    <path d="M14 34h8M32 34h45M14 48h8M32 48h26M14 62h8M32 62h59M14 76h8M32 76h37" stroke-linecap="round" stroke-width="4"/>
+    <path d="M14 34h8M32 34h45M14 48h8M32 48h26" stroke="#2fe879" stroke-linecap="round" stroke-width="4"/>
+    <path d="M14 62h8M32 62h59M14 76h8M32 76h37" stroke="#ff5f6d" stroke-linecap="round" stroke-width="4"/>
+  </g>
+  <path d="M116 50h22m-8-8 8 8-8 8" fill="none" stroke="#9aa8bd" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <g id="semantic-analysis" transform="translate(150 12)" filter="url(#soft-glow)">
+    <rect width="76" height="76" rx="8" fill="#0b1524" stroke="#38465d" stroke-width="2"/>
+    <path d="M23 19 50 57M53 20 23 57M23 19l-5 29 31 9 4-37z" fill="none" stroke="url(#process-cyan-purple)" stroke-width="3"/>
+    <circle cx="23" cy="19" r="5" fill="#0b1524" stroke="#28bdf6" stroke-width="3"/>
+    <circle cx="18" cy="48" r="5" fill="#0b1524" stroke="#28bdf6" stroke-width="3"/>
+    <circle cx="49" cy="57" r="5" fill="#0b1524" stroke="#8b5cff" stroke-width="3"/>
+    <circle cx="53" cy="20" r="5" fill="#0b1524" stroke="#8b5cff" stroke-width="3"/>
+  </g>
+  <path d="M242 50h22m-8-8 8 8-8 8" fill="none" stroke="#9aa8bd" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <g id="intent-comparison" transform="translate(276 12)" filter="url(#soft-glow)">
+    <path d="M37 12c-11 0-20 9-20 20v4c-7 2-12 8-12 16s5 14 12 16v2c0 10 8 18 18 18h11V12z" fill="none" stroke="#35e882" stroke-width="4" stroke-linecap="round"/>
+    <path d="M46 12h11c10 0 18 8 18 18v2c7 2 12 8 12 16s-5 14-12 16v4c0 11-9 20-20 20h-9z" fill="none" stroke="#6f62ff" stroke-width="4" stroke-linecap="round"/>
+    <path d="M46 20v60M25 38h21M24 62h22M58 36h13M58 60h18M58 78h10" fill="none" stroke="url(#process-cyan-purple)" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="24" cy="38" r="4" fill="#0b1524" stroke="#28bdf6" stroke-width="3"/>
+    <circle cx="24" cy="62" r="4" fill="#0b1524" stroke="#28bdf6" stroke-width="3"/>
+    <circle cx="71" cy="36" r="4" fill="#0b1524" stroke="#8b5cff" stroke-width="3"/>
+    <circle cx="76" cy="60" r="4" fill="#0b1524" stroke="#8b5cff" stroke-width="3"/>
+  </g>
+  <path d="M382 50h22m-8-8 8 8-8 8" fill="none" stroke="#9aa8bd" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <g id="intent-diff-output" transform="translate(416 12)" filter="url(#soft-glow)">
+    <rect width="92" height="76" rx="8" fill="#0b1524" stroke="#38465d" stroke-width="2"/>
+    <path d="M16 28h8M34 28h40M16 44h8M34 44h55M16 60h8M34 60h50M16 76h8M34 76h36" stroke="#7a879a" stroke-linecap="round" stroke-width="5"/>
+    <path d="M16 28h8M34 28h40" stroke="#2fe879" stroke-linecap="round" stroke-width="5"/>
+    <path d="M16 44h8M34 44h55" stroke="#4d75ff" stroke-linecap="round" stroke-width="5"/>
+  </g>
+  <g fill="none" stroke="none" font-family="Inter, Segoe UI, sans-serif" font-size="9" font-weight="700" letter-spacing="1.8">
+    <text x="8" y="110" fill="#2fe879">CODE CHANGES</text>
+    <text x="148" y="110" fill="#8b5cff">SEMANTIC ANALYSIS</text>
+    <text x="276" y="110" fill="#28bdf6">INTENT COMPARISON</text>
+    <text x="416" y="110" fill="#8b5cff">INTENT DIFF</text>
+  </g>
+</svg>

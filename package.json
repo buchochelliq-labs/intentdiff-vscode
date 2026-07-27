@@ -1,0 +1,977 @@
+{
+  "name": "intentdiff",
+  "displayName": "IntentDiff",
+  "description": "Live semantic review that surfaces moved code, refactorings, and meaningful changes.",
+  "version": "0.0.1-beta.1",
+  "publisher": "buchochelliq-labs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/buchochelliq-labs/intentdiff.git",
+    "directory": "plugins/vscode"
+  },
+  "homepage": "https://github.com/buchochelliq-labs/intentdiff/tree/main/plugins/vscode",
+  "bugs": {
+    "url": "https://github.com/buchochelliq-labs/intentdiff/issues"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "semantic-diff",
+    "semantic-review",
+    "code-review",
+    "refactoring",
+    "scm",
+    "diff"
+  ],
+  "icon": "resources/icon.png",
+  "galleryBanner": {
+    "color": "#172033",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:intentdiff.toggle",
+    "onCommand:intentdiff.toggleEditorDiff",
+    "onCommand:intentdiff.showEditorDiff",
+    "onCommand:intentdiff.hideEditorDiff",
+    "onCommand:intentdiff.toggleHideComments",
+    "onCommand:intentdiff.showCommentChanges",
+    "onCommand:intentdiff.hideCommentChanges",
+    "onCommand:intentdiff.configureVisibleChangeTypes",
+    "onCommand:intentdiff.restartServer",
+    "onCommand:intentdiff.diffActiveFile",
+    "onCommand:intentdiff.showOutput",
+    "onCommand:intentdiff.refreshReview",
+    "onCommand:intentdiff.cycleReviewGrouping",
+    "onCommand:intentdiff.openReviewDashboard",
+    "onCommand:intentdiff.openDiagnostics",
+    "onCommand:intentdiff.exportDiagnostics",
+    "onCommand:intentdiff.openReviewPanel",
+    "onCommand:intentdiff.reviewPanel.openNativeDiff",
+    "onCommand:intentdiff.reviewPanel.openSemanticOnlyDiff",
+    "onCommand:intentdiff.reviewPanel.stageFile",
+    "onCommand:intentdiff.reviewPanel.revertFile",
+    "onCommand:intentdiff.reviewPanel.previousChange",
+    "onCommand:intentdiff.reviewPanel.nextChange",
+    "onCommand:intentdiff.reviewPanel.toggleRail",
+    "onCommand:intentdiff.reviewPanel.toggleEvidenceDrawer",
+    "onCommand:intentdiff.openSemanticDiff",
+    "onCommand:intentdiff.openSemanticOnlyDiff",
+    "onCommand:intentdiff.openFullDiff",
+    "onCommand:intentdiff.openChange",
+    "onCommand:intentdiff.nextSemanticChange",
+    "onCommand:intentdiff.previousSemanticChange",
+    "onCommand:intentdiff.expandSemanticDiffContext",
+    "onCommand:intentdiff.collapseSemanticDiffContext",
+    "onCommand:intentdiff.clearReview",
+    "onCommand:intentdiff.revealActiveFileInReview",
+    "onView:intentdiff.dashboard",
+    "onView:intentdiff.review",
+    "onView:intentdiff.semanticChanges"
+  ],
+  "main": "./out/src/extension.js",
+  "contributes": {
+    "walkthroughs": [
+      {
+        "id": "intentdiff.gettingStarted",
+        "title": "Get started with IntentDiff",
+        "description": "Review the intent behind your changes: pick a base ref, run a semantic review, read the intent, mind the guardrails, and pipe out release notes.",
+        "steps": [
+          {
+            "id": "intentdiff.gettingStarted.baseRef",
+            "title": "Pick your base ref",
+            "description": "IntentDiff compares your working tree against `intentdiff.ref` (default `HEAD`).\n[Open the setting](command:workbench.action.openSettings?%22intentdiff.ref%22)",
+            "media": {
+              "markdown": "media/walkthroughs/base-ref.md"
+            },
+            "completionEvents": [
+              "onSettingChanged:intentdiff.ref"
+            ]
+          },
+          {
+            "id": "intentdiff.gettingStarted.runReview",
+            "title": "Run a semantic review",
+            "description": "Parse the changed files and group them into intent.\n[Refresh Semantic Review](command:intentdiff.refreshReview)",
+            "media": {
+              "markdown": "media/walkthroughs/run-review.md"
+            },
+            "completionEvents": [
+              "onCommand:intentdiff.refreshReview"
+            ]
+          },
+          {
+            "id": "intentdiff.gettingStarted.readIntent",
+            "title": "Read the intent",
+            "description": "See what changed and why — open the IntentDiff view, then pick a file from Semantic Changes.\n[Open the IntentDiff view](command:workbench.view.extension.intentdiffActivity)",
+            "media": {
+              "markdown": "media/walkthroughs/read-intent.md"
+            },
+            "completionEvents": [
+              "onView:intentdiff.review"
+            ]
+          },
+          {
+            "id": "intentdiff.gettingStarted.guardrails",
+            "title": "Watch the guardrails",
+            "description": "Protected-symbol changes surface in Problems and pin to the top of the tree.\n[Open Problems](command:workbench.actions.view.problems)",
+            "media": {
+              "markdown": "media/walkthroughs/guardrails.md"
+            },
+            "completionEvents": [
+              "onCommand:workbench.actions.view.problems"
+            ]
+          },
+          {
+            "id": "intentdiff.gettingStarted.releaseNotes",
+            "title": "Pipe out release notes",
+            "description": "Open a file's review from the IntentDiff view, then switch to the Release Notes rail — copy as Markdown or export JSON.\n[Open the IntentDiff view](command:workbench.view.extension.intentdiffActivity)",
+            "media": {
+              "markdown": "media/walkthroughs/release-notes.md"
+            },
+            "completionEvents": [
+              "onView:intentdiff.review"
+            ]
+          }
+        ]
+      }
+    ],
+    "colors": [
+      {
+        "id": "intentdiff.semanticChanges.root",
+        "description": "Icon color for the IntentDiff Semantic Changes root.",
+        "defaults": {
+          "dark": "#4fd6ff",
+          "light": "#0078a8",
+          "highContrast": "#4fd6ff"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.fileWithGroups",
+        "description": "Icon color for files with IntentDiff semantic groups.",
+        "defaults": {
+          "dark": "#4fd6ff",
+          "light": "#0078a8",
+          "highContrast": "#4fd6ff"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.movedCode",
+        "description": "Icon color for moved-code review groups.",
+        "defaults": {
+          "dark": "#56d6c2",
+          "light": "#007f73",
+          "highContrast": "#56d6c2"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.refactoring",
+        "description": "Icon color for refactoring review groups.",
+        "defaults": {
+          "dark": "#b58cff",
+          "light": "#6f45c9",
+          "highContrast": "#c8a7ff"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.meaningful",
+        "description": "Icon color for meaningful-change review groups.",
+        "defaults": {
+          "dark": "#f7c14d",
+          "light": "#9a6500",
+          "highContrast": "#ffd866"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.ignoredStyle",
+        "description": "Icon color for ignored-style review groups.",
+        "defaults": {
+          "dark": "#7ee787",
+          "light": "#22863a",
+          "highContrast": "#7ee787"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.noiseSuppressed",
+        "description": "Icon color for suppressed-noise review groups.",
+        "defaults": {
+          "dark": "#8b949e",
+          "light": "#6a737d",
+          "highContrast": "#b8c4d6"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.rawChange",
+        "description": "Icon color for raw change evidence rows.",
+        "defaults": {
+          "dark": "#d2a8ff",
+          "light": "#8250df",
+          "highContrast": "#d2a8ff"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.addition",
+        "description": "Icon color for addition evidence rows.",
+        "defaults": {
+          "dark": "#7ee787",
+          "light": "#22863a",
+          "highContrast": "#7ee787"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.deletion",
+        "description": "Icon color for deletion evidence rows.",
+        "defaults": {
+          "dark": "#ff6b6b",
+          "light": "#cf222e",
+          "highContrast": "#ff8b8b"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.modification",
+        "description": "Icon color for modification evidence rows.",
+        "defaults": {
+          "dark": "#f7c14d",
+          "light": "#9a6500",
+          "highContrast": "#ffd866"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.reorder",
+        "description": "Icon color for reorder evidence rows.",
+        "defaults": {
+          "dark": "#9aa4b2",
+          "light": "#6a737d",
+          "highContrast": "#b8c4d6"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.crossFile",
+        "description": "Icon color for cross-file review entries.",
+        "defaults": {
+          "dark": "#ffab70",
+          "light": "#bc4c00",
+          "highContrast": "#ffab70"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.schemaStatus",
+        "description": "Icon color for schema/profile status review entries.",
+        "defaults": {
+          "dark": "#4fd6ff",
+          "light": "#0078a8",
+          "highContrast": "#4fd6ff"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.guardrail",
+        "description": "Icon color for guardrail review entries.",
+        "defaults": {
+          "dark": "#ff6b6b",
+          "light": "#cf222e",
+          "highContrast": "#ff8b8b"
+        }
+      },
+      {
+        "id": "intentdiff.semanticChanges.muted",
+        "description": "Icon color for muted IntentDiff review states.",
+        "defaults": {
+          "dark": "#8b949e",
+          "light": "#6a737d",
+          "highContrast": "#b8c4d6"
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "intentdiff.toggle",
+        "title": "IntentDiff: Toggle Live Semantic Diff"
+      },
+      {
+        "command": "intentdiff.toggleEditorDiff",
+        "title": "IntentDiff: Toggle Semantic Diff Overlay",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "intentdiff.showEditorDiff",
+        "title": "IntentDiff: Show Semantic Diff Overlay",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "intentdiff.hideEditorDiff",
+        "title": "IntentDiff: Hide Semantic Diff Overlay",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "intentdiff.toggleHideComments",
+        "title": "IntentDiff: Toggle Comment Changes",
+        "icon": "$(comment)"
+      },
+      {
+        "command": "intentdiff.showCommentChanges",
+        "title": "IntentDiff: Show Comment Changes",
+        "icon": "$(comment)"
+      },
+      {
+        "command": "intentdiff.hideCommentChanges",
+        "title": "IntentDiff: Hide Comment Changes",
+        "icon": "$(comment-unresolved)"
+      },
+      {
+        "command": "intentdiff.configureVisibleChangeTypes",
+        "title": "IntentDiff: Configure Visible Change Types",
+        "icon": "$(list-filter)"
+      },
+      {
+        "command": "intentdiff.restartServer",
+        "title": "IntentDiff: Restart LiveServer"
+      },
+      {
+        "command": "intentdiff.diffActiveFile",
+        "title": "IntentDiff: Diff Active File"
+      },
+      {
+        "command": "intentdiff.showOutput",
+        "title": "IntentDiff: Show Output"
+      },
+      {
+        "command": "intentdiff.refreshReview",
+        "title": "IntentDiff: Refresh Semantic Review"
+      },
+      {
+        "command": "intentdiff.cycleReviewGrouping",
+        "title": "IntentDiff: Cycle Review File Grouping",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "intentdiff.openReviewDashboard",
+        "title": "IntentDiff: Open Review Dashboard",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "intentdiff.openDiagnostics",
+        "title": "IntentDiff: Open Diagnostics",
+        "icon": "$(pulse)"
+      },
+      {
+        "command": "intentdiff.exportDiagnostics",
+        "title": "IntentDiff: Export Diagnostics Report",
+        "icon": "$(save)"
+      },
+      {
+        "command": "intentdiff.openReviewPanel",
+        "title": "IntentDiff: Open Custom Review",
+        "icon": {
+          "light": "resources/review-icon-light.svg",
+          "dark": "resources/review-icon-dark.svg"
+        }
+      },
+      {
+        "command": "intentdiff.reviewPanel.openNativeDiff",
+        "title": "IntentDiff: Open Native Diff",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "intentdiff.setIntentExplainerKey",
+        "title": "IntentDiff: Set Intent Explainer Key (BYOK)"
+      },
+      {
+        "command": "intentdiff.clearIntentExplainerKey",
+        "title": "IntentDiff: Clear Intent Explainer Key"
+      },
+      {
+        "command": "intentdiff.reviewPanel.openSemanticOnlyDiff",
+        "title": "IntentDiff: Open Semantic-Only Native Diff",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "intentdiff.reviewPanel.stageFile",
+        "title": "IntentDiff: Stage File",
+        "icon": "$(add)"
+      },
+      {
+        "command": "intentdiff.reviewPanel.revertFile",
+        "title": "IntentDiff: Revert File",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "intentdiff.reviewPanel.previousChange",
+        "title": "IntentDiff: Previous Review Intent",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "intentdiff.reviewPanel.nextChange",
+        "title": "IntentDiff: Next Review Intent",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "intentdiff.reviewPanel.toggleRail",
+        "title": "IntentDiff: Toggle Review Rail",
+        "icon": "$(layout-sidebar-left)"
+      },
+      {
+        "command": "intentdiff.reviewPanel.toggleEvidenceDrawer",
+        "title": "IntentDiff: Toggle Evidence Drawer",
+        "icon": "$(panel-bottom)"
+      },
+      {
+        "command": "intentdiff.openSemanticDiff",
+        "title": "IntentDiff: Open Semantic Diff",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "intentdiff.openSemanticOnlyDiff",
+        "title": "IntentDiff: Open Semantic-Only Native Diff",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "intentdiff.openFullDiff",
+        "title": "IntentDiff: Open Full VS Code Diff",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "intentdiff.openChange",
+        "title": "IntentDiff: Open Semantic Change"
+      },
+      {
+        "command": "intentdiff.nextSemanticChange",
+        "title": "IntentDiff: Next Semantic Change",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "intentdiff.previousSemanticChange",
+        "title": "IntentDiff: Previous Semantic Change",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "intentdiff.expandSemanticDiffContext",
+        "title": "IntentDiff: Expand Semantic Diff Context",
+        "icon": "$(unfold)"
+      },
+      {
+        "command": "intentdiff.collapseSemanticDiffContext",
+        "title": "IntentDiff: Collapse Semantic Diff Context",
+        "icon": "$(fold)"
+      },
+      {
+        "command": "intentdiff.clearReview",
+        "title": "IntentDiff: Clear Semantic Review"
+      },
+      {
+        "command": "intentdiff.revealActiveFileInReview",
+        "title": "IntentDiff: Reveal Active File in Semantic Review"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "intentdiffActivity",
+          "title": "IntentDiff",
+          "icon": "resources/activity-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "intentdiffActivity": [
+        {
+          "id": "intentdiff.dashboard",
+          "name": "Review Dashboard",
+          "type": "webview",
+          "contextualTitle": "IntentDiff"
+        },
+        {
+          "id": "intentdiff.review",
+          "name": "Semantic Changes",
+          "contextualTitle": "IntentDiff"
+        }
+      ],
+      "scm": [
+        {
+          "id": "intentdiff.semanticChanges",
+          "name": "Semantic Changes",
+          "contextualTitle": "IntentDiff"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "intentdiff.dashboard",
+        "contents": "Open this view to see the richer IntentDiff review dashboard for saved working-tree semantic changes against `intentdiff.ref`.\n[Refresh Semantic Review](command:intentdiff.refreshReview)"
+      },
+      {
+        "view": "intentdiff.review",
+        "contents": "Open this view to auto-refresh saved working-tree semantic changes against `intentdiff.ref`. Use manual refresh if you need to rerun the review immediately.\n[Refresh Semantic Review](command:intentdiff.refreshReview)"
+      },
+      {
+        "view": "intentdiff.semanticChanges",
+        "contents": "Open this view to auto-refresh saved working-tree semantic changes against `intentdiff.ref`. Use manual refresh if you need to rerun the review immediately.\n[Refresh Semantic Review](command:intentdiff.refreshReview)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "intentdiff.refreshReview",
+          "when": "view == intentdiff.dashboard || view == intentdiff.review || view == intentdiff.semanticChanges",
+          "group": "navigation"
+        },
+        {
+          "command": "intentdiff.cycleReviewGrouping",
+          "when": "view == intentdiff.dashboard || view == intentdiff.review || view == intentdiff.semanticChanges",
+          "group": "navigation@0"
+        },
+        {
+          "command": "intentdiff.openReviewPanel",
+          "when": "view == intentdiff.dashboard || view == intentdiff.review || view == intentdiff.semanticChanges",
+          "group": "navigation@1"
+        },
+        {
+          "command": "intentdiff.openDiagnostics",
+          "when": "view == intentdiff.dashboard || view == intentdiff.review || view == intentdiff.semanticChanges",
+          "group": "navigation@1"
+        },
+        {
+          "command": "intentdiff.clearReview",
+          "when": "view == intentdiff.dashboard || view == intentdiff.review || view == intentdiff.semanticChanges",
+          "group": "navigation@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "intentdiff.openReviewPanel",
+          "when": "isInDiffEditor",
+          "group": "navigation@-10"
+        },
+        {
+          "command": "intentdiff.reviewPanel.openNativeDiff",
+          "when": "activeWebviewPanelId == intentdiff.reviewPanel",
+          "group": "navigation@0"
+        },
+        {
+          "command": "intentdiff.reviewPanel.openSemanticOnlyDiff",
+          "when": "activeWebviewPanelId == intentdiff.reviewPanel",
+          "group": "navigation@1"
+        },
+        {
+          "command": "intentdiff.reviewPanel.stageFile",
+          "when": "activeWebviewPanelId == intentdiff.reviewPanel",
+          "group": "navigation@1.5"
+        },
+        {
+          "command": "intentdiff.reviewPanel.revertFile",
+          "when": "activeWebviewPanelId == intentdiff.reviewPanel",
+          "group": "navigation@1.6"
+        },
+        {
+          "command": "intentdiff.reviewPanel.previousChange",
+          "when": "activeWebviewPanelId == intentdiff.reviewPanel",
+          "group": "navigation@2"
+        },
+        {
+          "command": "intentdiff.reviewPanel.nextChange",
+          "when": "activeWebviewPanelId == intentdiff.reviewPanel",
+          "group": "navigation@3"
+        },
+        {
+          "command": "intentdiff.reviewPanel.toggleRail",
+          "when": "activeWebviewPanelId == intentdiff.reviewPanel",
+          "group": "1_layout@1"
+        },
+        {
+          "command": "intentdiff.reviewPanel.toggleEvidenceDrawer",
+          "when": "activeWebviewPanelId == intentdiff.reviewPanel",
+          "group": "1_layout@2"
+        },
+        {
+          "command": "intentdiff.openSemanticOnlyDiff",
+          "when": "intentdiff.inSemanticDiff && !intentdiff.semanticOnlyDiffVisible",
+          "group": "navigation@0"
+        },
+        {
+          "command": "intentdiff.openFullDiff",
+          "when": "intentdiff.inSemanticDiff && intentdiff.semanticOnlyDiffVisible",
+          "group": "navigation@0"
+        },
+        {
+          "command": "intentdiff.previousSemanticChange",
+          "when": "intentdiff.inSemanticDiff",
+          "group": "navigation@1"
+        },
+        {
+          "command": "intentdiff.nextSemanticChange",
+          "when": "intentdiff.inSemanticDiff",
+          "group": "navigation@1"
+        },
+        {
+          "command": "intentdiff.collapseSemanticDiffContext",
+          "when": "intentdiff.semanticOnlyDiffVisible",
+          "group": "navigation@2"
+        },
+        {
+          "command": "intentdiff.expandSemanticDiffContext",
+          "when": "intentdiff.semanticOnlyDiffVisible",
+          "group": "navigation@2"
+        },
+        {
+          "command": "intentdiff.hideEditorDiff",
+          "when": "resourceScheme == file && intentdiff.editorDiffVisible",
+          "group": "navigation@3"
+        },
+        {
+          "command": "intentdiff.showEditorDiff",
+          "when": "resourceScheme == file && !intentdiff.editorDiffVisible",
+          "group": "navigation@3"
+        },
+        {
+          "command": "intentdiff.hideCommentChanges",
+          "when": "resourceScheme == file && !intentdiff.hideComments",
+          "group": "navigation@4"
+        },
+        {
+          "command": "intentdiff.showCommentChanges",
+          "when": "resourceScheme == file && intentdiff.hideComments",
+          "group": "navigation@4"
+        },
+        {
+          "command": "intentdiff.configureVisibleChangeTypes",
+          "when": "resourceScheme == file",
+          "group": "navigation@5"
+        },
+        {
+          "command": "intentdiff.hideEditorDiff",
+          "when": "resourceScheme =~ /^intentdiff-/ && intentdiff.editorDiffVisible",
+          "group": "navigation@3"
+        },
+        {
+          "command": "intentdiff.showEditorDiff",
+          "when": "resourceScheme =~ /^intentdiff-/ && !intentdiff.editorDiffVisible",
+          "group": "navigation@3"
+        },
+        {
+          "command": "intentdiff.hideCommentChanges",
+          "when": "resourceScheme =~ /^intentdiff-/ && !intentdiff.hideComments",
+          "group": "navigation@4"
+        },
+        {
+          "command": "intentdiff.showCommentChanges",
+          "when": "resourceScheme =~ /^intentdiff-/ && intentdiff.hideComments",
+          "group": "navigation@4"
+        },
+        {
+          "command": "intentdiff.configureVisibleChangeTypes",
+          "when": "resourceScheme =~ /^intentdiff-/",
+          "group": "navigation@5"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "intentdiff.openSemanticDiff",
+          "when": "(view == intentdiff.review || view == intentdiff.semanticChanges) && viewItem =~ /intentdiffReview/",
+          "group": "inline"
+        },
+        {
+          "command": "intentdiff.openReviewPanel",
+          "when": "(view == intentdiff.review || view == intentdiff.semanticChanges) && viewItem =~ /intentdiffReview(File|Entry\\.|CrossFile$)/",
+          "group": "navigation@0"
+        },
+        {
+          "command": "intentdiff.openSemanticOnlyDiff",
+          "when": "(view == intentdiff.review || view == intentdiff.semanticChanges) && viewItem =~ /intentdiffReview(File|Entry\\.|CrossFile$)/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "intentdiff.openFullDiff",
+          "when": "(view == intentdiff.review || view == intentdiff.semanticChanges) && viewItem =~ /intentdiffReview(File|Entry\\.|CrossFile$)/",
+          "group": "navigation@2"
+        }
+      ]
+    },
+    "configurationDefaults": {
+      "diffEditor.hideUnchangedRegions.enabled": true,
+      "diffEditor.hideUnchangedRegions.contextLineCount": 1,
+      "diffEditor.hideUnchangedRegions.minimumLineCount": 2,
+      "diffEditor.hideUnchangedRegions.revealLineCount": 10
+    },
+    "configuration": {
+      "title": "IntentDiff",
+      "properties": {
+        "intentdiff.executable": {
+          "type": "string",
+          "default": "intentdiff",
+          "scope": "machine",
+          "description": "Machine/user-level path or command name for the IntentDiff executable. Workspace values are ignored for safety."
+        },
+        "intentdiff.ref": {
+          "type": "string",
+          "default": "HEAD",
+          "description": "Git ref to compare live buffers against."
+        },
+        "intentdiff.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable live semantic diff feedback."
+        },
+        "intentdiff.debounceMs": {
+          "type": "number",
+          "default": 250,
+          "minimum": 50,
+          "description": "Debounce delay in milliseconds before sending a live diff request."
+        },
+        "intentdiff.liveServer.engine": {
+          "type": "string",
+          "enum": ["auto", "native", "python"],
+          "default": "auto",
+          "description": "Which live-server engine to spawn when intentdiff.executable is unset: 'auto' prefers the bundled native server when present, 'native' requires it (falls back to python with a warning if missing), 'python' always uses the Python CLI. An explicit intentdiff.executable always wins."
+        },
+        "intentdiff.review.maxAutoRetries": {
+          "type": "number",
+          "default": 2,
+          "minimum": 0,
+          "description": "Maximum consecutive automatic semantic-review retries after transient failures. Deterministic failures never auto-retry. Editing a file or running a manual refresh always resumes."
+        },
+        "intentdiff.fuel": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Wasm fuel override passed to IntentDiff live-server. Defaults to IntentDiff's bounded parser fuel; set 'inf' only for trusted workspaces that need uncapped parsing."
+        },
+        "intentdiff.trace": {
+          "type": "boolean",
+          "default": false,
+          "description": "Write protocol traffic and server stderr to the IntentDiff output channel."
+        },
+        "intentdiff.review.pollIntervalMs": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 500,
+          "description": "Fallback polling interval in milliseconds while the Semantic Changes view is visible and the VS Code Git status watcher is unavailable. File, save, rename, and Git status events still trigger refreshes immediately."
+        },
+        "intentdiff.review.groupFilesBy": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "none",
+            "language",
+            "schema",
+            "languageThenSchema"
+          ],
+          "default": "auto",
+          "description": "Controls how IntentDiff groups files in Semantic Changes and the Review Dashboard. Auto stays flat for tiny single-language reviews, then groups mixed, larger, or schema-aware reviews."
+        },
+        "intentdiff.review.diffSurface": {
+          "type": "string",
+          "enum": [
+            "native",
+            "panel"
+          ],
+          "enumDescriptions": [
+            "Open reviews in VS Code's native diff editor with semantic decorations, intent CodeLens and Peek.",
+            "Open reviews in the IntentDiff semantic panel with per-hunk stage/revert, inline editing, collapsible non-semantic regions and syntax highlighting."
+          ],
+          "default": "native",
+          "description": "Which surface a Semantic Changes selection opens: VS Code's native diff editor, or the IntentDiff semantic review panel. Image assets always use the panel."
+        },
+        "intentdiff.review.diffContextLines": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 10,
+          "description": "How many unchanged context lines to keep around each intent hunk in the IntentDiff semantic panel before collapsing. 0 shows only the intent hunks; higher values show more surrounding code."
+        },
+        "intentdiff.intent.explainer": {
+          "type": "string",
+          "enum": [
+            "deterministic",
+            "llm"
+          ],
+          "enumDescriptions": [
+            "Fast, offline explanations composed from the change evidence (node role + actual before/after value).",
+            "Enrich behavior-affecting changes with an LLM (see intentdiff.intent.llm.*). Falls back to deterministic when unavailable."
+          ],
+          "default": "deterministic",
+          "description": "How IntentDiff explains the intent 'why' on hovers."
+        },
+        "intentdiff.intent.llm.provider": {
+          "type": "string",
+          "enum": [
+            "vscode-lm",
+            "anthropic",
+            "openai-compatible"
+          ],
+          "enumDescriptions": [
+            "Use your existing GitHub Copilot (or other registered chat model) via VS Code's Language Model API — no API key, VS Code asks for consent.",
+            "Bring-your-own Anthropic API key (stored in SecretStorage via 'IntentDiff: Set Intent Explainer Key').",
+            "Bring-your-own OpenAI-compatible endpoint — cloud (OpenAI) or a local/self-hosted server (Ollama, LM Studio, vLLM) via intentdiff.intent.llm.baseUrl."
+          ],
+          "default": "vscode-lm",
+          "markdownDescription": "LLM provider for intent explanations. `vscode-lm` uses VS Code's built-in models (Copilot) and never sends raw source. **⚠️ Any cloud provider means change summaries leave this machine** — see `intentdiff.intent.llm.codeSharing` for exactly what is shared.",
+          "scope": "machine-overridable"
+        },
+        "intentdiff.intent.llm.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Endpoint for `anthropic`/`openai-compatible` providers. **⚠️ Everything the explainer shares is sent to this host.** Verbatim source (`full` sharing) is only honoured for loopback addresses (`localhost`, `127.0.0.0/8`, `[::1]`); any other host is capped to `signatures`.",
+          "scope": "machine-overridable"
+        },
+        "intentdiff.intent.llm.model": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Model name for the configured provider (free text; provider defaults apply when empty).",
+          "scope": "machine-overridable"
+        },
+        "intentdiff.intent.llm.codeSharing": {
+          "type": "string",
+          "enum": [
+            "signatures",
+            "facts",
+            "full"
+          ],
+          "enumDescriptions": [
+            "Send a locally-derived summary plus symbol names and param/return types (the public API surface). Never sends function bodies, statements, or literal values. Recommended balance of privacy and accuracy.",
+            "Most private: send only structural facts (kind, arity, stub-vs-substantive, size, role, value-change category). No identifiers, no literals, no bodies — the model can't even name the symbol.",
+            "Send the actual changed source code. Maximum accuracy, but only ever transmitted to a LOCAL endpoint (localhost Ollama/LM Studio/vLLM); cloud providers and Copilot are automatically downgraded to 'signatures' so raw code never leaves your machine."
+          ],
+          "default": "signatures",
+          "markdownDescription": "How much the LLM explainer may see. `facts`: privacy-safe counts/enums only — no identifiers, no source. `signatures`: **⚠️ transmits identifiers** (symbol and parameter names) to the configured provider. `full`: **⚠️ raw source code is sent** — honoured ONLY for a local (loopback) endpoint; cloud endpoints are automatically capped to `signatures`.",
+          "scope": "machine-overridable"
+        },
+        "intentdiff.diagnostics.fuelPeakWarning": {
+          "type": "number",
+          "default": 20000000,
+          "minimum": 0,
+          "description": "Peak Wasm fuel consumed by one parser call before IntentDiff UI diagnostics mark a file as over policy."
+        },
+        "intentdiff.diagnostics.fuelPerKbWarning": {
+          "type": "number",
+          "default": 15000000,
+          "minimum": 0,
+          "description": "Normalized Wasm fuel per KB before IntentDiff UI diagnostics mark a parser call as over policy."
+        },
+        "intentdiff.diagnostics.fuelPerLineWarning": {
+          "type": "number",
+          "default": 1500000,
+          "minimum": 0,
+          "description": "Normalized Wasm fuel per line before IntentDiff UI diagnostics mark a parser call as over policy."
+        },
+        "intentdiff.schemas.fetchMode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "cache-only",
+            "off"
+          ],
+          "default": "cache-only",
+          "scope": "machine",
+          "description": "Machine/user-level control for runtime JSON/YAML schema fetching. Workspace values are ignored for safety. 'auto' fetches HTTPS schemas with cache fallback, 'cache-only' uses existing cached schemas only, and 'off' disables schema fetching."
+        },
+        "intentdiff.schemas.cacheTtlHours": {
+          "type": "number",
+          "default": 24,
+          "minimum": 0,
+          "description": "Hours before cached remote JSON/YAML schemas are considered stale."
+        },
+        "intentdiff.schemas.allowPrivateHosts": {
+          "type": "boolean",
+          "default": false,
+          "scope": "machine",
+          "description": "Machine/user-level opt-in for schema URLs that resolve to private, link-local, or loopback hosts. Workspace values are ignored for safety. Keep disabled unless you intentionally use internal schema servers."
+        },
+        "intentdiff.diff.fallbackDiff": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show fallback token/text diffs when a semantic parser falls back. Disable to surface a warning instead."
+        },
+        "intentdiff.diff.defaultMode": {
+          "type": "string",
+          "enum": [
+            "full",
+            "semanticOnly"
+          ],
+          "default": "full",
+          "description": "Native diff mode used by Semantic Changes entries. 'full' opens the existing VS Code diff; 'semanticOnly' opens a filtered native diff containing only semantic change chunks."
+        },
+        "intentdiff.diff.contextLines": {
+          "type": "number",
+          "default": 3,
+          "minimum": 0,
+          "description": "Context lines to include around each semantic change in semantic-only native diffs."
+        },
+        "intentdiff.diff.hideComments": {
+          "type": "boolean",
+          "default": false,
+          "description": "Hide changes whose semantic nodes are comments."
+        },
+        "intentdiff.visualization.showAdditions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show addition decorations."
+        },
+        "intentdiff.visualization.showDeletions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show deletion decorations, including inline deletion markers."
+        },
+        "intentdiff.visualization.showModifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show modification decorations."
+        },
+        "intentdiff.visualization.inlineDeletionMarkers": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show subtle modified-editor markers for inline deletions whose removed text no longer exists in the buffer."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "tsc -p ./ --noEmit",
+    "test": "npm run compile && npm run test:unit",
+    "test:unit": "node --test out/test/baseUri.test.js out/test/config.test.js out/test/contentClass.test.js out/test/gitStatus.test.js out/test/mapper.test.js out/test/protocol.test.js out/test/reviewActionModel.test.js out/test/reviewModel.test.js out/test/reviewRefresh.test.js out/test/reviewTimelineModel.test.js out/test/reviewTree.test.js out/test/reviewWebviewModel.test.js out/test/liveServerLaunch.test.js out/test/intentCodeLens.test.js out/test/intentExplain.test.js out/test/intentLlmPrompt.test.js out/test/releaseNotes.test.js out/test/selectionRange.test.js out/test/semanticOnlyDiff.test.js out/test/themeColors.test.js",
+    "test:integration": "npm run compile && node out/test/integration/runTests.js",
+    "test:semanticdiff-comparison": "npm run compile && node out/test/comparison/runComparison.js",
+    "vsix": "npm run compile && vsce package --baseContentUrl https://github.com/buchochelliq-labs/intentdiff/blob/HEAD/plugins/vscode --baseImagesUrl https://github.com/buchochelliq-labs/intentdiff/raw/HEAD/plugins/vscode",
+    "release:dry-run": "powershell -ExecutionPolicy Bypass -File ../../scripts/verify-vscode-extension-release.ps1",
+    "install:local": "powershell -ExecutionPolicy Bypass -File ../../scripts/install-vscode-extension.ps1",
+    "sync:local": "powershell -ExecutionPolicy Bypass -File ../../scripts/sync-local-dev.ps1",
+    "dev:watch": "npm run watch",
+    "dev:host": "powershell -ExecutionPolicy Bypass -File ../../scripts/sync-local-dev.ps1 -OpenDevHost"
+  },
+  "devDependencies": {
+    "@highlightjs/cdn-assets": "^11.11.1",
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^20.12.12",
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.9.2",
+    "jsdom": "^24.1.3",
+    "ovsx": "1.0.0",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "tmp": "0.2.7"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "In untrusted workspaces the LLM explainer is capped to privacy-safe facts and its provider/endpoint/sharing settings cannot be escalated by workspace configuration.",
+      "restrictedConfigurations": [
+        "intentdiff.intent.llm.provider",
+        "intentdiff.intent.llm.baseUrl",
+        "intentdiff.intent.llm.model",
+        "intentdiff.intent.llm.codeSharing"
+      ]
+    }
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.45"
+  }
+}

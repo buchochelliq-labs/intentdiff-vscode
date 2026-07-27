@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">IntentDiff icon</title>
+  <desc id="desc">A dark split diff tile with a semantic intent curve, review check, and compact diff marks.</desc>
+  <defs>
+    <linearGradient id="tile" x1="34" y1="12" x2="220" y2="238" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#07182d"/>
+      <stop offset="1" stop-color="#061120"/>
+    </linearGradient>
+    <linearGradient id="red" x1="29" y1="74" x2="91" y2="74" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff5f63"/>
+      <stop offset="1" stop-color="#ff8170"/>
+    </linearGradient>
+    <linearGradient id="intent" x1="88" y1="96" x2="182" y2="146" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#78f0f2"/>
+      <stop offset="0.48" stop-color="#78dfcd"/>
+      <stop offset="1" stop-color="#96ea83"/>
+    </linearGradient>
+    <linearGradient id="check" x1="181" y1="119" x2="220" y2="159" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9cf086"/>
+      <stop offset="1" stop-color="#80e476"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="256" height="256" rx="36" fill="#f4f3f0"/>
+  <rect x="1" y="1" width="254" height="254" rx="34" fill="url(#tile)"/>
+
+  <path d="M126 30v190" stroke="#5f7087" stroke-width="5" stroke-linecap="round" opacity="0.68"/>
+
+  <path d="M36 76h54" stroke="url(#red)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M36 166h54" stroke="url(#red)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M37 122h52" stroke="#253246" stroke-width="13" stroke-linecap="round"/>
+
+  <path
+    d="M89 95c20 0 27 18 39 30 13 13 25 20 50 20"
+    fill="none"
+    stroke="url(#intent)"
+    stroke-width="9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <circle cx="206" cy="130" r="25" fill="url(#check)"/>
+  <path d="M195 130l8 8 17-21" fill="none" stroke="#071529" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M164 170h52" stroke="#8ce981" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="208" cy="76" r="10" fill="#ffd25a"/>
+</svg>

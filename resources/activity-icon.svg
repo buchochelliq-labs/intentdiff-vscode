@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="IntentDiff">
+  <path
+    fill="none"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="1.8"
+    d="M5 6.5h4.2m-4.2 5h4.2m-4.2 5h4.2M15.2 5.8c2.8 0 4.8 1.7 4.8 4.2 0 3.7-4.6 4.1-6.7 6.2m0 0 2.3 2.3m-2.3-2.3 2.3-2.3"
+  />
+</svg>

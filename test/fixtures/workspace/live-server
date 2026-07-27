@@ -1,0 +1,460 @@
+const fs = require("node:fs");
+const path = require("node:path");
+const { execFileSync } = require("node:child_process");
+const readline = require("node:readline");
+
+const logPath = process.env.INTENTDIFF_VSCODE_LOG;
+// argv: [node, <script>, <workspaceRoot>, --stdio, ...] - the extension spawns
+// with cwd pinned to the EXTENSION path (executable-hijack hardening), so the
+// workspace root must come from argv, never from process.cwd().
+const repoRoot = require("node:path").resolve(process.argv[2] || process.cwd());
+const LANGUAGE_SMOKE_FILE = ".intentdiff-language-smoke.json";
+
+function log(entry) {
+  if (!logPath) {
+    return;
+  }
+  fs.appendFileSync(logPath, `${JSON.stringify(entry)}\n`, "utf8");
+}
+
+function write(payload) {
+  process.stdout.write(`${JSON.stringify(payload)}\n`);
+}
+
+log({ kind: "start", argv: process.argv.slice(2) });
+write({
+  op: "ready",
+  ok: true,
+  protocol_version: 2,
+  repo_path: repoRoot,
+  ref: refArg(),
+  transport: "stdio",
+  capabilities: { diff: true, cancel: true },
+  limits: { max_content_bytes: 1_000_000 },
+});
+
+const lines = readline.createInterface({
+  input: process.stdin,
+  crlfDelay: Infinity,
+});
+
+lines.on("line", (line) => {
+  let payload;
+  try {
+    payload = JSON.parse(line);
+  } catch (error) {
+    write({
+      op: "error",
+      seq: 0,
+      ok: false,
+      error: { code: "bad_json", message: String(error) },
+    });
+    return;
+  }
+
+  log({ kind: "request", payload });
+  if (payload.op === "cancel") {
+    write({ op: "cancel", seq: payload.seq, ok: true, cancelled: payload.seq });
+    return;
+  }
+  if (payload.op === "review") {
+    const sendReview = () => write({
+      op: "review",
+      seq: payload.seq,
+      ok: true,
+      metadata: {
+        duration_ms: 7,
+        file_count: 2,
+        guardrail_violation_count: 1,
+        cross_file_change_count: 2,
+      },
+      commit_diff: fakeCommitDiff(),
+    });
+    if (fs.existsSync(path.join(repoRoot, ".git", "intentdiff-slow-review"))) {
+      setTimeout(sendReview, 1800);
+      return;
+    }
+    sendReview();
+    return;
+  }
+  if (payload.op !== "diff") {
+    write({ op: payload.op || "unknown", seq: payload.seq || 0, ok: true });
+    return;
+  }
+
+  const content = String(payload.content || "");
+  if (content.includes("server-error")) {
+    write({
+      op: "diff",
+      seq: payload.seq,
+      ok: false,
+      error: { code: "fake_error", message: "fake LiveServer error" },
+    });
+    return;
+  }
+
+  const sendDiff = () => write({
+    op: "diff",
+    seq: payload.seq,
+    ok: true,
+    metadata: {
+      duration_ms: 3,
+      language: "yaml",
+      change_count: content.includes("clean") ? 0 : 1,
+      style_only: false,
+      guardrail_violation_count: content.includes("guardrail") ? 1 : 0,
+    },
+    diff: fakeDiff(content, payload.path),
+  });
+  if (content.includes("slow-review")) {
+    setTimeout(sendDiff, 650);
+    return;
+  }
+  sendDiff();
+});
+
+function refArg() {
+  const index = process.argv.indexOf("--ref");
+  if (index >= 0 && process.argv[index + 1]) {
+    return process.argv[index + 1];
+  }
+  return "HEAD";
+}
+
+function fakeDiff(content, file) {
+  if (content.length === 0) {
+    return fakeDeletedFileDiff(file);
+  }
+  if (content.includes("clean")) {
+    return {
+      old_filename: file,
+      new_filename: file,
+      language: "yaml",
+      changes: [],
+      change_groups: [],
+      guardrail_violations: [],
+      parse_errors: [],
+      is_style_only: false,
+    };
+  }
+  return {
+    old_filename: file,
+    new_filename: file,
+    language: "yaml",
+    changes: [
+      {
+        change_type: "MODIFICATION",
+        description: "Update protected host",
+        new_node: {
+          node_type: "block_mapping_pair",
+          label: "server.host",
+          position: { start_line: 0, start_col: 0, end_line: 0, end_col: 16 },
+        },
+      },
+    ],
+    change_groups: [
+      {
+        kind: "MEANINGFUL_CHANGE",
+        rule_id: "fake.integration",
+      },
+    ],
+    guardrail_violations: content.includes("guardrail")
+      ? [
+          {
+            rule_id: "prod-host",
+            severity: "immutable",
+            file,
+            language: "yaml",
+            semantic_path: "server.host",
+            old_value: "localhost",
+            new_value: "prod.example.com",
+            message: "Protected host changed",
+            position: { start_line: 0, start_col: 0, end_line: 0, end_col: 16 },
+          },
+        ]
+      : [],
+    parse_errors: content.includes("parse-error") ? ["fake parse warning"] : [],
+    is_style_only: false,
+  };
+}
+
+function fakeCommitDiff() {
+  const languageSmoke = readLanguageSmokeSpec();
+  if (languageSmoke) {
+    return fakeLanguageSmokeCommitDiff(languageSmoke);
+  }
+  const fileDiffs = [];
+  for (const entry of gitStatusEntries()) {
+    if (entry.path === "binary.dat" || entry.path.startsWith(".intentdiff-")) {
+      continue;
+    }
+    if (entry.path === "review-readme.md") {
+      fileDiffs.push(fakeReadmeDiff());
+      continue;
+    }
+    if (entry.status === "deleted") {
+      fileDiffs.push(fakeDeletedFileDiff(entry.path));
+      continue;
+    }
+    const content = readFile(entry.path);
+    fileDiffs.push(fakeDiff(content, entry.path));
+  }
+  const guardrails = fileDiffs.flatMap((diff) => diff.guardrail_violations || []);
+  return {
+    old_ref: refArg(),
+    new_ref: "",
+    guardrail_violations: guardrails,
+    file_diffs: fileDiffs,
+    cross_file_changes: [
+    ],
+    parse_errors: [],
+  };
+}
+
+function gitStatusEntries() {
+  let output = "";
+  try {
+    output = execFileSync("git", ["-c", `safe.directory=${repoRoot}`, "status", "--porcelain=v1"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      windowsHide: true,
+    });
+  } catch {
+    return [];
+  }
+  return output.split(/\r?\n/u)
+    .filter((line) => line.length >= 4)
+    .map((line) => {
+      const code = line.slice(0, 2);
+      const rawPath = line.slice(3).trim();
+      const arrow = " -> ";
+      const relativePath = rawPath.includes(arrow)
+        ? rawPath.slice(rawPath.lastIndexOf(arrow) + arrow.length)
+        : rawPath;
+      return {
+        path: unquoteGitPath(relativePath).replace(/\\/gu, "/"),
+        status: statusFromCode(code),
+      };
+    });
+}
+
+function statusFromCode(code) {
+  if (code === "??") {
+    return "untracked";
+  }
+  if (code.includes("D")) {
+    return "deleted";
+  }
+  if (code.includes("R")) {
+    return "renamed";
+  }
+  if (code.includes("A")) {
+    return "added";
+  }
+  return "modified";
+}
+
+function unquoteGitPath(value) {
+  if (value.startsWith('"') && value.endsWith('"')) {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value.slice(1, -1);
+    }
+  }
+  return value;
+}
+
+function readFile(relativePath) {
+  try {
+    return fs.readFileSync(path.join(repoRoot, relativePath), "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function readLanguageSmokeSpec() {
+  const specPath = path.join(repoRoot, LANGUAGE_SMOKE_FILE);
+  if (!fs.existsSync(specPath)) {
+    return null;
+  }
+  try {
+    const data = JSON.parse(fs.readFileSync(specPath, "utf8"));
+    return Array.isArray(data.files) ? data.files : null;
+  } catch {
+    return null;
+  }
+}
+
+function fakeLanguageSmokeCommitDiff(files) {
+  const fileDiffs = files.map((item) => fakeLanguageSmokeDiff(item));
+  return {
+    old_ref: refArg(),
+    new_ref: "",
+    guardrail_violations: fileDiffs.flatMap((diff) => diff.guardrail_violations || []),
+    file_diffs: fileDiffs,
+    cross_file_changes: [],
+    parse_errors: [],
+  };
+}
+
+function fakeLanguageSmokeDiff(item) {
+  const language = item.language || "generic";
+  const file = item.path || `language-smoke/${language}.txt`;
+  const kind = item.kind || "modification";
+  const base = {
+    old_filename: file,
+    new_filename: file,
+    language,
+    changes: [],
+    change_groups: [],
+    guardrail_violations: [],
+    parse_errors: [],
+    is_style_only: false,
+  };
+  if (kind === "style") {
+    return { ...base, is_style_only: true };
+  }
+  if (kind === "parse") {
+    return { ...base, parse_errors: [`${language} fake parse warning`] };
+  }
+  if (kind === "refactoring") {
+    return {
+      ...base,
+      change_groups: [{
+        kind: "REFACTORING",
+        rule_id: "language-smoke.refactoring",
+        refactoring_kind: "Extract symbol",
+      }],
+    };
+  }
+  if (kind === "guardrail") {
+    return {
+      ...base,
+      changes: [fakeModificationChange(language)],
+      guardrail_violations: [{
+        rule_id: "language-smoke.guardrail",
+        severity: "immutable",
+        file,
+        language,
+        semantic_path: `${language}.smoke`,
+        old_value: "old",
+        new_value: "new",
+        message: `${language} smoke guardrail`,
+        position: { start_line: 0, start_col: 0, end_line: 0, end_col: 8 },
+      }],
+    };
+  }
+  if (kind === "addition") {
+    return {
+      ...base,
+      changes: [{
+        change_type: "ADDITION",
+        description: `${language} smoke addition`,
+        new_node: {
+          node_type: "smoke_node",
+          label: "new value",
+          position: { start_line: 0, start_col: 0, end_line: 0, end_col: 9 },
+        },
+      }],
+    };
+  }
+  if (kind === "deletion") {
+    return fakeDeletedFileDiff(file, language, "old value");
+  }
+  return {
+    ...base,
+    changes: [fakeModificationChange(language)],
+  };
+}
+
+function fakeModificationChange(language) {
+  return {
+    change_type: "MODIFICATION",
+    description: `${language} smoke modification`,
+    old_node: {
+      node_type: "smoke_node",
+      label: "old value",
+      position: { start_line: 0, start_col: 0, end_line: 0, end_col: 9 },
+    },
+    new_node: {
+      node_type: "smoke_node",
+      label: "new value",
+      position: { start_line: 0, start_col: 0, end_line: 0, end_col: 9 },
+    },
+  };
+}
+
+function fakeDeletedFileDiff(file, language = "yaml", explicitLabel) {
+  const label = explicitLabel ?? (file === "review-deleted.yaml" ? "gone: true" : "base: false");
+  return {
+    old_filename: file,
+    new_filename: file,
+    language,
+    changes: [
+      {
+        change_type: "DELETION",
+        description: `Delete line 1: '${label}'`,
+        old_node: {
+          node_type: "block_mapping_pair",
+          label,
+          position: { start_line: 0, start_col: 0, end_line: 0, end_col: label.length },
+        },
+      },
+    ],
+    change_groups: [],
+    guardrail_violations: [],
+    parse_errors: [],
+    is_style_only: false,
+  };
+}
+
+function fakeReadmeDiff() {
+  const textDiff = "| `intentdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override [+for active-file live diffs. Set `null` to use `intentdiff.yaml`. ]|";
+  return {
+    old_filename: "review-readme.md",
+    new_filename: "review-readme.md",
+    language: "generic",
+    changes: [
+      {
+        change_type: "ADDITION",
+        description: "Insert text on line 73: '\"i'",
+        text_diff: textDiff,
+        new_node: {
+          node_type: "text_span",
+          label: "\"i",
+          position: { start_line: 72, start_col: 17, end_line: 72, end_col: 19 },
+        },
+      },
+      {
+        change_type: "MODIFICATION",
+        description: "Update line 73",
+        text_diff: textDiff,
+        old_node: {
+          node_type: "text_span",
+          label: "ull",
+          position: { start_line: 72, start_col: 18, end_line: 72, end_col: 21 },
+        },
+        new_node: {
+          node_type: "text_span",
+          label: "f\"",
+          position: { start_line: 72, start_col: 20, end_line: 72, end_col: 22 },
+        },
+      },
+      {
+        change_type: "DELETION",
+        description: "Delete text on line 73: ' Optional'",
+        text_diff: textDiff,
+        old_node: {
+          node_type: "text_span",
+          label: " Optional",
+          position: { start_line: 72, start_col: 24, end_line: 72, end_col: 33 },
+        },
+      },
+    ],
+    change_groups: [],
+    guardrail_violations: [],
+    parse_errors: [],
+    is_style_only: false,
+  };
+}

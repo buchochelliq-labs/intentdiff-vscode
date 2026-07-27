@@ -1,0 +1,17 @@
+{
+  "name": "@intentdiff/review-shell",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Electron-first IntentDiff standalone review shell with reusable web renderer.",
+  "main": "src/main.ts",
+  "scripts": {
+    "test": "npm run build:web && node --test test/reviewShell.test.js",
+    "build:web": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "electron": "^42.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
