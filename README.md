@@ -1,5 +1,8 @@
 # IntentDiff VS Code Extension
 
+[![CI](https://github.com/buchochelliq-labs/intentdiff-vscode/actions/workflows/ci.yml/badge.svg)](https://github.com/buchochelliq-labs/intentdiff-vscode/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Bring IntentDiff into VS Code with live semantic diff feedback, a
 group-first **Semantic Changes** review tree, native diff navigation,
 guardrail diagnostics, and cross-file refactoring visibility.
