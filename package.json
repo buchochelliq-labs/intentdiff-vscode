@@ -7,12 +7,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buchochelliq-labs/intentdiff.git",
-    "directory": "plugins/vscode"
+    "url": "https://github.com/buchochelliq-labs/intentdiff-vscode.git"
   },
-  "homepage": "https://github.com/buchochelliq-labs/intentdiff/tree/main/plugins/vscode",
+  "homepage": "https://github.com/buchochelliq-labs/intentdiff-vscode",
   "bugs": {
-    "url": "https://github.com/buchochelliq-labs/intentdiff/issues"
+    "url": "https://github.com/buchochelliq-labs/intentdiff-vscode/issues"
   },
   "engines": {
     "vscode": "^1.90.0"
@@ -938,12 +937,10 @@
     "test:unit": "node --test out/test/baseUri.test.js out/test/config.test.js out/test/contentClass.test.js out/test/gitStatus.test.js out/test/mapper.test.js out/test/protocol.test.js out/test/reviewActionModel.test.js out/test/reviewModel.test.js out/test/reviewRefresh.test.js out/test/reviewTimelineModel.test.js out/test/reviewTree.test.js out/test/reviewWebviewModel.test.js out/test/liveServerLaunch.test.js out/test/intentCodeLens.test.js out/test/intentExplain.test.js out/test/intentLlmPrompt.test.js out/test/releaseNotes.test.js out/test/selectionRange.test.js out/test/semanticOnlyDiff.test.js out/test/themeColors.test.js",
     "test:integration": "npm run compile && node out/test/integration/runTests.js",
     "test:semanticdiff-comparison": "npm run compile && node out/test/comparison/runComparison.js",
-    "vsix": "npm run compile && vsce package --baseContentUrl https://github.com/buchochelliq-labs/intentdiff/blob/HEAD/plugins/vscode --baseImagesUrl https://github.com/buchochelliq-labs/intentdiff/raw/HEAD/plugins/vscode",
-    "release:dry-run": "powershell -ExecutionPolicy Bypass -File ../../scripts/verify-vscode-extension-release.ps1",
-    "install:local": "powershell -ExecutionPolicy Bypass -File ../../scripts/install-vscode-extension.ps1",
-    "sync:local": "powershell -ExecutionPolicy Bypass -File ../../scripts/sync-local-dev.ps1",
-    "dev:watch": "npm run watch",
-    "dev:host": "powershell -ExecutionPolicy Bypass -File ../../scripts/sync-local-dev.ps1 -OpenDevHost"
+    "vsix": "npm run compile && vsce package --baseContentUrl https://github.com/buchochelliq-labs/intentdiff-vscode/blob/HEAD --baseImagesUrl https://github.com/buchochelliq-labs/intentdiff-vscode/raw/HEAD",
+    "publish:vsce": "vsce publish --packagePath",
+    "publish:ovsx": "ovsx publish",
+    "dev:watch": "npm run watch"
   },
   "devDependencies": {
     "@highlightjs/cdn-assets": "^11.11.1",
