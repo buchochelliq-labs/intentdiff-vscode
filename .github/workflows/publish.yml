@@ -137,4 +137,25 @@ jobs:
             echo "::warning::OVSX_PAT is not set - skipping Open VSX"
             exit 0
           fi
+
+          # Open VSX requires the namespace to exist before anything can be published
+          # into it, and it must equal package.json's `publisher` -- ovsx derives the
+          # target from the VSIX itself, so a mismatch is not something a flag can fix.
+          # Read it rather than hardcoding, so the two cannot drift apart.
+          namespace=$(node -p "require('./package.json').publisher")
+          echo "open vsx namespace: $namespace"
+
+          # create-namespace is not idempotent: it errors once the namespace exists,
+          # which is the normal state for every release after the first. Treat that as
+          # success, but only that -- any other failure still fails the job.
+          if npx ovsx create-namespace "$namespace" --pat "$OVSX_PAT" >ns.log 2>&1; then
+            echo "namespace $namespace created"
+          elif grep -qiE "already (exists|owned)|conflict" ns.log; then
+            echo "namespace $namespace already exists"
+          else
+            echo "::error::could not create the Open VSX namespace $namespace" >&2
+            cat ns.log >&2
+            exit 1
+          fi
+
           npx ovsx publish ./*.vsix --pat "$OVSX_PAT"
