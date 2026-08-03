@@ -72,8 +72,16 @@ jobs:
           echo "built ${vsix[0]} ($(du -h "${vsix[0]}" | cut -f1))"
           # The extension entry point must actually be inside the archive; vsce will
           # happily package an empty build if compilation silently produced nothing.
-          unzip -l "${vsix[0]}" | grep -q "extension/out/extension.js" \
-            || { echo "::error::VSIX contains no compiled entry point" >&2; exit 1; }
+          # Read the path from package.json rather than hardcoding it: `main` is
+          # ./out/src/extension.js here, not ./out/extension.js, and a hardcoded guess
+          # fails the build for the wrong reason the moment the layout changes.
+          entry=$(node -p "require('./package.json').main.replace(/^[.][/]/, '')")
+          echo "package.json main -> $entry"
+          unzip -l "${vsix[0]}" | grep -q "extension/${entry}" \
+            || { echo "::error::VSIX contains no compiled entry point at extension/${entry}" >&2
+                 echo "--- archive contents ---" >&2
+                 unzip -l "${vsix[0]}" | head -40 >&2
+                 exit 1; }
           sha256sum "${vsix[0]}" | tee "${vsix[0]}.sha256"
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
