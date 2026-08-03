@@ -948,7 +948,7 @@
   "devDependencies": {
     "@highlightjs/cdn-assets": "^11.11.1",
     "@types/jsdom": "^28.0.3",
-    "@types/node": "^20.12.12",
+    "@types/node": "^26.1.2",
     "@types/vscode": "^1.90.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.9.2",
