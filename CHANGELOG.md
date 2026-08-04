@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.0.1 - 2026-08-04
+
+First stable release, and the first under the **IntentumDiff** name (previously IntentDiff).
 
 - Added natural-language intent explanations ("what + why") on hovers, CodeLens,
   inlay hints, and release notes, with honest no-op/stub detection.

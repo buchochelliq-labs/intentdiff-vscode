@@ -2,7 +2,7 @@
   "name": "intentumdiff",
   "displayName": "IntentumDiff",
   "description": "Live semantic review that surfaces moved code, refactorings, and meaningful changes.",
-  "version": "0.0.1-beta.1",
+  "version": "0.0.1",
   "publisher": "buchochelliq-labs",
   "license": "MIT",
   "repository": {
