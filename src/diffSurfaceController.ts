@@ -108,14 +108,14 @@ export class DiffSurfaceController {
         crossFileChange: payload.crossFileChange,
         message: "Cross-file summary has no single target file to open.",
       }, null, 2));
-      void vscode.window.showInformationMessage("IntentDiff: cross-file summary has no single target file.");
+      void vscode.window.showInformationMessage("IntentumDiff: cross-file summary has no single target file.");
       return;
     }
     try {
       assertSafeRelativePath(payload.relativePath);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      void vscode.window.showWarningMessage(`IntentDiff: cannot open semantic diff: ${message}`);
+      void vscode.window.showWarningMessage(`IntentumDiff: cannot open semantic diff: ${message}`);
       return;
     }
     const filePayload: OpenFileReviewPayload = { ...payload, relativePath: payload.relativePath };
@@ -123,13 +123,13 @@ export class DiffSurfaceController {
     const file = this.host.reviewFileFor(filePayload.folderUri, filePayload.relativePath);
     if (file?.status === "skipped" || file?.status === "error") {
       void vscode.window.showInformationMessage(
-        `IntentDiff: ${file.skippedReason ?? file.error ?? "file cannot be opened semantically"}`,
+        `IntentumDiff: ${file.skippedReason ?? file.error ?? "file cannot be opened semantically"}`,
       );
       return;
     }
     if (isImageLikePath(filePayload.relativePath)) {
       this.host.output.appendLine(
-        "IntentDiff: image assets open in the custom review panel; native semantic text diff is not available for binary images.",
+        "IntentumDiff: image assets open in the custom review panel; native semantic text diff is not available for binary images.",
       );
       await this.host.openReviewPanel(filePayload);
       return;
@@ -148,14 +148,14 @@ export class DiffSurfaceController {
       relativePath: filePayload.relativePath,
       cacheNonce: this.host.resolvedCommitFor(filePayload.folderUri),
     });
-    const title = `${filePayload.relativePath} (IntentDiff: ${ref} ↔ working tree)`;
+    const title = `${filePayload.relativePath} (IntentumDiff: ${ref} ↔ working tree)`;
     const mode = modeOverride ?? readDiffMode();
     if (mode === "semanticOnly" && file?.diff) {
       await this.openSemanticOnlyNativeDiff(filePayload, file.diff, baseUri, modifiedUri, ref);
       return;
     }
     if (mode === "semanticOnly" && !file?.diff) {
-      void vscode.window.showInformationMessage("IntentDiff: semantic-only diff needs a ready semantic review; opening full diff.");
+      void vscode.window.showInformationMessage("IntentumDiff: semantic-only diff needs a ready semantic review; opening full diff.");
     }
     await this.openFullNativeDiff(filePayload, file?.diff, baseUri, modifiedUri, ref, title);
   }
@@ -212,7 +212,7 @@ export class DiffSurfaceController {
       diff,
       options: readSemanticOnlyOptions(this.host.hideComments()),
     });
-    const title = `${payload.relativePath} (IntentDiff semantic-only: ${ref} ↔ working tree)`;
+    const title = `${payload.relativePath} (IntentumDiff semantic-only: ${ref} ↔ working tree)`;
     await vscode.commands.executeCommand(
       "vscode.diff",
       semanticDocs.baseUri,

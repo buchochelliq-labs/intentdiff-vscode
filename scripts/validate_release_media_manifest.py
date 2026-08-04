@@ -158,7 +158,7 @@ def validate_manifest(
             )
 
         filename = full_screenshot_path.name
-        expected_prefix = f"intentdiff-vscode-{surface}"
+        expected_prefix = f"intentumdiff-vscode-{surface}"
         if not filename.startswith(expected_prefix) or not filename.lower().endswith(".png"):
             raise AssertionError(
                 f"Visual proof surface '{surface}' has unexpected screenshot filename '{filename}'."

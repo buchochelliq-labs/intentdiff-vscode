@@ -1,4 +1,4 @@
-// On-demand perceptual asset compares (`intentdiff assets git`), extracted from
+// On-demand perceptual asset compares (`intentumdiff assets git`), extracted from
 // PysdController (issue #79 stage 2). Owns the resolved-compare cache keyed by
 // folder + ref + resolved commit, so image panels render the compared viewer
 // synchronously once ready; the inflight set dedupes background runs.
@@ -86,13 +86,13 @@ export class AssetCompareService {
     await this.host.onCompareReady();
   }
 
-  /** Spawn `intentdiff assets git` and parse its asset_diffs (empty on any failure). */
+  /** Spawn `intentumdiff assets git` and parse its asset_diffs (empty on any failure). */
   private runAssetsCompare(
     folder: vscode.WorkspaceFolder,
     ref: string,
   ): Promise<Array<Record<string, unknown>>> {
     const settings = this.host.settingsForFolder(folder);
-    const outDir = path.join(folder.uri.fsPath, ".intentdiff", "assets");
+    const outDir = path.join(folder.uri.fsPath, ".intentumdiff", "assets");
     const args = ["assets", "git", "--repo", folder.uri.fsPath, "--base", ref, "--out", outDir, "--json"];
     return new Promise<Array<Record<string, unknown>>>((resolve) => {
       execFile(
@@ -101,7 +101,7 @@ export class AssetCompareService {
         {
           cwd: folder.uri.fsPath,
           maxBuffer: 64 * 1024 * 1024,
-          // Merge with process.env — buildLiveServerEnv only adds INTENTDIFF_*
+          // Merge with process.env — buildLiveServerEnv only adds INTENTUMDIFF_*
           // vars, so passing it alone would drop PATH/SystemRoot and the
           // executable (a Python console script) could not find its runtime.
           env: { ...process.env, ...buildLiveServerEnv(settings), PYTHONUTF8: "1", PYTHONIOENCODING: "utf-8" },

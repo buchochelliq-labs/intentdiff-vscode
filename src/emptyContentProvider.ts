@@ -2,7 +2,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { assertSafeRelativePath } from "./baseUri";
 
-export const EMPTY_SCHEME = "intentdiff-empty";
+export const EMPTY_SCHEME = "intentumdiff-empty";
 
 export interface EmptyDocumentIdentity {
   folderUri: string;

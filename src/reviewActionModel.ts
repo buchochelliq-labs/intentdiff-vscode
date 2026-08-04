@@ -223,7 +223,7 @@ function semanticHunkPreviewPatch(
   replacementLines: string[],
 ): string {
   const header = [
-    `IntentDiff semantic hunk ${kind ?? "action"}`,
+    `IntentumDiff semantic hunk ${kind ?? "action"}`,
     `file ${fsPath}`,
     `working lines ${startLine}-${endLine}`,
   ];

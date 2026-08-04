@@ -1,8 +1,8 @@
 # Read the intent
 
-IntentDiff answers *what changed and why it matters* — not just which lines moved.
+IntentumDiff answers *what changed and why it matters* — not just which lines moved.
 
-[Open the IntentDiff view](command:workbench.view.extension.intentdiffActivity), then
+[Open the IntentumDiff view](command:workbench.view.extension.intentumdiffActivity), then
 pick a file in **Semantic Changes** — click a file to open its diff, or expand it and
 click an **intent** or **evidence** row to jump straight to that change.
 
@@ -18,5 +18,5 @@ Where intent shows up:
 
 Want richer, context-aware explanations? Turn on the optional **BYOK / Copilot LLM
 explainer** — it sends a locally-derived, privacy-safe fact sheet (not your raw
-source) unless you point it at a local endpoint. Set `intentdiff.intent.explainer`
+source) unless you point it at a local endpoint. Set `intentumdiff.intent.explainer`
 to `llm`.

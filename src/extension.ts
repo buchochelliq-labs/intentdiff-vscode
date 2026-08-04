@@ -26,7 +26,7 @@ import {
   readSemanticOnlyOptions,
   resolveExecutableForFolder,
   settingsForFolder,
-  workspaceVenvIntentDiffCandidates,
+  workspaceVenvIntentumDiffCandidates,
   type NativeDiffMode,
 } from "./extensionSettings";
 import { BASE_SCHEME, assertSafeRelativePath, decodeBaseIdentity } from "./baseUri";
@@ -213,8 +213,8 @@ export function deactivate(): void {
 }
 
 class PysdController implements vscode.Disposable {
-  private readonly output = vscode.window.createOutputChannel("IntentDiff");
-  private readonly diagnostics = vscode.languages.createDiagnosticCollection("IntentDiff");
+  private readonly output = vscode.window.createOutputChannel("IntentumDiff");
+  private readonly diagnostics = vscode.languages.createDiagnosticCollection("IntentumDiff");
   private readonly status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 20);
   private readonly diffStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 20);
   private readonly reviewTree = new SemanticReviewTreeProvider();
@@ -306,61 +306,61 @@ class PysdController implements vscode.Disposable {
   private hideComments = false;
 
   // Category accents (overview-ruler ticks, borders, inline markers) use the
-  // contributed intentdiff.semanticChanges.* tokens so the live overlay shares
+  // contributed intentumdiff.semanticChanges.* tokens so the live overlay shares
   // one palette with every other surface. Line backgrounds keep the
   // theme-native translucent diffEditor.* tokens (the contributed tokens are
   // vivid foregrounds, unsuitable as a full-strength background).
   private readonly decorationTypes = {
     addition: vscode.window.createTextEditorDecorationType({
       backgroundColor: new vscode.ThemeColor("diffEditor.insertedTextBackground"),
-      overviewRulerColor: new vscode.ThemeColor("intentdiff.semanticChanges.addition"),
+      overviewRulerColor: new vscode.ThemeColor("intentumdiff.semanticChanges.addition"),
       overviewRulerLane: vscode.OverviewRulerLane.Right,
     }),
     deletion: vscode.window.createTextEditorDecorationType({
       backgroundColor: new vscode.ThemeColor("diffEditor.removedTextBackground"),
-      overviewRulerColor: new vscode.ThemeColor("intentdiff.semanticChanges.deletion"),
+      overviewRulerColor: new vscode.ThemeColor("intentumdiff.semanticChanges.deletion"),
       overviewRulerLane: vscode.OverviewRulerLane.Right,
     }),
     modification: vscode.window.createTextEditorDecorationType({
       backgroundColor: new vscode.ThemeColor("diffEditor.changedTextBackground"),
-      overviewRulerColor: new vscode.ThemeColor("intentdiff.semanticChanges.modification"),
+      overviewRulerColor: new vscode.ThemeColor("intentumdiff.semanticChanges.modification"),
       overviewRulerLane: vscode.OverviewRulerLane.Right,
     }),
     move: vscode.window.createTextEditorDecorationType({
       isWholeLine: true,
       border: "1px dashed",
-      borderColor: new vscode.ThemeColor("intentdiff.semanticChanges.movedCode"),
-      overviewRulerColor: new vscode.ThemeColor("intentdiff.semanticChanges.movedCode"),
+      borderColor: new vscode.ThemeColor("intentumdiff.semanticChanges.movedCode"),
+      overviewRulerColor: new vscode.ThemeColor("intentumdiff.semanticChanges.movedCode"),
       overviewRulerLane: vscode.OverviewRulerLane.Right,
     }),
     refactoring: vscode.window.createTextEditorDecorationType({
       isWholeLine: true,
       border: "1px solid",
-      borderColor: new vscode.ThemeColor("intentdiff.semanticChanges.refactoring"),
-      overviewRulerColor: new vscode.ThemeColor("intentdiff.semanticChanges.refactoring"),
+      borderColor: new vscode.ThemeColor("intentumdiff.semanticChanges.refactoring"),
+      overviewRulerColor: new vscode.ThemeColor("intentumdiff.semanticChanges.refactoring"),
       overviewRulerLane: vscode.OverviewRulerLane.Right,
     }),
     style: vscode.window.createTextEditorDecorationType({
       isWholeLine: true,
       opacity: "0.65",
-      overviewRulerColor: new vscode.ThemeColor("intentdiff.semanticChanges.muted"),
+      overviewRulerColor: new vscode.ThemeColor("intentumdiff.semanticChanges.muted"),
       overviewRulerLane: vscode.OverviewRulerLane.Right,
     }),
     inlineDeletionWord: vscode.window.createTextEditorDecorationType({
       backgroundColor: new vscode.ThemeColor("diffEditor.changedTextBackground"),
       border: "1px dotted",
-      borderColor: new vscode.ThemeColor("intentdiff.semanticChanges.deletion"),
-      overviewRulerColor: new vscode.ThemeColor("intentdiff.semanticChanges.deletion"),
+      borderColor: new vscode.ThemeColor("intentumdiff.semanticChanges.deletion"),
+      overviewRulerColor: new vscode.ThemeColor("intentumdiff.semanticChanges.deletion"),
       overviewRulerLane: vscode.OverviewRulerLane.Right,
     }),
     inlineDeletionGap: vscode.window.createTextEditorDecorationType({
       textDecoration: "none; border-left: 1px dotted; border-right: 1px dotted;",
       after: {
-        color: new vscode.ThemeColor("intentdiff.semanticChanges.deletion"),
+        color: new vscode.ThemeColor("intentumdiff.semanticChanges.deletion"),
         backgroundColor: new vscode.ThemeColor("diffEditor.removedTextBackground"),
         margin: "0 0 0 0.25em",
       },
-      overviewRulerColor: new vscode.ThemeColor("intentdiff.semanticChanges.deletion"),
+      overviewRulerColor: new vscode.ThemeColor("intentumdiff.semanticChanges.deletion"),
       overviewRulerLane: vscode.OverviewRulerLane.Right,
     }),
   };
@@ -418,10 +418,10 @@ class PysdController implements vscode.Disposable {
       fuelPolicy: () => readFuelPolicy(),
       setTimelineSnapshots: (snapshots) => this.reviewTimeline.setReviewSnapshots(snapshots),
     });
-    this.status.command = "intentdiff.showOutput";
-    this.status.text = "IntentDiff";
-    this.status.tooltip = "IntentDiff";
-    this.diffStatus.name = "IntentDiff mode";
+    this.status.command = "intentumdiff.showOutput";
+    this.status.text = "IntentumDiff";
+    this.status.tooltip = "IntentumDiff";
+    this.diffStatus.name = "IntentumDiff mode";
   }
 
   activate(): void {
@@ -431,11 +431,11 @@ class PysdController implements vscode.Disposable {
     this.telemetry.restore();
     this.reviewTree.setGroupingMode(readReviewGroupingMode());
     this.reviewTree.setDiffSurface(readReviewDiffSurface());
-    const reviewView = vscode.window.createTreeView("intentdiff.review", {
+    const reviewView = vscode.window.createTreeView("intentumdiff.review", {
       treeDataProvider: this.reviewTree,
       showCollapseAll: true,
     });
-    const scmReviewView = vscode.window.createTreeView("intentdiff.semanticChanges", {
+    const scmReviewView = vscode.window.createTreeView("intentumdiff.semanticChanges", {
       treeDataProvider: this.reviewTree,
       showCollapseAll: true,
     });
@@ -476,7 +476,7 @@ class PysdController implements vscode.Disposable {
       vscode.workspace.registerTextDocumentContentProvider(SEMANTIC_MODIFIED_SCHEME, this.semanticOnlyContentProvider),
       reviewDashboardProvider,
       reviewPanelController,
-      vscode.window.registerWebviewViewProvider("intentdiff.dashboard", reviewDashboardProvider, {
+      vscode.window.registerWebviewViewProvider("intentumdiff.dashboard", reviewDashboardProvider, {
         webviewOptions: { retainContextWhenHidden: true },
       }),
       registerReviewTimelineProvider(vscode.workspace, this.reviewTimeline),
@@ -489,8 +489,8 @@ class PysdController implements vscode.Disposable {
         [{ scheme: "file" }, { scheme: BASE_SCHEME }, { scheme: EMPTY_SCHEME }],
         new IntentHoverProvider((uri) => this.intentLensContext(uri), this.intentLlmExplainer),
       ),
-      vscode.commands.registerCommand("intentdiff.setIntentExplainerKey", () => this.intentLlmExplainer.setKey()),
-      vscode.commands.registerCommand("intentdiff.clearIntentExplainerKey", () => this.intentLlmExplainer.clearKey()),
+      vscode.commands.registerCommand("intentumdiff.setIntentExplainerKey", () => this.intentLlmExplainer.setKey()),
+      vscode.commands.registerCommand("intentumdiff.clearIntentExplainerKey", () => this.intentLlmExplainer.clearKey()),
       vscode.languages.registerCodeActionsProvider(
         [{ scheme: "file" }, { scheme: BASE_SCHEME }, { scheme: EMPTY_SCHEME }],
         new IntentCodeActionProvider((uri) => this.intentLensContext(uri)),
@@ -502,58 +502,58 @@ class PysdController implements vscode.Disposable {
         this.intentInlayHints,
       ),
       vscode.commands.registerCommand(
-        "intentdiff.peekIntent",
+        "intentumdiff.peekIntent",
         (args?: PeekIntentArgs) => this.peekIntent(args),
       ),
       reviewView,
       scmReviewView,
       reviewView.onDidChangeVisibility(() => this.syncReviewViewVisibility("view visibility")),
       scmReviewView.onDidChangeVisibility(() => this.syncReviewViewVisibility("view visibility")),
-      vscode.commands.registerCommand("intentdiff.toggle", () => this.toggle()),
-      vscode.commands.registerCommand("intentdiff.toggleEditorDiff", () => this.toggleEditorDiff()),
-      vscode.commands.registerCommand("intentdiff.showEditorDiff", () => this.setEditorDiffVisible(true)),
-      vscode.commands.registerCommand("intentdiff.hideEditorDiff", () => this.setEditorDiffVisible(false)),
-      vscode.commands.registerCommand("intentdiff.toggleHideComments", () => this.toggleHideComments()),
-      vscode.commands.registerCommand("intentdiff.showCommentChanges", () => this.setHideComments(false)),
-      vscode.commands.registerCommand("intentdiff.hideCommentChanges", () => this.setHideComments(true)),
-      vscode.commands.registerCommand("intentdiff.configureVisibleChangeTypes", () => this.configureVisibleChangeTypes()),
-      vscode.commands.registerCommand("intentdiff.restartServer", () => this.restartAll()),
-      vscode.commands.registerCommand("intentdiff.diffActiveFile", () => this.diffActiveEditorNow()),
-      vscode.commands.registerCommand("intentdiff.showOutput", () => this.output.show()),
-      vscode.commands.registerCommand("intentdiff.refreshReview", () => this.requestFullReview("manual refresh")),
-      vscode.commands.registerCommand("intentdiff.openReviewDashboard", () => this.openReviewDashboard()),
-      vscode.commands.registerCommand("intentdiff.openDiagnostics", () => this.telemetry.openDiagnosticsReport()),
-      vscode.commands.registerCommand("intentdiff.exportDiagnostics", () => this.telemetry.exportDiagnosticsReport()),
-      vscode.commands.registerCommand("intentdiff.cycleReviewGrouping", () => this.cycleReviewGrouping()),
+      vscode.commands.registerCommand("intentumdiff.toggle", () => this.toggle()),
+      vscode.commands.registerCommand("intentumdiff.toggleEditorDiff", () => this.toggleEditorDiff()),
+      vscode.commands.registerCommand("intentumdiff.showEditorDiff", () => this.setEditorDiffVisible(true)),
+      vscode.commands.registerCommand("intentumdiff.hideEditorDiff", () => this.setEditorDiffVisible(false)),
+      vscode.commands.registerCommand("intentumdiff.toggleHideComments", () => this.toggleHideComments()),
+      vscode.commands.registerCommand("intentumdiff.showCommentChanges", () => this.setHideComments(false)),
+      vscode.commands.registerCommand("intentumdiff.hideCommentChanges", () => this.setHideComments(true)),
+      vscode.commands.registerCommand("intentumdiff.configureVisibleChangeTypes", () => this.configureVisibleChangeTypes()),
+      vscode.commands.registerCommand("intentumdiff.restartServer", () => this.restartAll()),
+      vscode.commands.registerCommand("intentumdiff.diffActiveFile", () => this.diffActiveEditorNow()),
+      vscode.commands.registerCommand("intentumdiff.showOutput", () => this.output.show()),
+      vscode.commands.registerCommand("intentumdiff.refreshReview", () => this.requestFullReview("manual refresh")),
+      vscode.commands.registerCommand("intentumdiff.openReviewDashboard", () => this.openReviewDashboard()),
+      vscode.commands.registerCommand("intentumdiff.openDiagnostics", () => this.telemetry.openDiagnosticsReport()),
+      vscode.commands.registerCommand("intentumdiff.exportDiagnostics", () => this.telemetry.exportDiagnosticsReport()),
+      vscode.commands.registerCommand("intentumdiff.cycleReviewGrouping", () => this.cycleReviewGrouping()),
       vscode.commands.registerCommand(
-        "intentdiff.openReviewPanel",
+        "intentumdiff.openReviewPanel",
         (payload?: OpenReviewPayload | ReviewTreeNode | ReviewWebviewPayload) => this.openReviewPanel(payload),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.openNativeDiff",
+        "intentumdiff.reviewPanel.openNativeDiff",
         () => this.openReviewPanelNativeDiff("full"),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.openSemanticOnlyDiff",
+        "intentumdiff.reviewPanel.openSemanticOnlyDiff",
         () => this.openReviewPanelNativeDiff("semanticOnly"),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.stageFile",
+        "intentumdiff.reviewPanel.stageFile",
         async (payload?: OpenReviewPayload | ReviewWebviewPayload) => {
           const uri = this.reviewPayloadUri(payload);
           if (!uri) {
-            void vscode.window.showInformationMessage("IntentDiff: no reviewed file is available to stage.");
+            void vscode.window.showInformationMessage("IntentumDiff: no reviewed file is available to stage.");
             return;
           }
           await vscode.commands.executeCommand("git.stage", uri);
         },
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.revertFile",
+        "intentumdiff.reviewPanel.revertFile",
         async (payload?: OpenReviewPayload | ReviewWebviewPayload) => {
           const uri = this.reviewPayloadUri(payload);
           if (!uri) {
-            void vscode.window.showInformationMessage("IntentDiff: no reviewed file is available to revert.");
+            void vscode.window.showInformationMessage("IntentumDiff: no reviewed file is available to revert.");
             return;
           }
           const choice = await vscode.window.showWarningMessage(
@@ -567,59 +567,59 @@ class PysdController implements vscode.Disposable {
         },
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.stageHunk",
+        "intentumdiff.reviewPanel.stageHunk",
         async (payload?: ReviewWebviewPayload) => this.handleSemanticHunkAction("stageHunk", payload),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.revertHunk",
+        "intentumdiff.reviewPanel.revertHunk",
         async (payload?: ReviewWebviewPayload) => this.handleSemanticHunkAction("revertHunk", payload),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.applyHunk",
+        "intentumdiff.reviewPanel.applyHunk",
         async (payload?: ReviewWebviewPayload) => this.handleSemanticHunkAction("applyHunk", payload),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.previousChange",
+        "intentumdiff.reviewPanel.previousChange",
         () => this.reviewPanelController?.postPanelCommand("previousChange"),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.nextChange",
+        "intentumdiff.reviewPanel.nextChange",
         () => this.reviewPanelController?.postPanelCommand("nextChange"),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.toggleRail",
+        "intentumdiff.reviewPanel.toggleRail",
         () => this.reviewPanelController?.postPanelCommand("toggleRail"),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.toggleEvidenceDrawer",
+        "intentumdiff.reviewPanel.toggleEvidenceDrawer",
         () => this.reviewPanelController?.postPanelCommand("toggleEvidenceDrawer"),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.reviewPanel.setView",
+        "intentumdiff.reviewPanel.setView",
         (reviewView?: string) => this.reviewPanelController?.postPanelCommand("setReviewView", reviewView),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.openSemanticDiff",
+        "intentumdiff.openSemanticDiff",
         (payload: OpenReviewPayload | ReviewTreeNode) => this.diffSurfaces.open(payload),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.openChange",
+        "intentumdiff.openChange",
         (payload: OpenReviewPayload | ReviewTreeNode) => this.diffSurfaces.open(payload),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.openSemanticOnlyDiff",
+        "intentumdiff.openSemanticOnlyDiff",
         (payload?: OpenReviewPayload | ReviewTreeNode) => this.diffSurfaces.open(payload, "semanticOnly"),
       ),
       vscode.commands.registerCommand(
-        "intentdiff.openFullDiff",
+        "intentumdiff.openFullDiff",
         (payload?: OpenReviewPayload | ReviewTreeNode) => this.diffSurfaces.open(payload, "full"),
       ),
-      vscode.commands.registerCommand("intentdiff.nextSemanticChange", () => this.navigateSemanticChange(1)),
-      vscode.commands.registerCommand("intentdiff.previousSemanticChange", () => this.navigateSemanticChange(-1)),
-      vscode.commands.registerCommand("intentdiff.expandSemanticDiffContext", () => this.adjustSemanticContextLines(1)),
-      vscode.commands.registerCommand("intentdiff.collapseSemanticDiffContext", () => this.adjustSemanticContextLines(-1)),
-      vscode.commands.registerCommand("intentdiff.clearReview", () => this.clearReview()),
-      vscode.commands.registerCommand("intentdiff.revealActiveFileInReview", () => this.revealActiveFileInReview()),
+      vscode.commands.registerCommand("intentumdiff.nextSemanticChange", () => this.navigateSemanticChange(1)),
+      vscode.commands.registerCommand("intentumdiff.previousSemanticChange", () => this.navigateSemanticChange(-1)),
+      vscode.commands.registerCommand("intentumdiff.expandSemanticDiffContext", () => this.adjustSemanticContextLines(1)),
+      vscode.commands.registerCommand("intentumdiff.collapseSemanticDiffContext", () => this.adjustSemanticContextLines(-1)),
+      vscode.commands.registerCommand("intentumdiff.clearReview", () => this.clearReview()),
+      vscode.commands.registerCommand("intentumdiff.revealActiveFileInReview", () => this.revealActiveFileInReview()),
       vscode.workspace.onDidOpenTextDocument((document) => this.scheduleDocument(document)),
       vscode.workspace.onDidSaveTextDocument((document) => {
         this.scheduleDocument(document);
@@ -642,38 +642,38 @@ class PysdController implements vscode.Disposable {
       }),
       vscode.workspace.onDidChangeConfiguration((event) => {
         if (
-          event.affectsConfiguration("intentdiff.executable")
-          || event.affectsConfiguration("intentdiff.ref")
-          || event.affectsConfiguration("intentdiff.enabled")
-          || event.affectsConfiguration("intentdiff.debounceMs")
-          || event.affectsConfiguration("intentdiff.fuel")
-          || event.affectsConfiguration("intentdiff.trace")
-          || event.affectsConfiguration("intentdiff.schemas")
+          event.affectsConfiguration("intentumdiff.executable")
+          || event.affectsConfiguration("intentumdiff.ref")
+          || event.affectsConfiguration("intentumdiff.enabled")
+          || event.affectsConfiguration("intentumdiff.debounceMs")
+          || event.affectsConfiguration("intentumdiff.fuel")
+          || event.affectsConfiguration("intentumdiff.trace")
+          || event.affectsConfiguration("intentumdiff.schemas")
         ) {
           this.restartAll();
         } else if (
-          event.affectsConfiguration("intentdiff.diff.hideComments")
-          || event.affectsConfiguration("intentdiff.diff.fallbackDiff")
-          || event.affectsConfiguration("intentdiff.diff.contextLines")
-          || event.affectsConfiguration("intentdiff.diff.defaultMode")
-          || event.affectsConfiguration("intentdiff.visualization")
+          event.affectsConfiguration("intentumdiff.diff.hideComments")
+          || event.affectsConfiguration("intentumdiff.diff.fallbackDiff")
+          || event.affectsConfiguration("intentumdiff.diff.contextLines")
+          || event.affectsConfiguration("intentumdiff.diff.defaultMode")
+          || event.affectsConfiguration("intentumdiff.visualization")
         ) {
           this.readVisualSettings();
           this.updateEditorContext();
           this.refreshVisibleDecorations();
           if (
-            event.affectsConfiguration("intentdiff.diff.hideComments")
-            || event.affectsConfiguration("intentdiff.diff.contextLines")
-            || event.affectsConfiguration("intentdiff.visualization")
+            event.affectsConfiguration("intentumdiff.diff.hideComments")
+            || event.affectsConfiguration("intentumdiff.diff.contextLines")
+            || event.affectsConfiguration("intentumdiff.visualization")
           ) {
             void this.diffSurfaces.refreshOpenSemanticOnly();
           }
         }
-        if (event.affectsConfiguration("intentdiff.review.groupFilesBy")
-          || event.affectsConfiguration("intentdiff.review.diffSurface")) {
+        if (event.affectsConfiguration("intentumdiff.review.groupFilesBy")
+          || event.affectsConfiguration("intentumdiff.review.diffSurface")) {
           this.applyReviewGrouping();
         }
-        if (event.affectsConfiguration("intentdiff.review.pollIntervalMs") && this.reviewViewVisible) {
+        if (event.affectsConfiguration("intentumdiff.review.pollIntervalMs") && this.reviewViewVisible) {
           this.reviewPolling.stopPolling();
           this.reviewPolling.startPolling();
         }
@@ -681,8 +681,8 @@ class PysdController implements vscode.Disposable {
     );
     if (this.context.extensionMode === vscode.ExtensionMode.Test) {
       this.context.subscriptions.push(
-        vscode.commands.registerCommand("intentdiff.test.getReviewState", () => this.reviewStateForTests()),
-        vscode.commands.registerCommand("intentdiff.test.getActiveDiffState", () => this.activeDiffStateForTests()),
+        vscode.commands.registerCommand("intentumdiff.test.getReviewState", () => this.reviewStateForTests()),
+        vscode.commands.registerCommand("intentumdiff.test.getActiveDiffState", () => this.activeDiffStateForTests()),
       );
     }
     const visibilityTimer = setTimeout(() => {
@@ -708,13 +708,13 @@ class PysdController implements vscode.Disposable {
   private toggle(): void {
     this.paused = !this.paused;
     if (this.paused) {
-      this.status.text = "IntentDiff: paused";
+      this.status.text = "IntentumDiff: paused";
       this.clearTimers();
       this.clearVisuals();
       this.serverSessions.disposeAll();
       return;
     }
-    this.status.text = "IntentDiff: enabled";
+    this.status.text = "IntentumDiff: enabled";
     this.scheduleDocument(vscode.window.activeTextEditor?.document);
     this.scheduleReviewRefresh("enabled", { forceFull: true });
   }
@@ -731,7 +731,7 @@ class PysdController implements vscode.Disposable {
     this.overlaysVisible = visible;
     this.updateEditorContext();
     this.refreshVisibleDecorations();
-    this.status.text = this.overlaysVisible ? "IntentDiff: overlays shown" : "IntentDiff: overlays hidden";
+    this.status.text = this.overlaysVisible ? "IntentumDiff: overlays shown" : "IntentumDiff: overlays hidden";
   }
 
   private setHideComments(hidden: boolean): void {
@@ -739,11 +739,11 @@ class PysdController implements vscode.Disposable {
     this.updateEditorContext();
     this.refreshVisibleDecorations();
     void this.diffSurfaces.refreshOpenSemanticOnly();
-    this.status.text = this.hideComments ? "IntentDiff: comments hidden" : "IntentDiff: comments shown";
+    this.status.text = this.hideComments ? "IntentumDiff: comments hidden" : "IntentumDiff: comments shown";
   }
 
   private async configureVisibleChangeTypes(): Promise<void> {
-    const config = vscode.workspace.getConfiguration("intentdiff");
+    const config = vscode.workspace.getConfiguration("intentumdiff");
     const options = [
       { label: "Additions", setting: "visualization.showAdditions" },
       { label: "Deletions", setting: "visualization.showDeletions" },
@@ -761,7 +761,7 @@ class PysdController implements vscode.Disposable {
       })),
       {
         canPickMany: true,
-        title: "IntentDiff visible change types",
+        title: "IntentumDiff visible change types",
       },
     );
     if (!picked) {
@@ -786,7 +786,7 @@ class PysdController implements vscode.Disposable {
     this.clearReview();
     this.baseContentProvider.clear();
     this.emptyContentProvider.clear();
-    this.status.text = "IntentDiff: restarting";
+    this.status.text = "IntentumDiff: restarting";
     this.scheduleDocument(vscode.window.activeTextEditor?.document);
     this.scheduleReviewRefresh("restart", { forceFull: true });
   }
@@ -794,24 +794,24 @@ class PysdController implements vscode.Disposable {
   private diffActiveEditorNow(): void {
     const document = vscode.window.activeTextEditor?.document;
     if (!document) {
-      void vscode.window.showInformationMessage("IntentDiff: no active editor");
+      void vscode.window.showInformationMessage("IntentumDiff: no active editor");
       return;
     }
     this.diffDocument(document);
   }
 
   private async openReviewDashboard(): Promise<void> {
-    await vscode.commands.executeCommand("workbench.view.extension.intentdiffActivity");
-    await vscode.commands.executeCommand("intentdiff.dashboard.focus");
+    await vscode.commands.executeCommand("workbench.view.extension.intentumdiffActivity");
+    await vscode.commands.executeCommand("intentumdiff.dashboard.focus");
   }
 
   private async cycleReviewGrouping(): Promise<void> {
-    const config = vscode.workspace.getConfiguration("intentdiff");
+    const config = vscode.workspace.getConfiguration("intentumdiff");
     const current = readReviewGroupingMode();
     const next = nextReviewFileGroupingMode(current);
     await config.update("review.groupFilesBy", next, vscode.ConfigurationTarget.Global);
     this.applyReviewGrouping();
-    void vscode.window.showInformationMessage(`IntentDiff review grouping: ${reviewGroupingModeLabel(next)}`);
+    void vscode.window.showInformationMessage(`IntentumDiff review grouping: ${reviewGroupingModeLabel(next)}`);
   }
 
   private applyReviewGrouping(): void {
@@ -850,19 +850,19 @@ class PysdController implements vscode.Disposable {
       return;
     }
     if (message.command === "stageFile") {
-      await vscode.commands.executeCommand("intentdiff.reviewPanel.stageFile", message.payload);
+      await vscode.commands.executeCommand("intentumdiff.reviewPanel.stageFile", message.payload);
       return;
     }
     if (message.command === "revertFile") {
-      await vscode.commands.executeCommand("intentdiff.reviewPanel.revertFile", message.payload);
+      await vscode.commands.executeCommand("intentumdiff.reviewPanel.revertFile", message.payload);
       return;
     }
     if (message.command === "stageHunk" || message.command === "revertHunk" || message.command === "applyHunk") {
-      await vscode.commands.executeCommand(`intentdiff.reviewPanel.${message.command}`, message.payload);
+      await vscode.commands.executeCommand(`intentumdiff.reviewPanel.${message.command}`, message.payload);
       return;
     }
     if (message.command === "editHunk") {
-      await vscode.commands.executeCommand("intentdiff.reviewPanel.applyHunk", message.payload);
+      await vscode.commands.executeCommand("intentumdiff.reviewPanel.applyHunk", message.payload);
     }
   }
 
@@ -890,7 +890,7 @@ class PysdController implements vscode.Disposable {
   ): Promise<void> {
     const filePayload = this.releaseNotesPayloadFor(payload);
     if (!filePayload) {
-      void vscode.window.showInformationMessage("IntentDiff: no reviewed file is available for release notes.");
+      void vscode.window.showInformationMessage("IntentumDiff: no reviewed file is available for release notes.");
       return;
     }
     const model = await this.buildReviewPanelModelForPayload(filePayload);
@@ -909,7 +909,7 @@ class PysdController implements vscode.Disposable {
       }
       const markdown = releaseNotesToMarkdown(notes, { title: `Release notes — ${filePayload.relativePath}`, narrative });
       await vscode.env.clipboard.writeText(markdown);
-      void vscode.window.showInformationMessage("IntentDiff: release notes copied as Markdown.");
+      void vscode.window.showInformationMessage("IntentumDiff: release notes copied as Markdown.");
       return;
     }
     const baseName = path.basename(filePayload.relativePath).replace(/\.[^.]+$/u, "") || "release-notes";
@@ -925,7 +925,7 @@ class PysdController implements vscode.Disposable {
       return;
     }
     await vscode.workspace.fs.writeFile(target, Buffer.from(releaseNotesToJson(notes), "utf8"));
-    void vscode.window.showInformationMessage(`IntentDiff: release notes exported to ${path.basename(target.fsPath)}.`);
+    void vscode.window.showInformationMessage(`IntentumDiff: release notes exported to ${path.basename(target.fsPath)}.`);
   }
 
   private openTimelineSnapshot(payload: ReviewWebviewPayload | undefined): void {
@@ -934,7 +934,7 @@ class PysdController implements vscode.Disposable {
       ? this.telemetry.timeline().find((item) => item.id === snapshotId)
       : undefined;
     if (!snapshot) {
-      void vscode.window.showWarningMessage("IntentDiff: review timeline snapshot is no longer available.");
+      void vscode.window.showWarningMessage("IntentumDiff: review timeline snapshot is no longer available.");
       return;
     }
     this.output.appendLine(JSON.stringify({
@@ -942,7 +942,7 @@ class PysdController implements vscode.Disposable {
     }, null, 2));
     this.output.show(true);
     void vscode.window.showInformationMessage(
-      `IntentDiff snapshot: ${snapshot.folderName}, ${snapshot.fileCount} files, ${snapshot.semanticChangeCount} semantic changes, ${snapshot.errorCount} errors, ${snapshot.fuelHotspotCount} fuel hotspots.`,
+      `IntentumDiff snapshot: ${snapshot.folderName}, ${snapshot.fileCount} files, ${snapshot.semanticChangeCount} semantic changes, ${snapshot.errorCount} errors, ${snapshot.fuelHotspotCount} fuel hotspots.`,
     );
   }
 
@@ -964,7 +964,7 @@ class PysdController implements vscode.Disposable {
     }
     if (kind !== "stageHunk" && editResult.error) {
       void vscode.window.showWarningMessage(
-        `IntentDiff: semantic hunk action is unavailable: ${editResult.error}`,
+        `IntentumDiff: semantic hunk action is unavailable: ${editResult.error}`,
       );
       return;
     }
@@ -974,7 +974,7 @@ class PysdController implements vscode.Disposable {
     );
     if (!result.target) {
       void vscode.window.showWarningMessage(
-        `IntentDiff: semantic hunk action is unavailable${result.error ? `: ${result.error}` : "."}`,
+        `IntentumDiff: semantic hunk action is unavailable${result.error ? `: ${result.error}` : "."}`,
       );
       return;
     }
@@ -1030,7 +1030,7 @@ class PysdController implements vscode.Disposable {
       await document.save();
       void vscode.window.showInformationMessage(`${hunkEdit.target.previewLabel} applied.`);
     } else {
-      void vscode.window.showWarningMessage(`IntentDiff: ${hunkEdit.target.previewLabel} did not apply.`);
+      void vscode.window.showWarningMessage(`IntentumDiff: ${hunkEdit.target.previewLabel} did not apply.`);
     }
   }
 
@@ -1039,12 +1039,12 @@ class PysdController implements vscode.Disposable {
     hunkEdit: SemanticReviewHunkEdit,
   ): Promise<void> {
     if (!hunkEdit.indexPatch) {
-      void vscode.window.showWarningMessage("IntentDiff: semantic hunk stage is unavailable: patch could not be generated.");
+      void vscode.window.showWarningMessage("IntentumDiff: semantic hunk stage is unavailable: patch could not be generated.");
       return;
     }
     const folderUri = payload?.folderUri;
     if (!folderUri) {
-      void vscode.window.showWarningMessage("IntentDiff: semantic hunk stage is unavailable: missing workspace folder.");
+      void vscode.window.showWarningMessage("IntentumDiff: semantic hunk stage is unavailable: missing workspace folder.");
       return;
     }
     const repoFsPath = vscode.Uri.parse(folderUri).fsPath;
@@ -1062,7 +1062,7 @@ class PysdController implements vscode.Disposable {
       }, null, 2));
       void vscode.window.showInformationMessage(`${hunkEdit.target.previewLabel} staged.`);
     } catch (error) {
-      void vscode.window.showWarningMessage(`IntentDiff: semantic hunk stage failed: ${messageOf(error)}`);
+      void vscode.window.showWarningMessage(`IntentumDiff: semantic hunk stage failed: ${messageOf(error)}`);
     }
   }
 
@@ -1073,7 +1073,7 @@ class PysdController implements vscode.Disposable {
     );
     if (!result.target) {
       if (result.error) {
-        void vscode.window.showWarningMessage(`IntentDiff: unsafe review file target: ${result.error}`);
+        void vscode.window.showWarningMessage(`IntentumDiff: unsafe review file target: ${result.error}`);
       }
       return undefined;
     }
@@ -1197,14 +1197,14 @@ class PysdController implements vscode.Disposable {
     const retrySuppression = this.autoReviewRetrySuppression();
     if (retrySuppression) {
       this.reviewRefreshQueued = false;
-      this.status.text = "IntentDiff: review failed (auto-retry paused)";
+      this.status.text = "IntentumDiff: review failed (auto-retry paused)";
       if (!this.reviewRetrySuppressedLogged) {
         this.reviewRetrySuppressedLogged = true;
         this.output.appendLine(JSON.stringify({
           reviewAutoRetryPaused: {
             reason: retrySuppression,
             lastError: this.lastReviewFailure ?? null,
-            hint: "Edit a file or run 'IntentDiff: Refresh Semantic Changes' to retry.",
+            hint: "Edit a file or run 'IntentumDiff: Refresh Semantic Changes' to retry.",
           },
         }, null, 2));
       }
@@ -1272,7 +1272,7 @@ class PysdController implements vscode.Disposable {
           changed = true;
         }
         if (plan.refresh.length > 0) {
-          this.reviewFiles.delete(reviewKey(folderUri, ".intentdiff-review"));
+          this.reviewFiles.delete(reviewKey(folderUri, ".intentumdiff-review"));
         }
         for (const file of plan.refresh) {
           this.markReviewFilePending(plan.folder, file.relativePath, pendingMessageFor(file));
@@ -1350,7 +1350,7 @@ class PysdController implements vscode.Disposable {
     }
     const target = this.resolveDocument(document);
     if (!target) {
-      this.status.text = "IntentDiff: unavailable";
+      this.status.text = "IntentumDiff: unavailable";
       this.clearDocumentVisuals(document.uri);
       return;
     }
@@ -1364,16 +1364,16 @@ class PysdController implements vscode.Disposable {
     try {
       session = this.serverSessions.ensure(target.folder);
     } catch (error) {
-      this.status.text = "IntentDiff: error";
+      this.status.text = "IntentumDiff: error";
       const message = error instanceof Error ? error.message : String(error);
       this.output.appendLine(`LiveServer startup failed: ${message}`);
       void this.notifyLiveServerFailure(target.folder, {
         message,
-        toast: "IntentDiff LiveServer could not start.",
+        toast: "IntentumDiff LiveServer could not start.",
       });
       return;
     }
-    this.status.text = "IntentDiff: diffing";
+    this.status.text = "IntentumDiff: diffing";
     session.client.diff(target.relativePath, document.getText(), { purpose: "live" });
   }
 
@@ -1381,10 +1381,10 @@ class PysdController implements vscode.Disposable {
     folder: vscode.WorkspaceFolder,
     details: LiveServerFailureDetails,
   ): Promise<void> {
-    this.reviewFiles.set(reviewKey(folder.uri.toString(), ".intentdiff-liveserver"), {
+    this.reviewFiles.set(reviewKey(folder.uri.toString(), ".intentumdiff-liveserver"), {
       folderName: folder.name,
       folderUri: folder.uri.toString(),
-      relativePath: ".intentdiff-liveserver",
+      relativePath: ".intentumdiff-liveserver",
       status: "error",
       error: details.message,
     });
@@ -1411,9 +1411,9 @@ class PysdController implements vscode.Disposable {
       ...actions,
     );
     if (selected === "Use bundled engine") {
-      // Clear intentdiff.executable at every level it is set so the launch chooser falls
+      // Clear intentumdiff.executable at every level it is set so the launch chooser falls
       // through to the bundled native engine (issue 100 Phase C).
-      const config = vscode.workspace.getConfiguration("intentdiff");
+      const config = vscode.workspace.getConfiguration("intentumdiff");
       const inspected = config.inspect<string>("executable");
       if (inspected?.workspaceFolderValue !== undefined) {
         await config.update("executable", undefined, vscode.ConfigurationTarget.WorkspaceFolder);
@@ -1429,13 +1429,13 @@ class PysdController implements vscode.Disposable {
     }
     if (selected === "Use workspace .venv" && suggestedExecutable) {
       await vscode.workspace
-        .getConfiguration("intentdiff")
+        .getConfiguration("intentumdiff")
         .update("executable", suggestedExecutable, vscode.ConfigurationTarget.Global);
       this.restartAll();
       return;
     }
     if (selected === "Open Setting") {
-      await vscode.commands.executeCommand("workbench.action.openSettings", "intentdiff.executable");
+      await vscode.commands.executeCommand("workbench.action.openSettings", "intentumdiff.executable");
       return;
     }
     if (selected === "Show Output") {
@@ -1628,7 +1628,7 @@ class PysdController implements vscode.Disposable {
 
   private async refreshReview(reason: string = "refresh"): Promise<void> {
     if (!this.isEnabled()) {
-      this.status.text = "IntentDiff: disabled";
+      this.status.text = "IntentumDiff: disabled";
       return;
     }
     if (this.hasInFlightReviewWork()) {
@@ -1639,19 +1639,19 @@ class PysdController implements vscode.Disposable {
     }
     this.reviewDispatching = true;
     this.cancelPendingReviewRefresh();
-    this.status.text = "IntentDiff: review queued";
+    this.status.text = "IntentumDiff: review queued";
     try {
       this.clearReview({ preserveRefreshState: true });
       this.baseContentProvider.clear();
       const dispatchGeneration = this.reviewGeneration;
       const folders = vscode.workspace.workspaceFolders ?? [];
       if (folders.length === 0) {
-        this.status.text = "IntentDiff: review clean";
+        this.status.text = "IntentumDiff: review clean";
         this.output.appendLine("Semantic review: no workspace folders found.");
         return;
       }
 
-      this.status.text = `IntentDiff: reviewing 0/${folders.length}`;
+      this.status.text = `IntentumDiff: reviewing 0/${folders.length}`;
       for (const folder of folders) {
         const folderUri = folder.uri.toString();
         this.setReviewPlaceholder(
@@ -1699,10 +1699,10 @@ class PysdController implements vscode.Disposable {
           }, 15000));
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          this.reviewFiles.set(reviewKey(folderUri, ".intentdiff-review"), {
+          this.reviewFiles.set(reviewKey(folderUri, ".intentumdiff-review"), {
             folderName: folder.name,
             folderUri,
-            relativePath: ".intentdiff-review",
+            relativePath: ".intentumdiff-review",
             status: "error",
             error: message,
           });
@@ -1768,8 +1768,8 @@ class PysdController implements vscode.Disposable {
       ?? (activeDiffTabPayload?.sawDiff ? undefined : this.firstReadyReviewPayload());
     if (!payload?.relativePath) {
       const message = activeDiffTabPayload?.sawDiff
-        ? "IntentDiff: this diff is not in the current semantic review. Refresh Semantic Review, then try again."
-        : "IntentDiff: no reviewed file is available for the custom review panel.";
+        ? "IntentumDiff: this diff is not in the current semantic review. Refresh Semantic Review, then try again."
+        : "IntentumDiff: no reviewed file is available for the custom review panel.";
       void vscode.window.showInformationMessage(message);
       return;
     }
@@ -1777,7 +1777,7 @@ class PysdController implements vscode.Disposable {
       assertSafeRelativePath(payload.relativePath);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      void vscode.window.showWarningMessage(`IntentDiff: cannot open custom review: ${message}`);
+      void vscode.window.showWarningMessage(`IntentumDiff: cannot open custom review: ${message}`);
       return;
     }
     const filePayload: OpenFileReviewPayload = { ...payload, relativePath: payload.relativePath };
@@ -1824,7 +1824,7 @@ class PysdController implements vscode.Disposable {
 
   private async openReviewPanelNativeDiff(mode: NativeDiffMode): Promise<void> {
     if (!this.reviewPanelPayload) {
-      void vscode.window.showInformationMessage("IntentDiff: no custom review panel is active.");
+      void vscode.window.showInformationMessage("IntentumDiff: no custom review panel is active.");
       return;
     }
     await this.diffSurfaces.open(this.reviewPanelPayload, mode);
@@ -1834,8 +1834,8 @@ class PysdController implements vscode.Disposable {
     filePayload: OpenFileReviewPayload,
   ): Promise<ReturnType<typeof buildReviewPanelModel> | undefined> {
     const file = this.reviewFiles.get(reviewKey(filePayload.folderUri, filePayload.relativePath));
-    if (!file || file.status !== "ready" || !file.diff || file.relativePath === ".intentdiff-review") {
-      void vscode.window.showInformationMessage("IntentDiff: custom review panel needs a ready semantic review for this file.");
+    if (!file || file.status !== "ready" || !file.diff || file.relativePath === ".intentumdiff-review") {
+      void vscode.window.showInformationMessage("IntentumDiff: custom review panel needs a ready semantic review for this file.");
       return undefined;
     }
     const folderUri = vscode.Uri.parse(filePayload.folderUri);
@@ -1933,7 +1933,7 @@ class PysdController implements vscode.Disposable {
     target: { folder: vscode.WorkspaceFolder; relativePath: string },
   ): OpenFileReviewPayload | undefined {
     const file = this.reviewFiles.get(reviewKey(target.folder.uri.toString(), target.relativePath));
-    if (!file || file.status !== "ready" || !file.diff || file.relativePath === ".intentdiff-review") {
+    if (!file || file.status !== "ready" || !file.diff || file.relativePath === ".intentumdiff-review") {
       return undefined;
     }
     return {
@@ -1944,7 +1944,7 @@ class PysdController implements vscode.Disposable {
 
   private firstReadyReviewPayload(): OpenFileReviewPayload | undefined {
     for (const file of this.reviewFiles.values()) {
-      if (file.status === "ready" && file.diff && file.relativePath !== ".intentdiff-review") {
+      if (file.status === "ready" && file.diff && file.relativePath !== ".intentumdiff-review") {
         return {
           folderUri: file.folderUri,
           relativePath: file.relativePath,
@@ -2010,10 +2010,10 @@ class PysdController implements vscode.Disposable {
       }
       if (stale.length > 0) {
         void groups.close(stale, true);
-        this.output.appendLine(`IntentDiff: closed ${stale.length} stale base directory diff tab(s).`);
+        this.output.appendLine(`IntentumDiff: closed ${stale.length} stale base directory diff tab(s).`);
       }
     } catch (error) {
-      this.output.appendLine(`IntentDiff: stale base tab cleanup skipped: ${messageOf(error)}`);
+      this.output.appendLine(`IntentumDiff: stale base tab cleanup skipped: ${messageOf(error)}`);
     }
   }
 
@@ -2097,7 +2097,7 @@ class PysdController implements vscode.Disposable {
       const risk = riskForKind(group.kind);
       const label = categoryForKind(group.kind)?.label ?? group.kind;
       void vscode.window.showInformationMessage(
-        `IntentDiff${risk ? ` · ${risk === "behavior" ? "Behavior" : "Internal"}` : ""}: ${label}`,
+        `IntentumDiff${risk ? ` · ${risk === "behavior" ? "Behavior" : "Internal"}` : ""}: ${label}`,
       );
     }
   }
@@ -2105,7 +2105,7 @@ class PysdController implements vscode.Disposable {
   private async navigateSemanticChange(direction: 1 | -1): Promise<void> {
     const context = this.diffSurfaces.active();
     if (!context?.diff) {
-      void vscode.window.showInformationMessage("IntentDiff: no semantic diff is active.");
+      void vscode.window.showInformationMessage("IntentumDiff: no semantic diff is active.");
       return;
     }
     const targets = selectedChanges(context.diff, readSemanticOnlyOptions(this.hideComments))
@@ -2120,7 +2120,7 @@ class PysdController implements vscode.Disposable {
         target: NonNullable<ReturnType<typeof reviewTargetForChange>>;
       } => item.target !== undefined);
     if (targets.length === 0) {
-      void vscode.window.showInformationMessage("IntentDiff: no visible semantic changes to navigate.");
+      void vscode.window.showInformationMessage("IntentumDiff: no visible semantic changes to navigate.");
       return;
     }
     const key = `${context.folderUri}::${context.relativePath}::${context.mode}`;
@@ -2137,15 +2137,15 @@ class PysdController implements vscode.Disposable {
   }
 
   private async adjustSemanticContextLines(delta: 1 | -1): Promise<void> {
-    const config = vscode.workspace.getConfiguration("intentdiff");
+    const config = vscode.workspace.getConfiguration("intentumdiff");
     const current = Math.max(0, config.get("diff.contextLines", 3));
     const next = Math.max(0, current + delta);
     if (next === current) {
-      void vscode.window.showInformationMessage("IntentDiff: semantic-only context is already collapsed.");
+      void vscode.window.showInformationMessage("IntentumDiff: semantic-only context is already collapsed.");
       return;
     }
     await config.update("diff.contextLines", next, vscode.ConfigurationTarget.Workspace);
-    this.status.text = `IntentDiff: semantic context ${next}`;
+    this.status.text = `IntentumDiff: semantic context ${next}`;
     this.updateEditorContext();
     await this.diffSurfaces.refreshOpenSemanticOnly();
   }
@@ -2210,7 +2210,7 @@ class PysdController implements vscode.Disposable {
     }
     const folderUri = folder.uri.toString();
     const relativePath = result.newFilename || result.oldFilename || "unknown";
-    if (relativePath === ".intentdiff-review" || relativePath === "unknown") {
+    if (relativePath === ".intentumdiff-review" || relativePath === "unknown") {
       return;
     }
     const reviewFile: ReviewFile = {
@@ -2269,7 +2269,7 @@ class PysdController implements vscode.Disposable {
     const maxRetries = readReviewMaxAutoRetries();
     if (this.reviewFailureStreak > maxRetries) {
       return "review failed " + this.reviewFailureStreak
-        + " times (intentdiff.review.maxAutoRetries = " + maxRetries + ")";
+        + " times (intentumdiff.review.maxAutoRetries = " + maxRetries + ")";
     }
     return undefined;
   }
@@ -2287,10 +2287,10 @@ class PysdController implements vscode.Disposable {
     }
     this.recordReviewFailure(message, code);
     this.completeReviewRequest(folder.uri.toString(), seq);
-    this.reviewFiles.set(reviewKey(folder.uri.toString(), ".intentdiff-review"), {
+    this.reviewFiles.set(reviewKey(folder.uri.toString(), ".intentumdiff-review"), {
       folderName: folder.name,
       folderUri: folder.uri.toString(),
-      relativePath: ".intentdiff-review",
+      relativePath: ".intentumdiff-review",
       status: "error",
       error: message,
     });
@@ -2331,7 +2331,7 @@ class PysdController implements vscode.Disposable {
     const folderUri = folder.uri.toString();
     const streamed = this.streamedReviewFiles.get(folderUri);
     this.streamedReviewFiles.delete(folderUri);
-    this.reviewFiles.delete(reviewKey(folderUri, ".intentdiff-review"));
+    this.reviewFiles.delete(reviewKey(folderUri, ".intentumdiff-review"));
     for (const diff of commitDiff.file_diffs ?? []) {
       const relativePath = diff.new_filename || diff.old_filename || "unknown";
       this.reviewFiles.set(reviewKey(folderUri, relativePath), {
@@ -2346,10 +2346,10 @@ class PysdController implements vscode.Disposable {
       }
     }
     if ((commitDiff.parse_errors?.length ?? 0) > 0) {
-      this.reviewFiles.set(reviewKey(folderUri, ".intentdiff-review"), {
+      this.reviewFiles.set(reviewKey(folderUri, ".intentumdiff-review"), {
         folderName: folder.name,
         folderUri,
-        relativePath: ".intentdiff-review",
+        relativePath: ".intentumdiff-review",
         status: "error",
         error: commitDiff.parse_errors?.slice(0, 5).join("\n"),
       });
@@ -2362,14 +2362,14 @@ class PysdController implements vscode.Disposable {
       || (commitDiff.parse_errors?.length ?? 0) > 0
       || (commitDiff.cross_file_changes?.length ?? 0) > 0;
     if (!hasReviewContent) {
-      this.reviewFiles.set(reviewKey(folderUri, ".intentdiff-review"), {
+      this.reviewFiles.set(reviewKey(folderUri, ".intentumdiff-review"), {
         folderName: folder.name,
         folderUri,
-        relativePath: ".intentdiff-review",
+        relativePath: ".intentumdiff-review",
         status: "ready",
         diff: {
-          old_filename: ".intentdiff-review",
-          new_filename: ".intentdiff-review",
+          old_filename: ".intentumdiff-review",
+          new_filename: ".intentumdiff-review",
           language: "generic",
           changes: [],
           change_groups: [],
@@ -2416,10 +2416,10 @@ class PysdController implements vscode.Disposable {
   }
 
   private setReviewPlaceholder(folder: vscode.WorkspaceFolder, pendingMessage: string): void {
-    this.reviewFiles.set(reviewKey(folder.uri.toString(), ".intentdiff-review"), {
+    this.reviewFiles.set(reviewKey(folder.uri.toString(), ".intentumdiff-review"), {
       folderName: folder.name,
       folderUri: folder.uri.toString(),
-      relativePath: ".intentdiff-review",
+      relativePath: ".intentumdiff-review",
       status: "pending",
       pendingMessage,
     });
@@ -2448,7 +2448,7 @@ class PysdController implements vscode.Disposable {
   private finishReviewIfIdle(): void {
     const pendingCount = this.reviewRequests.size + this.incrementalReviewRequests.size;
     if (pendingCount > 0) {
-      this.status.text = `IntentDiff: reviewing ${pendingCount} pending`;
+      this.status.text = `IntentumDiff: reviewing ${pendingCount} pending`;
       return;
     }
     this.updateReviewTree();
@@ -2458,13 +2458,13 @@ class PysdController implements vscode.Disposable {
       this.reviewCrossFileEntries.map((entry) => entry.change),
     );
     if (summary.guardrailCount > 0) {
-      this.status.text = `IntentDiff: review ${summary.guardrailCount} guardrail`;
+      this.status.text = `IntentumDiff: review ${summary.guardrailCount} guardrail`;
     } else if (summary.errorCount > 0) {
-      this.status.text = `IntentDiff: review ${summary.errorCount} error`;
+      this.status.text = `IntentumDiff: review ${summary.errorCount} error`;
     } else if (summary.crossFileChangeCount > 0) {
-      this.status.text = `IntentDiff: review ${summary.crossFileChangeCount} cross-file`;
+      this.status.text = `IntentumDiff: review ${summary.crossFileChangeCount} cross-file`;
     } else {
-      this.status.text = `IntentDiff: review ${summary.semanticChangeCount} changes`;
+      this.status.text = `IntentumDiff: review ${summary.semanticChangeCount} changes`;
     }
     this.output.appendLine(JSON.stringify({ reviewSummary: summary }, null, 2));
     this.drainQueuedReviewRefresh();
@@ -2583,7 +2583,7 @@ class PysdController implements vscode.Disposable {
     if (diff.is_fallback === true && !fallbackDiffEnabled()) {
       this.diagnostics.set(uri, [new vscode.Diagnostic(
         new vscode.Range(0, 0, 0, 1),
-        "IntentDiff fallback diff is disabled for this file.",
+        "IntentumDiff fallback diff is disabled for this file.",
         vscode.DiagnosticSeverity.Warning,
       )]);
       this.setDecorationsForUri(uri, []);
@@ -2601,7 +2601,7 @@ class PysdController implements vscode.Disposable {
     if (!this.overlaysVisible) {
       return [];
     }
-    const config = vscode.workspace.getConfiguration("intentdiff");
+    const config = vscode.workspace.getConfiguration("intentumdiff");
     const showAdditions = config.get("visualization.showAdditions", true);
     const showDeletions = config.get("visualization.showDeletions", true);
     const showModifications = config.get("visualization.showModifications", true);
@@ -2641,16 +2641,16 @@ class PysdController implements vscode.Disposable {
   }
 
   private readVisualSettings(): void {
-    const config = vscode.workspace.getConfiguration("intentdiff");
+    const config = vscode.workspace.getConfiguration("intentumdiff");
     this.hideComments = config.get("diff.hideComments", false);
   }
 
   private updateEditorContext(): void {
     const activeContext = this.diffSurfaces.active();
-    void vscode.commands.executeCommand("setContext", "intentdiff.editorDiffVisible", this.overlaysVisible);
-    void vscode.commands.executeCommand("setContext", "intentdiff.hideComments", this.hideComments);
-    void vscode.commands.executeCommand("setContext", "intentdiff.inSemanticDiff", activeContext !== undefined);
-    void vscode.commands.executeCommand("setContext", "intentdiff.semanticOnlyDiffVisible", activeContext?.mode === "semanticOnly");
+    void vscode.commands.executeCommand("setContext", "intentumdiff.editorDiffVisible", this.overlaysVisible);
+    void vscode.commands.executeCommand("setContext", "intentumdiff.hideComments", this.hideComments);
+    void vscode.commands.executeCommand("setContext", "intentumdiff.inSemanticDiff", activeContext !== undefined);
+    void vscode.commands.executeCommand("setContext", "intentumdiff.semanticOnlyDiffVisible", activeContext?.mode === "semanticOnly");
     this.updateDiffStatus(activeContext);
   }
 
@@ -2668,19 +2668,19 @@ class PysdController implements vscode.Disposable {
       !options.hideComments ? "comments" : undefined,
     ].filter((item): item is string => item !== undefined);
     if (activeContext.mode === "semanticOnly") {
-      this.diffStatus.text = `$(filter) IntentDiff semantic-only (${options.contextLines} ctx)`;
-      this.diffStatus.command = "intentdiff.openFullDiff";
+      this.diffStatus.text = `$(filter) IntentumDiff semantic-only (${options.contextLines} ctx)`;
+      this.diffStatus.command = "intentumdiff.openFullDiff";
       this.diffStatus.tooltip = [
-        "IntentDiff semantic-only native diff",
+        "IntentumDiff semantic-only native diff",
         `Context lines: ${options.contextLines}`,
         `Visible: ${visibleFilters.join(", ") || "none"}`,
         "Click to switch to the full VS Code diff.",
       ].join("\n");
     } else {
-      this.diffStatus.text = "$(diff) IntentDiff full diff";
-      this.diffStatus.command = "intentdiff.openSemanticOnlyDiff";
+      this.diffStatus.text = "$(diff) IntentumDiff full diff";
+      this.diffStatus.command = "intentumdiff.openSemanticOnlyDiff";
       this.diffStatus.tooltip = [
-        "IntentDiff full VS Code diff",
+        "IntentumDiff full VS Code diff",
         `Semantic-only context lines: ${options.contextLines}`,
         `Semantic-only visible filters: ${visibleFilters.join(", ") || "none"}`,
         "Click to switch to semantic-only diff.",
@@ -2736,11 +2736,11 @@ class PysdController implements vscode.Disposable {
   }
 
   private handleProtocolError(error: { code: string; message: string }): void {
-    this.status.text = "IntentDiff: error";
-    this.output.appendLine(`IntentDiff error: ${error.code}: ${error.message}`);
+    this.status.text = "IntentumDiff: error";
+    this.output.appendLine(`IntentumDiff error: ${error.code}: ${error.message}`);
     if (error.code === "unsupported_protocol") {
       void vscode.window.showWarningMessage(
-        "IntentDiff LiveServer protocol v2 is required. Update IntentDiff or check intentdiff.executable.",
+        "IntentumDiff LiveServer protocol v2 is required. Update IntentumDiff or check intentumdiff.executable.",
       );
     }
   }

@@ -10,16 +10,16 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 
 export async function run(): Promise<void> {
-  const fixture = process.env.INTENTDIFF_FIXTURE_DIR!;
+  const fixture = process.env.INTENTUMDIFF_FIXTURE_DIR!;
   const booUri = vscode.Uri.file(path.join(fixture, "boo.py"));
   console.log("[semanticDiffWebviewSuite] opening diff for " + booUri.fsPath);
 
   // Verify the file exists in the fixture
   assert.ok(fs.existsSync(booUri.fsPath), "boo.py must exist in the fixture");
 
-  // Activate the IntentDiff extension
-  const extension = vscode.extensions.getExtension("buchochelliq-labs.intentdiff");
-  assert.ok(extension, "IntentDiff extension should be discoverable");
+  // Activate the IntentumDiff extension
+  const extension = vscode.extensions.getExtension("buchochelliq-labs.intentumdiff");
+  assert.ok(extension, "IntentumDiff extension should be discoverable");
   await extension.activate();
 
   // Open the boo.py file in an editor
@@ -32,7 +32,7 @@ export async function run(): Promise<void> {
   const reviewNode = {
     kind: "entry",
     file: {
-      folderName: "intentdiff-fixture",
+      folderName: "intentumdiff-fixture",
       folderUri: vscode.Uri.file(fixture).toString(),
       relativePath: "boo.py",
       status: "ready",
@@ -50,13 +50,13 @@ export async function run(): Promise<void> {
       },
     },
   };
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", reviewNode);
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", reviewNode);
 
   // Wait for the webview to appear
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
   // Find the webview and verify it has the diff rendered
-  // The semantic diff opens as a webview panel with id "intentdiff.semanticDiff"
+  // The semantic diff opens as a webview panel with id "intentumdiff.semanticDiff"
   const webviews = vscode.window.visibleTextEditors
     .concat([])
     .length;

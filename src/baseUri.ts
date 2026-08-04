@@ -1,4 +1,4 @@
-export const BASE_SCHEME = "intentdiff-base";
+export const BASE_SCHEME = "intentumdiff-base";
 
 export interface BaseDocumentIdentity {
   folderUri: string;
@@ -32,7 +32,7 @@ export function gitShowArgs(identity: BaseDocumentIdentity): string[] {
 
 export function assertSafeGitRef(ref: string): void {
   if (!ref || ref.includes("\0") || ref.startsWith("-")) {
-    throw new Error("Unsafe git ref for IntentDiff base document");
+    throw new Error("Unsafe git ref for IntentumDiff base document");
   }
 }
 
@@ -44,17 +44,17 @@ export function assertSafeRelativePath(relativePath: string): void {
   // e.g. `.claude/`). Directories are not reviewable base documents — `git show
   // <ref>:dir/` fails — so reject them here rather than attempt the read.
   if (relativePath.endsWith("/") || relativePath.endsWith("\\")) {
-    throw new Error("Directory paths are not valid IntentDiff base documents");
+    throw new Error("Directory paths are not valid IntentumDiff base documents");
   }
   if (
     /^[a-zA-Z]:[\\/]/u.test(relativePath)
     || relativePath.startsWith("/")
     || relativePath.startsWith("\\")
   ) {
-    throw new Error("Absolute paths are not allowed for IntentDiff base documents");
+    throw new Error("Absolute paths are not allowed for IntentumDiff base documents");
   }
   const segments = relativePath.split(/[\\/]+/u);
   if (segments.some((segment) => segment === "..")) {
-    throw new Error("Traversal paths are not allowed for IntentDiff base documents");
+    throw new Error("Traversal paths are not allowed for IntentumDiff base documents");
   }
 }

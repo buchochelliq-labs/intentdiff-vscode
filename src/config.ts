@@ -37,12 +37,12 @@ export function readTrustedExecutable(config: ConfigurationReader): string {
     return (
       cleanExecutable(inspected.globalValue)
       ?? cleanExecutable(inspected.defaultValue)
-      ?? "intentdiff"
+      ?? "intentumdiff"
     );
   }
   return (
-    cleanExecutable(config.get("executable", "intentdiff"))
-    ?? "intentdiff"
+    cleanExecutable(config.get("executable", "intentumdiff"))
+    ?? "intentumdiff"
   );
 }
 
@@ -75,8 +75,8 @@ export function bundledLiveServerPath(
   exists: (p: string) => boolean = existsSync,
 ): string | undefined {
   const exe = process.platform === "win32"
-    ? "intentdiff-live-server.exe"
-    : "intentdiff-live-server";
+    ? "intentumdiff-live-server.exe"
+    : "intentumdiff-live-server";
   const candidate = path.join(extensionPath, "native", exe);
   return exists(candidate) ? candidate : undefined;
 }
@@ -86,8 +86,8 @@ export type LiveServerLaunch =
   | { kind: "python" };
 
 /** Pure launch chooser (#100 Phase C — native-by-default cutover): an EXPLICIT
- *  `intentdiff.executable` always wins (users may point at their own binary); otherwise the
- *  trusted `intentdiff.liveServer.engine` setting decides — "python" skips the bundle,
+ *  `intentumdiff.executable` always wins (users may point at their own binary); otherwise the
+ *  trusted `intentumdiff.liveServer.engine` setting decides — "python" skips the bundle,
  *  "auto"/"native" use the bundled native server when present. With nothing bundled the python
  *  engine keeps working (a requested-native degrade is the caller's to surface). */
 export function chooseLiveServerLaunch(
@@ -95,7 +95,7 @@ export function chooseLiveServerLaunch(
   engine: LiveServerEngine,
   bundledPath: string | undefined,
 ): LiveServerLaunch {
-  if (rawExecutable !== "intentdiff") {
+  if (rawExecutable !== "intentumdiff") {
     return { kind: "python" };
   }
   if (engine === "python") {
@@ -111,7 +111,7 @@ export function chooseLiveServerLaunch(
  *  matches what was actually launched (a user override vs the bundle vs the python CLI). */
 export interface LiveServerLaunchContext {
   kind: "native" | "python";
-  /** True when `intentdiff.executable` is set to something other than the default. */
+  /** True when `intentumdiff.executable` is set to something other than the default. */
   userOverride: boolean;
   bundledPath?: string;
 }
@@ -120,7 +120,7 @@ export interface LiveServerFailureDetails {
   message: string;
   toast: string;
   suggestedExecutable?: string;
-  /** Offer a toast action that clears `intentdiff.executable` so the bundled engine takes over. */
+  /** Offer a toast action that clears `intentumdiff.executable` so the bundled engine takes over. */
   offerBundledFallback?: boolean;
 }
 
@@ -133,29 +133,29 @@ export function enoentFailureDetails(
   launch: LiveServerLaunchContext,
   venvCandidate: string | undefined,
 ): LiveServerFailureDetails {
-  const restart = "Then run 'IntentDiff: Restart LiveServer' or reload the window.";
+  const restart = "Then run 'IntentumDiff: Restart LiveServer' or reload the window.";
   if (launch.userOverride) {
     const fix = launch.bundledPath !== undefined
-      ? "Remove the 'intentdiff.executable' setting to use the extension's bundled engine, or point it at an existing executable."
-      : "Point the 'intentdiff.executable' setting at an existing executable, or remove it to use IntentDiff from the workspace .venv.";
+      ? "Remove the 'intentumdiff.executable' setting to use the extension's bundled engine, or point it at an existing executable."
+      : "Point the 'intentumdiff.executable' setting at an existing executable, or remove it to use IntentumDiff from the workspace .venv.";
     return {
-      message: `The configured IntentDiff executable does not exist: ${executable}. ${fix} ${restart}`,
-      toast: "IntentDiff: the configured 'intentdiff.executable' was not found.",
+      message: `The configured IntentumDiff executable does not exist: ${executable}. ${fix} ${restart}`,
+      toast: "IntentumDiff: the configured 'intentumdiff.executable' was not found.",
       offerBundledFallback: launch.bundledPath !== undefined,
     };
   }
   if (launch.kind === "native") {
     return {
-      message: `The bundled IntentDiff engine is missing: ${executable}. Reinstall the IntentDiff extension, or set 'intentdiff.liveServer.engine' to 'python'. ${restart}`,
-      toast: "IntentDiff: the bundled engine is missing — reinstall the extension.",
+      message: `The bundled IntentumDiff engine is missing: ${executable}. Reinstall the IntentumDiff extension, or set 'intentumdiff.liveServer.engine' to 'python'. ${restart}`,
+      toast: "IntentumDiff: the bundled engine is missing — reinstall the extension.",
     };
   }
   const install = venvCandidate !== undefined
-    ? `Install IntentDiff into the workspace .venv (expected at ${venvCandidate}), or set 'intentdiff.executable' to an absolute path.`
-    : "Install IntentDiff, then set 'intentdiff.executable' to an absolute path.";
+    ? `Install IntentumDiff into the workspace .venv (expected at ${venvCandidate}), or set 'intentumdiff.executable' to an absolute path.`
+    : "Install IntentumDiff, then set 'intentumdiff.executable' to an absolute path.";
   return {
     message: `Could not find '${executable}' on VS Code's PATH. ${install} ${restart}`,
-    toast: "IntentDiff was not found — install it or set 'intentdiff.executable'.",
+    toast: "IntentumDiff was not found — install it or set 'intentumdiff.executable'.",
     suggestedExecutable: venvCandidate,
   };
 }
@@ -186,8 +186,8 @@ export function buildLiveServerArgs(
 export function buildLiveServerEnv(settings: LiveServerSettings): NodeJS.ProcessEnv {
   const ttlSeconds = Math.max(0, Math.round(settings.schemaCacheTtlHours * 60 * 60));
   return {
-    INTENTDIFF_SCHEMA_FETCH: settings.schemaFetchMode,
-    INTENTDIFF_SCHEMA_CACHE_TTL_SECONDS: String(ttlSeconds),
-    INTENTDIFF_SCHEMA_ALLOW_PRIVATE_HOSTS: settings.schemaAllowPrivateHosts ? "1" : "0",
+    INTENTUMDIFF_SCHEMA_FETCH: settings.schemaFetchMode,
+    INTENTUMDIFF_SCHEMA_CACHE_TTL_SECONDS: String(ttlSeconds),
+    INTENTUMDIFF_SCHEMA_ALLOW_PRIVATE_HOSTS: settings.schemaAllowPrivateHosts ? "1" : "0",
   };
 }

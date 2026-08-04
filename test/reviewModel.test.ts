@@ -332,20 +332,20 @@ test("review entries keep added package configuration keys visible", () => {
       changes: [
         {
           change_type: "ADDITION",
-          description: "Insert -> pair('intentdiff.diff.fallbackDiff')",
+          description: "Insert -> pair('intentumdiff.diff.fallbackDiff')",
           new_node: {
             node_type: "pair",
-            label: "intentdiff.diff.fallbackDiff",
+            label: "intentumdiff.diff.fallbackDiff",
             position: { start_line: 215, start_col: 8, end_line: 219, end_col: 9 },
             children: [],
           },
         },
         {
           change_type: "ADDITION",
-          description: "Insert -> pair('intentdiff.diff.hideComments')",
+          description: "Insert -> pair('intentumdiff.diff.hideComments')",
           new_node: {
             node_type: "pair",
-            label: "intentdiff.diff.hideComments",
+            label: "intentumdiff.diff.hideComments",
             position: { start_line: 220, start_col: 8, end_line: 224, end_col: 9 },
             children: [],
           },
@@ -357,8 +357,8 @@ test("review entries keep added package configuration keys visible", () => {
   assert.deepEqual(
     entries.map((entry) => entry.label),
     [
-      "Insert -> pair('intentdiff.diff.fallbackDiff')",
-      "Insert -> pair('intentdiff.diff.hideComments')",
+      "Insert -> pair('intentumdiff.diff.fallbackDiff')",
+      "Insert -> pair('intentumdiff.diff.hideComments')",
     ],
   );
   assert.deepEqual(entries.map((entry) => entry.description), ["ADDITION", "ADDITION"]);
@@ -417,7 +417,7 @@ test("review entries narrate added files before raw evidence and never as style-
 
 test("ungrouped change on a modified file with no intent groups is a first-class meaningful entry", () => {
   // The .gitignore case: the generic token-churn noise group is emptied at the source, so the
-  // real `/.intentdiff` insert is owned by no group. With no shown intent groups telling the
+  // real `/.intentumdiff` insert is owned by no group. With no shown intent groups telling the
   // story, it must surface as its own Meaningful entry — not demoted under "Raw evidence".
   const reviewFile: ReviewFile = {
     folderName: "repo",
@@ -434,10 +434,10 @@ test("ungrouped change on a modified file with no intent groups is a first-class
       }],
       changes: [{
         change_type: "ADDITION",
-        description: "Insert line 86: '/.intentdiff'",
+        description: "Insert line 86: '/.intentumdiff'",
         new_node: {
           node_type: "text_line",
-          label: "/.intentdiff",
+          label: "/.intentumdiff",
           position: { start_line: 85, start_col: 0, end_line: 85, end_col: 12 },
         },
       }],
@@ -449,7 +449,7 @@ test("ungrouped change on a modified file with no intent groups is a first-class
   assert.ok(kinds.includes("meaningful"), "the ungrouped insert is a first-class meaningful entry");
   assert.ok(!kinds.includes("raw-evidence"), "it is not demoted to a Raw evidence node");
   const meaningful = entries.find((entry) => entry.kind === "meaningful");
-  assert.equal(meaningful?.label, "Insert line 86: '/.intentdiff'");
+  assert.equal(meaningful?.label, "Insert line 86: '/.intentumdiff'");
   // The emptied noise group still shows its "(N hidden)" summary.
   assert.ok(entries.some((entry) => entry.kind === "noise-suppressed"));
 });
@@ -622,11 +622,11 @@ test("review entries show image assets even when no engine change-groups exist",
   const entries = reviewEntriesForFile({
     folderName: "repo",
     folderUri: "file:///repo",
-    relativePath: "artifacts/release-media-review/intentdiff-vscode-language-sweep.png",
+    relativePath: "artifacts/release-media-review/intentumdiff-vscode-language-sweep.png",
     status: "ready",
     diff: {
-      old_filename: "artifacts/release-media-review/intentdiff-vscode-language-sweep.png",
-      new_filename: "artifacts/release-media-review/intentdiff-vscode-language-sweep.png",
+      old_filename: "artifacts/release-media-review/intentumdiff-vscode-language-sweep.png",
+      new_filename: "artifacts/release-media-review/intentumdiff-vscode-language-sweep.png",
       language: "png",
       has_semantic_changes: false,
       is_style_only: false,
@@ -639,7 +639,7 @@ test("review entries show image assets even when no engine change-groups exist",
   });
 
   assert.deepEqual(entries.map((entry) => entry.kind), ["asset"]);
-  assert.equal(entries[0].label, "Image asset: intentdiff-vscode-language-sweep.png");
+  assert.equal(entries[0].label, "Image asset: intentumdiff-vscode-language-sweep.png");
   assert.equal(entries[0].description, "image asset review");
 });
 
@@ -727,7 +727,7 @@ test("pending review file exposes a visible status entry", () => {
   const entries = reviewEntriesForFile({
     folderName: "repo",
     folderUri: "file:///repo",
-    relativePath: ".intentdiff-review",
+    relativePath: ".intentumdiff-review",
     status: "pending",
     pendingMessage: "Still waiting for LiveServer review response (seq 5)...",
   });

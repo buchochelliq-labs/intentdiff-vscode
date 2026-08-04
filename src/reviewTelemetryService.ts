@@ -82,7 +82,7 @@ export class ReviewTelemetryService {
   }
 
   private restoreTimelineSnapshots(): void {
-    const saved = this.host.workspaceState.get<unknown>("intentdiff.reviewTimelineSnapshots", []);
+    const saved = this.host.workspaceState.get<unknown>("intentumdiff.reviewTimelineSnapshots", []);
     if (!Array.isArray(saved)) {
       return;
     }
@@ -93,7 +93,7 @@ export class ReviewTelemetryService {
   }
 
   private persistTimelineSnapshots(): void {
-    void this.host.workspaceState.update("intentdiff.reviewTimelineSnapshots", this.timelineSnapshots);
+    void this.host.workspaceState.update("intentumdiff.reviewTimelineSnapshots", this.timelineSnapshots);
     this.host.setTimelineSnapshots(this.timelineSnapshots);
   }
 
@@ -109,7 +109,7 @@ export class ReviewTelemetryService {
   }
 
   private restoreFuelHistory(): void {
-    const saved = this.host.workspaceState.get<ReviewFuelHistory>("intentdiff.reviewFuelHistory", {});
+    const saved = this.host.workspaceState.get<ReviewFuelHistory>("intentumdiff.reviewFuelHistory", {});
     if (!saved || typeof saved !== "object" || Array.isArray(saved)) {
       return;
     }
@@ -127,7 +127,7 @@ export class ReviewTelemetryService {
   }
 
   private persistFuelHistory(): void {
-    void this.host.workspaceState.update("intentdiff.reviewFuelHistory", this.fuelHistorySnapshot());
+    void this.host.workspaceState.update("intentumdiff.reviewFuelHistory", this.fuelHistorySnapshot());
   }
 
   recordFuelTelemetry(folderUri: string, relativePath: string, diff: SemanticDiff | undefined): void {
@@ -196,8 +196,8 @@ export class ReviewTelemetryService {
   openDiagnosticsReport(): void {
     const report = this.buildDiagnosticsReport();
     const panel = vscode.window.createWebviewPanel(
-      "intentdiff.diagnostics",
-      "IntentDiff Diagnostics",
+      "intentumdiff.diagnostics",
+      "IntentumDiff Diagnostics",
       vscode.ViewColumn.Active,
       { enableScripts: false, retainContextWhenHidden: true },
     );
@@ -212,7 +212,7 @@ export class ReviewTelemetryService {
       { label: "JSON", description: "Machine-readable diagnostics report", extension: "json" },
       { label: "Markdown", description: "Human-readable diagnostics summary", extension: "md" },
     ], {
-      title: "Export IntentDiff diagnostics",
+      title: "Export IntentumDiff diagnostics",
       placeHolder: "Choose report format",
     });
     if (!selected) {
@@ -221,7 +221,7 @@ export class ReviewTelemetryService {
     const uri = await vscode.window.showSaveDialog({
       defaultUri: vscode.Uri.file(path.join(
         vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd(),
-        `intentdiff-diagnostics.${selected.extension}`,
+        `intentumdiff-diagnostics.${selected.extension}`,
       )),
       filters: selected.extension === "json"
         ? { "JSON": ["json"] }
@@ -235,6 +235,6 @@ export class ReviewTelemetryService {
       ? `${JSON.stringify(report, null, 2)}\n`
       : diagnosticsReportMarkdown(report);
     await writeFile(uri.fsPath, content, "utf8");
-    void vscode.window.showInformationMessage(`IntentDiff diagnostics exported to ${uri.fsPath}`);
+    void vscode.window.showInformationMessage(`IntentumDiff diagnostics exported to ${uri.fsPath}`);
   }
 }

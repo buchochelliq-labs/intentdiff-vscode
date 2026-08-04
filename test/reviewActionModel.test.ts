@@ -156,7 +156,7 @@ test("semantic hunk edit applies modified-side lines for apply actions", () => {
   assert.equal(result.edit?.editStartLine, 4);
   assert.equal(result.edit?.editEndLine, 6);
   assert.deepEqual(result.edit?.replacementLines, ["function main() {", "  boot();", "  logReady();"]);
-  assert.match(result.edit?.previewPatch ?? "", /IntentDiff semantic hunk applyHunk/u);
+  assert.match(result.edit?.previewPatch ?? "", /IntentumDiff semantic hunk applyHunk/u);
   assert.match(result.edit?.previewPatch ?? "", /\+   logReady\(\);/u);
 });
 
@@ -230,7 +230,7 @@ test("semantic hunk edit reverts modified-side range to base-side text", () => {
   assert.equal(result.edit?.editStartLine, 4);
   assert.equal(result.edit?.editEndLine, 6);
   assert.deepEqual(result.edit?.replacementLines, ["function main() {", "  boot();"]);
-  assert.match(result.edit?.previewPatch ?? "", /IntentDiff semantic hunk revertHunk/u);
+  assert.match(result.edit?.previewPatch ?? "", /IntentumDiff semantic hunk revertHunk/u);
 });
 
 test("semantic hunk edit rejects missing hunk text before editor mutation", () => {

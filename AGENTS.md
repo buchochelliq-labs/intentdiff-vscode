@@ -1,4 +1,4 @@
-# Agent instructions — intentdiff-vscode
+# Agent instructions — intentumdiff-vscode
 
 The VS Code extension: **renders what the engine serves — never computes semantics**.
 

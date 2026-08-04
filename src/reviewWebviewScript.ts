@@ -3,7 +3,7 @@
 export function script(): string {
   return `
     const vscode = acquireVsCodeApi();
-    window.__intentdiffPostMessage = function (message) { vscode.postMessage(message); };
+    window.__intentumdiffPostMessage = function (message) { vscode.postMessage(message); };
     const app = document.querySelector(".diff-app");
     const dashboard = document.querySelector(".dashboard-app");
     const persisted = vscode.getState() || {};
@@ -627,11 +627,11 @@ export function script(): string {
         if (action === "nextChange") moveSelection(1);
         if (action === "expandAll") { expandAllBlocks(); return; }
         if (action === "collapseAll") { collapseAllBlocks(); return; }
-        if (action === "applyEdits" && window.__intentdiffApplyEdits) {
-          window.__intentdiffApplyEdits();
+        if (action === "applyEdits" && window.__intentumdiffApplyEdits) {
+          window.__intentumdiffApplyEdits();
         }
-        if (action === "discardEdits" && window.__intentdiffDiscardEdits) {
-          window.__intentdiffDiscardEdits();
+        if (action === "discardEdits" && window.__intentumdiffDiscardEdits) {
+          window.__intentumdiffDiscardEdits();
         }
         return;
       }

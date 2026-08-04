@@ -10,7 +10,7 @@ const {
 } = require("../out/mainModel.js");
 const { modelFromArtifact, renderReviewShell } = require("../out/reviewArtifact.js");
 
-test("review shell model normalizes IntentDiff review artifacts", () => {
+test("review shell model normalizes IntentumDiff review artifacts", () => {
   const model = modelFromArtifact({
     summary: {
       checked_files: 2,
@@ -105,7 +105,7 @@ test("review shell model and renderer surface fuel telemetry from artifacts", ()
       metadata: {
         engine_telemetry: {
           calls: [{
-            plugin: "src/intentdiff/wasm/js_ts_parser.wasm",
+            plugin: "src/intentumdiff/wasm/js_ts_parser.wasm",
             function: "process",
             language: "typescript",
             provenance: "first_party_wasm",

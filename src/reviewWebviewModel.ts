@@ -592,7 +592,7 @@ export function renderDashboardHtml(model: ReviewDashboardModel, options: Render
   const body = model.files.length === 0
     ? `<section class="empty"><h2>No review loaded</h2><p>Refresh the review to populate semantic intent, guardrails, schema status, and raw evidence.</p>${actionButton("Refresh", "refresh")}</section>`
     : dashboardCockpit(model);
-  return page("IntentDiff Review", body, options);
+  return page("IntentumDiff Review", body, options);
 }
 
 export function renderPanelHtml(model: ReviewPanelModel, options: RenderOptions): string {
@@ -602,7 +602,7 @@ export function renderPanelHtml(model: ReviewPanelModel, options: RenderOptions)
   const isAsset = isImageLikePath(file.relativePath) || model.assetDiff !== undefined;
   const body = `
     <section class="diff-app" data-review-view="semantic" data-diff-mode="${isAsset ? "asset" : "text"}" data-language="${escapeHtml(hljsLanguageId(model))}" data-rail="left" data-rail-open="false" data-rail-pinned="false" data-minimap-open="true" data-drawer-open="false" data-unicode-open="false">
-      <header class="product-shell" aria-label="IntentDiff review workspace">
+      <header class="product-shell" aria-label="IntentumDiff review workspace">
         <div class="product-context" title="${escapeHtml(file.relativePath)}">
           <div class="product-file-line">
             <strong>${escapeHtml(file.relativePath)}</strong>
@@ -642,7 +642,7 @@ export function renderPanelHtml(model: ReviewPanelModel, options: RenderOptions)
         ${reviewTabbedPages(model, stats)}
       </main>
     </section>`;
-  return page(`IntentDiff - ${file.relativePath}`, body, options);
+  return page(`IntentumDiff - ${file.relativePath}`, body, options);
 }
 
 function renderAdaptiveDiffPage(model: ReviewPanelModel, options: RenderOptions): string {
@@ -832,7 +832,7 @@ function dashboardFile(
     fuelDiagnostics: fuelDiagnosticsSummary(file.diff, fuelPolicy),
     fuelHistory,
     entries,
-    payload: file.status === "ready" && file.relativePath !== ".intentdiff-review"
+    payload: file.status === "ready" && file.relativePath !== ".intentumdiff-review"
       ? { folderUri: file.folderUri, relativePath: file.relativePath }
       : undefined,
   };
@@ -879,7 +879,7 @@ function dashboardEntry(
     evidenceCount: entry.evidence?.length ?? 0,
     targetId: targetRowIdForEntry(entry, rows),
     explanation: entryExplanation(entry, file.diff),
-    payload: file.status === "ready" && file.relativePath !== ".intentdiff-review"
+    payload: file.status === "ready" && file.relativePath !== ".intentumdiff-review"
       ? {
         folderUri: file.folderUri,
         relativePath: file.relativePath,
@@ -1066,7 +1066,7 @@ function dashboardTopbar(model: ReviewDashboardModel): string {
     : groupingModeLabel(model.groupingMode);
   return `<header class="dashboard-topbar">
     <div class="dashboard-title">
-      <p class="eyebrow brand-eyebrow">${iconSvg("brand")}<span>IntentDiff review</span></p>
+      <p class="eyebrow brand-eyebrow">${iconSvg("brand")}<span>IntentumDiff review</span></p>
       <h1>Semantic review cockpit</h1>
       <p>Compact overview, docked context, and file-first review flow.</p>
     </div>
@@ -1410,7 +1410,7 @@ function hero(model: ReviewDashboardModel): string {
   const summary = model.summary;
   return `<section class="hero">
     <div>
-      <p class="eyebrow">IntentDiff review</p>
+      <p class="eyebrow">IntentumDiff review</p>
       <h1>Semantic intent, not just changed lines.</h1>
       <p>Groups stay human-facing. Raw changes remain visible as evidence.</p>
     </div>
@@ -1613,7 +1613,7 @@ function releaseNarrativeCard(narrative: string | undefined): string {
   return `<section class="insight-card release-narrative-card">
     <h3>Draft narrative <span class="ai-badge">AI</span></h3>
     ${paragraphs}
-    <p class="release-narrative-note">Drafted from IntentDiff's local intent summary — no source code was sent. Review before publishing.</p>
+    <p class="release-narrative-note">Drafted from IntentumDiff's local intent summary — no source code was sent. Review before publishing.</p>
   </section>`;
 }
 
@@ -1651,7 +1651,7 @@ function reviewTabbedPages(model: ReviewPanelModel, stats: DiffStats): string {
     ? intentSummaryParts.join(" · ")
     : noise ? "Formatting / noise only" : "No semantic changes";
   const intentHeroDesc = intentSummaryParts.length > 0
-    ? "IntentDiff groups source evidence into review intent so changed meaning stays visible."
+    ? "IntentumDiff groups source evidence into review intent so changed meaning stays visible."
     : noise
       ? `All ${noise.count} raw change${noise.count === 1 ? "" : "s"} in this file were suppressed as formatting or noise.`
       : "No behavior-affecting or refactor changes were detected in this file.";
@@ -1688,8 +1688,8 @@ function reviewTabbedPages(model: ReviewPanelModel, stats: DiffStats): string {
           <h3>Why inferred</h3>
           <p>${escapeHtml(
             intentSummaryParts.length > 0
-              ? `IntentDiff classified this file's changes into ${intentSummaryParts.join(" and ")}, kept separate from raw evidence so you can trust each call.`
-              : "IntentDiff keeps semantic groups, guardrails, and raw evidence as separate proof streams, so a file with only formatting or noise reads as exactly that.",
+              ? `IntentumDiff classified this file's changes into ${intentSummaryParts.join(" and ")}, kept separate from raw evidence so you can trust each call.`
+              : "IntentumDiff keeps semantic groups, guardrails, and raw evidence as separate proof streams, so a file with only formatting or noise reads as exactly that.",
           )}</p>
           <div class="tag-row">${presentCategories.slice(0, 6).map((kind) => `<span class="intent-tag tag-${kind}">${escapeHtml(entryKindLabel(kind))}</span>`).join("")}</div>
         </section>

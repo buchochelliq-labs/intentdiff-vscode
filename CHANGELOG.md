@@ -8,14 +8,14 @@
   existing GitHub Copilot (`vscode-lm`), Anthropic, or an OpenAI-compatible /
   local endpoint — Bring-Your-Own-Key, key stored in VS Code SecretStorage.
 - **Privacy-first LLM policy:** the explainer sends a locally-derived semantic
-  summary, **not your source code**. New `intentdiff.intent.llm.codeSharing`
+  summary, **not your source code**. New `intentumdiff.intent.llm.codeSharing`
   levels (`signatures` default / `facts` / `full`); verbatim source is only ever
   sent to a **local** endpoint — cloud providers and Copilot auto-downgrade. See
   [PRIVACY.md](PRIVACY.md).
 
 ## 0.0.1-beta.1 - 2026-06-03
 
-- Added live semantic diff feedback through `intentdiff live-server --stdio`.
+- Added live semantic diff feedback through `intentumdiff live-server --stdio`.
 - Added the Source Control **Semantic Changes** tree for saved working-tree
   review.
 - Added group-first review entries for moved code, refactorings, meaningful

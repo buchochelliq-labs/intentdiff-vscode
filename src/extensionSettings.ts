@@ -23,7 +23,7 @@ import type { LiveServerSettings } from "./types";
 export type NativeDiffMode = "full" | "semanticOnly";
 
 export function readLiveServerSettings(): LiveServerSettings {
-  const config = vscode.workspace.getConfiguration("intentdiff");
+  const config = vscode.workspace.getConfiguration("intentumdiff");
   return {
     executable: readTrustedExecutable(config),
     ref: config.get("ref", "HEAD"),
@@ -46,58 +46,58 @@ export function settingsForFolder(folder: vscode.WorkspaceFolder): LiveServerSet
 }
 
 export function resolveExecutableForFolder(executable: string, folder: vscode.WorkspaceFolder): string {
-  if (path.isAbsolute(executable) || executable !== "intentdiff" || !vscode.workspace.isTrusted) {
+  if (path.isAbsolute(executable) || executable !== "intentumdiff" || !vscode.workspace.isTrusted) {
     return executable;
   }
-  return workspaceVenvIntentDiffCandidates(folder).find((candidate) => existsSync(candidate)) ?? executable;
+  return workspaceVenvIntentumDiffCandidates(folder).find((candidate) => existsSync(candidate)) ?? executable;
 }
 
-export function workspaceVenvIntentDiffCandidates(folder: vscode.WorkspaceFolder): string[] {
+export function workspaceVenvIntentumDiffCandidates(folder: vscode.WorkspaceFolder): string[] {
   return [
-    path.join(folder.uri.fsPath, ".venv", "Scripts", "intentdiff.exe"),
-    path.join(folder.uri.fsPath, ".venv", "bin", "intentdiff"),
+    path.join(folder.uri.fsPath, ".venv", "Scripts", "intentumdiff.exe"),
+    path.join(folder.uri.fsPath, ".venv", "bin", "intentumdiff"),
   ];
 }
 
 /** The trusted engine choice for the live server (global config only, like the executable —
  *  it decides WHAT gets spawned). */
 export function readLiveServerEngine(): LiveServerEngine {
-  const config = vscode.workspace.getConfiguration("intentdiff");
+  const config = vscode.workspace.getConfiguration("intentumdiff");
   return normalizeLiveServerEngine(readTrustedValue<string>(config, "liveServer.engine", "auto"));
 }
 
-/** The RAW trusted executable setting, before the workspace-venv mapping — "intentdiff" means
+/** The RAW trusted executable setting, before the workspace-venv mapping — "intentumdiff" means
  *  the user did NOT override it (so the bundled native engine may be chosen). */
 export function readLiveServerRawExecutable(): string {
-  return readTrustedExecutable(vscode.workspace.getConfiguration("intentdiff"));
+  return readTrustedExecutable(vscode.workspace.getConfiguration("intentumdiff"));
 }
 
 export function readReviewMaxAutoRetries(): number {
-  const config = vscode.workspace.getConfiguration("intentdiff");
+  const config = vscode.workspace.getConfiguration("intentumdiff");
   const raw = config.get("review.maxAutoRetries", 2);
   return Number.isFinite(raw) ? Math.max(0, Math.round(raw as number)) : 2;
 }
 
 export function readDiffMode(): NativeDiffMode {
-  return vscode.workspace.getConfiguration("intentdiff").get<string>("diff.defaultMode", "full") === "semanticOnly"
+  return vscode.workspace.getConfiguration("intentumdiff").get<string>("diff.defaultMode", "full") === "semanticOnly"
     ? "semanticOnly"
     : "full";
 }
 
 export function readReviewGroupingMode(): ReviewFileGroupingMode {
   return normalizeReviewFileGroupingMode(
-    vscode.workspace.getConfiguration("intentdiff").get("review.groupFilesBy", "auto"),
+    vscode.workspace.getConfiguration("intentumdiff").get("review.groupFilesBy", "auto"),
   );
 }
 
 export function readReviewDiffSurface(): ReviewDiffSurface {
-  return vscode.workspace.getConfiguration("intentdiff").get<string>("review.diffSurface", "native") === "panel"
+  return vscode.workspace.getConfiguration("intentumdiff").get<string>("review.diffSurface", "native") === "panel"
     ? "panel"
     : "native";
 }
 
 export function readFuelPolicy(): ReviewFuelPolicy {
-  const config = vscode.workspace.getConfiguration("intentdiff");
+  const config = vscode.workspace.getConfiguration("intentumdiff");
   return {
     peakFuelWarning: nonNegativeNumber(
       config.get("diagnostics.fuelPeakWarning", DEFAULT_REVIEW_FUEL_POLICY.peakFuelWarning),
@@ -115,7 +115,7 @@ export function readFuelPolicy(): ReviewFuelPolicy {
 }
 
 export function readSemanticOnlyOptions(hideComments: boolean): SemanticOnlyOptions {
-  const config = vscode.workspace.getConfiguration("intentdiff");
+  const config = vscode.workspace.getConfiguration("intentumdiff");
   return {
     contextLines: Math.max(0, config.get("diff.contextLines", 3)),
     showAdditions: config.get("visualization.showAdditions", true),
@@ -127,10 +127,10 @@ export function readSemanticOnlyOptions(hideComments: boolean): SemanticOnlyOpti
 }
 
 export function readReviewDiffContextLines(): number {
-  const value = vscode.workspace.getConfiguration("intentdiff").get<number>("review.diffContextLines", 1);
+  const value = vscode.workspace.getConfiguration("intentumdiff").get<number>("review.diffContextLines", 1);
   return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 1;
 }
 
 export function fallbackDiffEnabled(): boolean {
-  return vscode.workspace.getConfiguration("intentdiff").get("diff.fallbackDiff", true);
+  return vscode.workspace.getConfiguration("intentumdiff").get("diff.fallbackDiff", true);
 }

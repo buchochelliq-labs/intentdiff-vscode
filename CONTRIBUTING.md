@@ -1,4 +1,4 @@
-# Contributing to intentdiff-vscode
+# Contributing to intentumdiff-vscode
 
 - Build + test per [docs/BUILDING.md](docs/BUILDING.md); lint (`tsc --noEmit`) and both test
   suites must be green.

@@ -86,7 +86,7 @@ test("semantic-only documents merge overlapping context windows", () => {
   );
 
   assert.equal(result.modifiedText, "1\n2\n3\n4");
-  assert.equal(result.modifiedText.includes("IntentDiff omitted"), false);
+  assert.equal(result.modifiedText.includes("IntentumDiff omitted"), false);
 });
 
 test("semantic-only documents insert identical separators between disjoint chunks", () => {

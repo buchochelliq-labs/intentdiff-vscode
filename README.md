@@ -1,13 +1,13 @@
-# IntentDiff VS Code Extension
+# IntentumDiff VS Code Extension
 
-[![CI](https://github.com/buchochelliq-labs/intentdiff-vscode/actions/workflows/ci.yml/badge.svg)](https://github.com/buchochelliq-labs/intentdiff-vscode/actions/workflows/ci.yml)
+[![CI](https://github.com/buchochelliq-labs/intentumdiff-vscode/actions/workflows/ci.yml/badge.svg)](https://github.com/buchochelliq-labs/intentumdiff-vscode/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Bring IntentDiff into VS Code with live semantic diff feedback, a
+Bring IntentumDiff into VS Code with live semantic diff feedback, a
 group-first **Semantic Changes** review tree, native diff navigation,
 guardrail diagnostics, and cross-file refactoring visibility.
 
-![IntentDiff VS Code demo](media/intentdiff-vscode-recording.gif)
+![IntentumDiff VS Code demo](media/intentumdiff-vscode-recording.gif)
 
 ![Semantic Changes groups](media/semantic-changes-groups.png)
 
@@ -30,17 +30,17 @@ guardrail diagnostics, and cross-file refactoring visibility.
 
 ## 🔒 Privacy — your code stays yours
 
-**IntentDiff is local-first by design. In its default configuration, nothing
+**IntentumDiff is local-first by design. In its default configuration, nothing
 about your code — not the files, not the diffs, not the semantic analysis —
 leaves your machine.** The diff engine, semantic review, and the built-in
 intent explanations all run locally. We do not bundle an API key, do not run a
 proxy, and collect no analytics on your code, diffs, or usage.
 
 The **optional** AI intent explainer is **off by default**. Even when you turn it
-on, IntentDiff sends the model a **locally-derived semantic summary — not your
+on, IntentumDiff sends the model a **locally-derived semantic summary — not your
 source code**:
 
-| `intentdiff.intent.llm.codeSharing` | Sent to the model | Bodies / literals |
+| `intentumdiff.intent.llm.codeSharing` | Sent to the model | Bodies / literals |
 |---|---|:---:|
 | `signatures` *(default)* | Summary + symbol names + param/return types | ❌ |
 | `facts` | Structural facts only (no identifiers) | ❌ |
@@ -56,7 +56,7 @@ never in `settings.json`.
 ## Requirements
 
 - VS Code 1.90 or newer
-- `intentdiff` available on `PATH`, or configured via `intentdiff.executable`
+- `intentumdiff` available on `PATH`, or configured via `intentumdiff.executable`
 - A workspace folder backed by git
 
 ## Run Locally
@@ -95,8 +95,8 @@ Extension Development Host for the closest local hot-reload loop.
 
 ## Install
 
-After publication, install **IntentDiff** from the VS Code Marketplace or Open
-VSX under extension ID `buchochelliq-labs.intentdiff`.
+After publication, install **IntentumDiff** from the VS Code Marketplace or Open
+VSX under extension ID `buchochelliq-labs.intentumdiff`.
 
 ## Install Locally
 
@@ -117,11 +117,11 @@ The installer checks for `npm` and the VS Code `code` CLI, installs npm
 dependencies only when `node_modules` is missing, compiles, packages, and runs
 `code --install-extension <vsix> --force`.
 It also writes an ignored workspace setting at `.vscode/settings.json` pointing
-`intentdiff.executable` at a local IntentDiff executable when one exists. The setting
-name remains `intentdiff.executable` for compatibility with the pre-rebrand extension.
+`intentumdiff.executable` at a local IntentumDiff executable when one exists. The setting
+name remains `intentumdiff.executable` for compatibility with the pre-rebrand extension.
 
 For the normal after-each-iteration loop, run the repository-level sync helper.
-It detects changed Python/Rust files and reinstalls the IntentDiff executable,
+It detects changed Python/Rust files and reinstalls the IntentumDiff executable,
 detects changed VS Code files and reinstalls the VSIX, and skips work when only
 docs/tests outside those surfaces changed:
 
@@ -149,12 +149,12 @@ Useful sync options:
 powershell -ExecutionPolicy Bypass -File scripts/sync-local-dev.ps1 `
   -ForceExecutable `
   -ForceVsCode `
-  -StopIntentDiffProcesses
+  -StopIntentumDiffProcesses
 ```
 
-When executable files changed, the sync helper stops repo-scoped IntentDiff
+When executable files changed, the sync helper stops repo-scoped IntentumDiff
 LiveServer/LSP processes before reinstalling so native files are not held open.
-Use `-SkipStopIntentDiffProcesses` only when you intentionally want to leave
+Use `-SkipStopIntentumDiffProcesses` only when you intentionally want to leave
 those processes running.
 
 Useful options:
@@ -164,7 +164,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install-vscode-extension.ps1 `
   -CodeCommand "C:\Users\you\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd" `
   -SkipNpmInstall `
   -SkipCompile `
-  -SetIntentDiffExecutable "C:\path\to\intentdiff.exe"
+  -SetIntentumDiffExecutable "C:\path\to\intentumdiff.exe"
 ```
 
 Use `-NoWorkspaceSettings` if you want to install the extension without writing
@@ -173,61 +173,61 @@ Use `-NoWorkspaceSettings` if you want to install the extension without writing
 To uninstall the local build:
 
 ```powershell
-code --uninstall-extension buchochelliq-labs.intentdiff
+code --uninstall-extension buchochelliq-labs.intentumdiff
 ```
 
 ## Settings
 
-The `intentdiff.*` setting namespace is retained as a compatibility alias for the
-first public IntentDiff release.
+The `intentumdiff.*` setting namespace is retained as a compatibility alias for the
+first public IntentumDiff release.
 
 | Setting | Default | Purpose |
 |---|---|---|
-| `intentdiff.executable` | `intentdiff` | Command or absolute path for the IntentDiff executable; `intentdiff` remains a supported compatibility command |
-| `intentdiff.ref` | `HEAD` | Git ref to compare live buffers against |
-| `intentdiff.enabled` | `true` | Enables live semantic diffing |
-| `intentdiff.debounceMs` | `250` | Debounce before sending a diff request |
-| `intentdiff.fuel` | `null` | Optional `--fuel` override for active-file live diffs. Defaults to IntentDiff's bounded parser fuel; use `"inf"` only in trusted workspaces. |
-| `intentdiff.trace` | `false` | Writes protocol/server logs to the output channel |
-| `intentdiff.schemas.fetchMode` | `"cache-only"` | Controls runtime JSON/YAML schema fetches: `auto`, `cache-only`, or `off`; workspace values are ignored |
-| `intentdiff.schemas.cacheTtlHours` | `24` | Hours before cached remote schemas are considered stale |
-| `intentdiff.schemas.allowPrivateHosts` | `false` | Allows schema URLs on private/internal hosts; workspace values are ignored |
-| `intentdiff.diff.fallbackDiff` | `true` | Shows fallback token/text diffs when semantic parsing falls back |
-| `intentdiff.diff.hideComments` | `false` | Hides changes whose semantic nodes are comments |
-| `intentdiff.visualization.showAdditions` | `true` | Shows addition decorations |
-| `intentdiff.visualization.showDeletions` | `true` | Shows deletion decorations and inline deletion markers |
-| `intentdiff.visualization.showModifications` | `true` | Shows modification decorations |
-| `intentdiff.visualization.inlineDeletionMarkers` | `true` | Shows subtle modified-editor markers for inline deletions |
-| `intentdiff.visualization.movedCode` | `true` | Shows move/refactoring decorations |
-| `intentdiff.intent.explainer` | `"deterministic"` | Intent "why" source: `deterministic` (offline, local) or `llm` (opt-in AI enrichment) |
-| `intentdiff.intent.llm.provider` | `"vscode-lm"` | LLM backend when the explainer is on: `vscode-lm` (your Copilot, no key), `anthropic` (BYOK), or `openai-compatible` (BYOK or local) |
-| `intentdiff.intent.llm.codeSharing` | `"signatures"` | Privacy level of the LLM payload: `signatures` (names/types, no bodies), `facts` (most private, no identifiers), or `full` (source — **local endpoints only**; cloud auto-downgrades) |
-| `intentdiff.intent.llm.baseUrl` | `""` | Base URL for the anthropic / openai-compatible provider (e.g. `http://localhost:11434` for Ollama). Blank = provider default |
-| `intentdiff.intent.llm.model` | `""` | Model id (BYOK) or family filter (vscode-lm). Blank = a sensible default |
+| `intentumdiff.executable` | `intentumdiff` | Command or absolute path for the IntentumDiff executable; `intentumdiff` remains a supported compatibility command |
+| `intentumdiff.ref` | `HEAD` | Git ref to compare live buffers against |
+| `intentumdiff.enabled` | `true` | Enables live semantic diffing |
+| `intentumdiff.debounceMs` | `250` | Debounce before sending a diff request |
+| `intentumdiff.fuel` | `null` | Optional `--fuel` override for active-file live diffs. Defaults to IntentumDiff's bounded parser fuel; use `"inf"` only in trusted workspaces. |
+| `intentumdiff.trace` | `false` | Writes protocol/server logs to the output channel |
+| `intentumdiff.schemas.fetchMode` | `"cache-only"` | Controls runtime JSON/YAML schema fetches: `auto`, `cache-only`, or `off`; workspace values are ignored |
+| `intentumdiff.schemas.cacheTtlHours` | `24` | Hours before cached remote schemas are considered stale |
+| `intentumdiff.schemas.allowPrivateHosts` | `false` | Allows schema URLs on private/internal hosts; workspace values are ignored |
+| `intentumdiff.diff.fallbackDiff` | `true` | Shows fallback token/text diffs when semantic parsing falls back |
+| `intentumdiff.diff.hideComments` | `false` | Hides changes whose semantic nodes are comments |
+| `intentumdiff.visualization.showAdditions` | `true` | Shows addition decorations |
+| `intentumdiff.visualization.showDeletions` | `true` | Shows deletion decorations and inline deletion markers |
+| `intentumdiff.visualization.showModifications` | `true` | Shows modification decorations |
+| `intentumdiff.visualization.inlineDeletionMarkers` | `true` | Shows subtle modified-editor markers for inline deletions |
+| `intentumdiff.visualization.movedCode` | `true` | Shows move/refactoring decorations |
+| `intentumdiff.intent.explainer` | `"deterministic"` | Intent "why" source: `deterministic` (offline, local) or `llm` (opt-in AI enrichment) |
+| `intentumdiff.intent.llm.provider` | `"vscode-lm"` | LLM backend when the explainer is on: `vscode-lm` (your Copilot, no key), `anthropic` (BYOK), or `openai-compatible` (BYOK or local) |
+| `intentumdiff.intent.llm.codeSharing` | `"signatures"` | Privacy level of the LLM payload: `signatures` (names/types, no bodies), `facts` (most private, no identifiers), or `full` (source — **local endpoints only**; cloud auto-downgrades) |
+| `intentumdiff.intent.llm.baseUrl` | `""` | Base URL for the anthropic / openai-compatible provider (e.g. `http://localhost:11434` for Ollama). Blank = provider default |
+| `intentumdiff.intent.llm.model` | `""` | Model id (BYOK) or family filter (vscode-lm). Blank = a sensible default |
 
 See **[PRIVACY.md](PRIVACY.md)** for exactly what the intent explainer sends at
 each `codeSharing` level and the local-only guarantee for `full`.
 
 ## Commands
 
-- `IntentDiff: Toggle Live Semantic Diff`
-- `IntentDiff: Toggle Semantic Diff Overlay`
-- `IntentDiff: Configure Visible Change Types`
-- `IntentDiff: Show Comment Changes` / `IntentDiff: Hide Comment Changes`
-- `IntentDiff: Restart LiveServer`
-- `IntentDiff: Diff Active File`
-- `IntentDiff: Refresh Semantic Review`
-- `IntentDiff: Open Semantic Diff`
-- `IntentDiff: Clear Semantic Review`
-- `IntentDiff: Reveal Active File in Semantic Review`
-- `IntentDiff: Show Output`
-- `IntentDiff: Set Intent Explainer Key (BYOK)` — stores a cloud LLM key in VS Code SecretStorage
-- `IntentDiff: Clear Intent Explainer Key`
+- `IntentumDiff: Toggle Live Semantic Diff`
+- `IntentumDiff: Toggle Semantic Diff Overlay`
+- `IntentumDiff: Configure Visible Change Types`
+- `IntentumDiff: Show Comment Changes` / `IntentumDiff: Hide Comment Changes`
+- `IntentumDiff: Restart LiveServer`
+- `IntentumDiff: Diff Active File`
+- `IntentumDiff: Refresh Semantic Review`
+- `IntentumDiff: Open Semantic Diff`
+- `IntentumDiff: Clear Semantic Review`
+- `IntentumDiff: Reveal Active File in Semantic Review`
+- `IntentumDiff: Show Output`
+- `IntentumDiff: Set Intent Explainer Key (BYOK)` — stores a cloud LLM key in VS Code SecretStorage
+- `IntentumDiff: Clear Intent Explainer Key`
 
 ## Semantic Changes Side Panel
 
 Open the Source Control sidebar and expand **Semantic Changes**. The view
-auto-refreshes saved working-tree semantic changes against `intentdiff.ref` when it
+auto-refreshes saved working-tree semantic changes against `intentumdiff.ref` when it
 becomes visible, then keeps itself current from file saves, creates, deletes,
 renames, Git status changes, and a fallback poll. Use the refresh button when
 you want to rerun the review immediately.
@@ -244,7 +244,7 @@ workspaces, results are grouped by workspace and file:
 - style-only, clean, skipped, and error entries are kept visible
 
 Selecting a file or entry opens a native VS Code diff editor against
-`intentdiff.ref`. The left side is a read-only `intentdiff-base:` document fetched from git;
+`intentumdiff.ref`. The left side is a read-only `intentumdiff-base:` document fetched from git;
 the right side is the working-tree file. If the entry has a semantic position,
 the relevant diff side reveals it and reuses the existing diagnostics/decorations
 mapping. Deleted text is selected on the base side because it no longer exists
@@ -275,22 +275,22 @@ comments, and hosted PR review remain future slices.
 1. Build the extension with `npm run compile`.
 2. Open `plugins/vscode` in VS Code and launch an Extension Development Host.
 3. In the Extension Development Host, open a small git-backed workspace.
-4. Set `intentdiff.executable` to the local `intentdiff` command or absolute path.
-5. Set `intentdiff.ref` to `HEAD` or a branch such as `origin/main`.
-6. Enable `intentdiff.trace` and open **IntentDiff: Show Output**.
+4. Set `intentumdiff.executable` to the local `intentumdiff` command or absolute path.
+5. Set `intentumdiff.ref` to `HEAD` or a branch such as `origin/main`.
+6. Enable `intentumdiff.trace` and open **IntentumDiff: Show Output**.
 7. Edit a supported file and confirm the status bar moves through `diffing`
    to `clean`, `style-only`, `N changes`, or `N guardrail`.
-8. Change a protected config value from `intentdiff.yaml` and confirm an editor
+8. Change a protected config value from `intentumdiff.yaml` and confirm an editor
    diagnostic appears at the changed position.
 9. Introduce a parse warning/error and confirm a warning diagnostic appears
    without crashing the extension host.
 10. Open the Source Control sidebar and confirm **Semantic Changes** refreshes
-    automatically. Use **IntentDiff: Refresh Semantic Review** to rerun it manually,
+    automatically. Use **IntentumDiff: Refresh Semantic Review** to rerun it manually,
     then confirm changed files appear with guardrails on top and any cross-file
     changes listed before ordinary file changes.
 11. Select a changed file in **Semantic Changes** and confirm a native diff editor
-    opens with a `intentdiff-base:` left side and the working-tree file on the right.
-12. Change `intentdiff.ref`, refresh the review, and confirm the diff editor uses the
+    opens with a `intentumdiff-base:` left side and the working-tree file on the right.
+12. Change `intentumdiff.ref`, refresh the review, and confirm the diff editor uses the
     new base ref.
 13. Move a saved function or class between files, refresh the review, and confirm
     a cross-file entry appears in **Semantic Changes**.
@@ -299,6 +299,6 @@ comments, and hosted PR review remain future slices.
 
 ## Notes
 
-This V1 extension consumes `intentdiff live-server --stdio` protocol v2. It is
+This V1 extension consumes `intentumdiff live-server --stdio` protocol v2. It is
 release-candidate ready; Marketplace/Open VSX publication is pending namespace
 and credential confirmation.

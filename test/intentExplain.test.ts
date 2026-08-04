@@ -318,10 +318,10 @@ test("non-code content changes drop code framing and use the content risk", () =
   // A .gitignore-style addition (generic text node) explained as config content.
   const change: SemanticChange = {
     change_type: "ADDITION",
-    new_node: { label: "/.intentdiff", node_type: "text_line", position: { start_line: 85, start_col: 0, end_line: 85, end_col: 11 } },
+    new_node: { label: "/.intentumdiff", node_type: "text_line", position: { start_line: 85, start_col: 0, end_line: 85, end_col: 11 } },
   };
   const explanation = explainChange(change, undefined, "config");
-  assert.match(explanation.what, /Added `\/\.intentdiff`/u);
+  assert.match(explanation.what, /Added `\/\.intentumdiff`/u);
   assert.doesNotMatch(explanation.why, /public API|function|behavior/iu);
   assert.equal(explanation.why, "New configuration entry.");
   assert.equal(explanation.risk, "content");

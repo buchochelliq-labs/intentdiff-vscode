@@ -1,8 +1,8 @@
 {
-  "name": "@intentdiff/review-shell",
+  "name": "@intentumdiff/review-shell",
   "version": "0.0.1",
   "private": true,
-  "description": "Electron-first IntentDiff standalone review shell with reusable web renderer.",
+  "description": "Electron-first IntentumDiff standalone review shell with reusable web renderer.",
   "main": "src/main.ts",
   "scripts": {
     "test": "npm run build:web && node --test test/reviewShell.test.js",

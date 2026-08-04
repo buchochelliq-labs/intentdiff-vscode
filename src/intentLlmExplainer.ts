@@ -14,8 +14,8 @@ import {
   type IntentShareLevel,
 } from "./intentLlmPrompt";
 
-const SECRET_KEY = "intentdiff.intentExplainerKey";
-const CONSENT_KEY = "intentdiff.intentExplainerConsent";
+const SECRET_KEY = "intentumdiff.intentExplainerKey";
+const CONSENT_KEY = "intentumdiff.intentExplainerConsent";
 const TIMEOUT_MS = 6000;
 
 type Provider = "vscode-lm" | "anthropic" | "openai-compatible";
@@ -38,7 +38,7 @@ export class IntentLlmExplainer {
   ) {}
 
   private config() {
-    return vscode.workspace.getConfiguration("intentdiff.intent");
+    return vscode.workspace.getConfiguration("intentumdiff.intent");
   }
 
   isEnabled(): boolean {
@@ -89,7 +89,7 @@ export class IntentLlmExplainer {
     }
     this.downgradeNotified = true;
     void vscode.window.showWarningMessage(
-      `IntentDiff: codeSharing "full" was capped to "signatures" — ${reason}. Raw source is only ever sent to loopback endpoints.`,
+      `IntentumDiff: codeSharing "full" was capped to "signatures" — ${reason}. Raw source is only ever sent to loopback endpoints.`,
     );
   }
 
@@ -102,20 +102,20 @@ export class IntentLlmExplainer {
 
   async setKey(): Promise<void> {
     const key = await vscode.window.showInputBox({
-      title: "IntentDiff — LLM API key (BYOK)",
+      title: "IntentumDiff — LLM API key (BYOK)",
       prompt: "Stored securely in VS Code SecretStorage. Not needed for the Copilot (vscode-lm) provider or a keyless local endpoint.",
       password: true,
       ignoreFocusOut: true,
     });
     if (key) {
       await this.secrets.store(SECRET_KEY, key.trim());
-      void vscode.window.showInformationMessage("IntentDiff: LLM API key saved to SecretStorage.");
+      void vscode.window.showInformationMessage("IntentumDiff: LLM API key saved to SecretStorage.");
     }
   }
 
   async clearKey(): Promise<void> {
     await this.secrets.delete(SECRET_KEY);
-    void vscode.window.showInformationMessage("IntentDiff: LLM API key cleared.");
+    void vscode.window.showInformationMessage("IntentumDiff: LLM API key cleared.");
   }
 
   /** Returns a one-sentence LLM explanation, or undefined to fall back to deterministic. */
@@ -254,7 +254,7 @@ export class IntentLlmExplainer {
       return true;
     }
     const choice = await vscode.window.showWarningMessage(
-      `IntentDiff will send a structured summary of the change — symbol names, types, and shape, NOT the source code — to ${host} to generate intent explanations. Continue?`,
+      `IntentumDiff will send a structured summary of the change — symbol names, types, and shape, NOT the source code — to ${host} to generate intent explanations. Continue?`,
       { modal: true },
       "Allow",
     );

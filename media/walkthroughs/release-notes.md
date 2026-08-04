@@ -1,12 +1,12 @@
 # Pipe out release notes
 
-IntentDiff turns a review into human-readable **release notes**, split by risk:
+IntentumDiff turns a review into human-readable **release notes**, split by risk:
 
 - **Behavior** — meaningful changes that may affect runtime.
 - **Internal** — refactors and moves (behavior preserved).
 - Guardrail violations are flagged; style and noise are excluded.
 
-[Open the IntentDiff view](command:workbench.view.extension.intentdiffActivity), open a
+[Open the IntentumDiff view](command:workbench.view.extension.intentumdiffActivity), open a
 file's review from **Semantic Changes**, then switch to the **Release Notes** rail:
 
 From there you can:

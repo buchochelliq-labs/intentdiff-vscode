@@ -105,9 +105,9 @@ export interface ReviewSummary {
 
 export function summarizeReview(files: ReviewFile[]): ReviewSummary {
   const summary: ReviewSummary = {
-    // The synthetic `.intentdiff-review` placeholder (review-level status/error carrier) is not
+    // The synthetic `.intentumdiff-review` placeholder (review-level status/error carrier) is not
     // a workspace file — counting it made the tree/summary claim one more file than exists.
-    fileCount: files.filter((f) => f.relativePath !== ".intentdiff-review").length,
+    fileCount: files.filter((f) => f.relativePath !== ".intentumdiff-review").length,
     readyCount: 0,
     skippedCount: 0,
     errorCount: 0,
@@ -349,7 +349,7 @@ function reviewEntriesForParserDiagnostics(diff: SemanticDiff | undefined): Revi
     entries.push({
       kind: "error",
       label: "Parser fallback used",
-      description: "IntentDiff used fallback parsing for this file; semantic precision may be reduced.",
+      description: "IntentumDiff used fallback parsing for this file; semantic precision may be reduced.",
       severity: "warning",
     });
   }

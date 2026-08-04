@@ -49,9 +49,9 @@ export function registerReviewTimelineProvider(
   const host = workspace as TimelineRegistrationHost;
   if (typeof host.registerTimelineProvider === "function") {
     try {
-      return host.registerTimelineProvider("intentdiff", provider);
+      return host.registerTimelineProvider("intentumdiff", provider);
     } catch (error) {
-      console.warn("IntentDiff Timeline provider unavailable:", error);
+      console.warn("IntentumDiff Timeline provider unavailable:", error);
       return new vscode.Disposable(() => undefined);
     }
   }

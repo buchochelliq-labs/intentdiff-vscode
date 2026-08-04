@@ -99,8 +99,8 @@ export class ReviewPanelWebviewController implements vscode.Disposable {
     this.currentModel = model;
     if (!this.panel) {
       this.panel = vscode.window.createWebviewPanel(
-        "intentdiff.reviewPanel",
-        "IntentDiff Review",
+        "intentumdiff.reviewPanel",
+        "IntentumDiff Review",
         vscode.ViewColumn.Active,
         {
           enableScripts: true,
@@ -126,7 +126,7 @@ export class ReviewPanelWebviewController implements vscode.Disposable {
     } else {
       this.panel.reveal(vscode.ViewColumn.Active, false);
     }
-    this.panel.title = `IntentDiff: ${model.file.relativePath}`;
+    this.panel.title = `IntentumDiff: ${model.file.relativePath}`;
     this.render();
   }
 

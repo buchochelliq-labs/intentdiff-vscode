@@ -1,5 +1,5 @@
 ﻿/**
- * Focused integration test for the IntentDiff Monaco diff webview.
+ * Focused integration test for the IntentumDiff Monaco diff webview.
  *
  * Opens the semantic diff for boo.py and verifies the webview renders with
  * the chevron + palette + line-number fixes. Bypasses the live-server pipeline.
@@ -10,8 +10,8 @@ import { downloadAndUnzipVSCode, runTests } from "@vscode/test-electron";
 export async function run(): Promise<void> {
   const extensionDevelopmentPath = path.resolve(__dirname, "../..");
   const extensionTestsPath = path.resolve(__dirname, "semanticDiffWebviewSuite.js");
-  const fixtureWorkspace = process.env.INTENTDIFF_FIXTURE_DIR
-    ? path.resolve(process.env.INTENTDIFF_FIXTURE_DIR)
+  const fixtureWorkspace = process.env.INTENTUMDIFF_FIXTURE_DIR
+    ? path.resolve(process.env.INTENTUMDIFF_FIXTURE_DIR)
     : path.join(extensionDevelopmentPath, "test", "fixtures", "workspace");
 
   const downloadedExecutable = await downloadAndUnzipVSCode({
@@ -32,8 +32,8 @@ export async function run(): Promise<void> {
       "--no-exit",
     ],
     extensionTestsEnv: {
-      INTENTDIFF_NODE_EXECUTABLE: process.execPath,
-      INTENTDIFF_FIXTURE_DIR: fixtureWorkspace,
+      INTENTUMDIFF_NODE_EXECUTABLE: process.execPath,
+      INTENTUMDIFF_FIXTURE_DIR: fixtureWorkspace,
     },
   });
 }

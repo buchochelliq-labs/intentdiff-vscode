@@ -4,9 +4,9 @@ A semantic review parses every changed file with the Rust core and groups the ra
 edits into **intent** — meaningful behavior changes, refactorings, moves, and
 style/noise that's safely ignored.
 
-[Refresh Semantic Review](command:intentdiff.refreshReview)
+[Refresh Semantic Review](command:intentumdiff.refreshReview)
 
-Then open the **IntentDiff** view in the Activity Bar to see the results:
+Then open the **IntentumDiff** view in the Activity Bar to see the results:
 
 - **Semantic Changes** — a tree of changed files, each expanded into its intents and
   raw evidence, ordered by importance (guardrails → cross-file → lifecycle → moved →

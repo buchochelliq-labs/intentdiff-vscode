@@ -16,7 +16,7 @@ import {
   readLiveServerEngine,
   readLiveServerRawExecutable,
   settingsForFolder,
-  workspaceVenvIntentDiffCandidates,
+  workspaceVenvIntentumDiffCandidates,
 } from "./extensionSettings";
 import { ProcessLineTransport } from "./processTransport";
 import {
@@ -77,14 +77,14 @@ export class ServerSessionManager {
     const launch = chooseLiveServerLaunch(rawExecutable, engine, bundled);
     const launchContext: LiveServerLaunchContext = {
       kind: launch.kind,
-      userOverride: rawExecutable !== "intentdiff",
+      userOverride: rawExecutable !== "intentumdiff",
       bundledPath: bundled,
     };
     if (launch.kind === "native") {
       settings.executable = launch.executable;
     } else if (engine === "native") {
       this.host.output.appendLine(
-        "intentdiff.liveServer.engine is 'native' but no bundled native server was found; using the python engine.",
+        "intentumdiff.liveServer.engine is 'native' but no bundled native server was found; using the python engine.",
       );
     }
     const args = buildLiveServerArgs(folder.uri.fsPath, settings);
@@ -107,12 +107,12 @@ export class ServerSessionManager {
         },
         onStderr: (line) => this.host.trace(`stderr: ${line}`),
         onExit: (code, signal) => {
-          this.host.setStatusText("IntentDiff: stopped");
+          this.host.setStatusText("IntentumDiff: stopped");
           this.host.output.appendLine(`LiveServer exited: code=${code ?? "null"} signal=${signal ?? "null"}`);
           this.sessions.delete(key);
         },
         onError: (error) => {
-          this.host.setStatusText("IntentDiff: error");
+          this.host.setStatusText("IntentumDiff: error");
           this.sessions.delete(key);
           const details = liveServerErrorDetails(error, settings, folder, launchContext);
           this.host.output.appendLine(`LiveServer error: ${details.message}`);
@@ -123,7 +123,7 @@ export class ServerSessionManager {
     );
     client.onEvent((event) => {
       if (event.kind === "ready") {
-        this.host.setStatusText("IntentDiff: ready");
+        this.host.setStatusText("IntentumDiff: ready");
         if (event.ready.capabilities?.review !== true) {
           this.host.output.appendLine(JSON.stringify({
             liveServerWarning: {
@@ -155,7 +155,7 @@ export class ServerSessionManager {
         }
         return;
       }
-      this.host.output.appendLine(`Malformed IntentDiff protocol line: ${event.message}`);
+      this.host.output.appendLine(`Malformed IntentumDiff protocol line: ${event.message}`);
     });
 
     const session = { folder, client, transport };
@@ -181,11 +181,11 @@ export function liveServerErrorDetails(
     return enoentFailureDetails(
       settings.executable,
       launch,
-      workspaceVenvIntentDiffCandidates(folder)[0],
+      workspaceVenvIntentumDiffCandidates(folder)[0],
     );
   }
   return {
     message: error.message,
-    toast: "IntentDiff LiveServer failed.",
+    toast: "IntentumDiff LiveServer failed.",
   };
 }

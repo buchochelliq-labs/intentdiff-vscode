@@ -151,7 +151,7 @@ export class LiveServerClient {
           seq: 0,
           error: {
             code: "unsupported_protocol",
-            message: "IntentDiff live-server did not report protocol version 2",
+            message: "IntentumDiff live-server did not report protocol version 2",
           },
         });
         return;
@@ -169,7 +169,7 @@ export class LiveServerClient {
         seq,
         error: response.error ?? {
           code: "protocol_error",
-          message: "IntentDiff returned an unsuccessful response",
+          message: "IntentumDiff returned an unsuccessful response",
         },
       });
       return;

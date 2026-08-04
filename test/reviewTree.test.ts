@@ -106,7 +106,7 @@ test("semantic review tree separates review groups, raw evidence, schema, and gu
 
   assert.equal(fileItem.description, "python | 1 guardrail | 4 groups | 6 raw | 1 suppressed | Databricks bundle schema");
   assert.equal(themeIconId(fileItem.iconPath), "shield");
-  assert.equal(themeIconColorId(fileItem.iconPath), "intentdiff.semanticChanges.guardrail");
+  assert.equal(themeIconColorId(fileItem.iconPath), "intentumdiff.semanticChanges.guardrail");
 
   const entryNodes = provider.getChildren({ kind: "file", file: reviewFile });
   assert.deepEqual(entryNodes.map((node) => node.kind === "entry" ? node.entry.kind : node.kind), [
@@ -123,7 +123,7 @@ test("semantic review tree separates review groups, raw evidence, schema, and gu
   // Selecting an intent group opens the native diff at its representative line.
   const meaningfulNode = entryNodes.find((node) => node.kind === "entry" && node.entry.kind === "meaningful");
   assert.ok(meaningfulNode?.kind === "entry");
-  assert.equal(provider.getTreeItem(meaningfulNode).command?.command, "intentdiff.openSemanticDiff");
+  assert.equal(provider.getTreeItem(meaningfulNode).command?.command, "intentumdiff.openSemanticDiff");
 
   const rawNode = entryNodes.find((node) => node.kind === "entry" && node.entry.kind === "raw-evidence");
   assert.ok(rawNode?.kind === "entry");
@@ -138,7 +138,7 @@ test("semantic review tree separates review groups, raw evidence, schema, and gu
   assert.equal(evidenceItem.label, "Evidence: Insert retry option");
   assert.equal(evidenceItem.description, "raw | ADDITION");
   // Selecting evidence opens the native diff at the representative line (spec surface B).
-  assert.equal(evidenceItem.command?.command, "intentdiff.openSemanticDiff");
+  assert.equal(evidenceItem.command?.command, "intentumdiff.openSemanticDiff");
   const evidenceArgs = evidenceItem.command?.arguments?.[0] as { relativePath?: string } | undefined;
   assert.equal(evidenceArgs?.relativePath, reviewFile.relativePath);
 });
@@ -148,28 +148,28 @@ test("diffSurface setting routes tree selections between native diff and the pan
   // Default is native.
   assert.equal(
     provider.getTreeItem({ kind: "file", file: reviewFile }).command?.command,
-    "intentdiff.openSemanticDiff",
+    "intentumdiff.openSemanticDiff",
   );
 
   provider.setDiffSurface("panel");
   assert.equal(
     provider.getTreeItem({ kind: "file", file: reviewFile }).command?.command,
-    "intentdiff.openReviewPanel",
+    "intentumdiff.openReviewPanel",
   );
   const meaningfulNode = provider
     .getChildren({ kind: "file", file: reviewFile })
     .find((node) => node.kind === "entry" && node.entry.kind === "meaningful");
   assert.ok(meaningfulNode?.kind === "entry");
-  assert.equal(provider.getTreeItem(meaningfulNode).command?.command, "intentdiff.openReviewPanel");
+  assert.equal(provider.getTreeItem(meaningfulNode).command?.command, "intentumdiff.openReviewPanel");
 
   provider.setDiffSurface("native");
   assert.equal(
     provider.getTreeItem({ kind: "file", file: reviewFile }).command?.command,
-    "intentdiff.openSemanticDiff",
+    "intentumdiff.openSemanticDiff",
   );
 });
 
-test("semantic review tree uses vivid IntentDiff icons for tree entries", () => {
+test("semantic review tree uses vivid IntentumDiff icons for tree entries", () => {
   const provider = new SemanticReviewTreeProvider();
   const entries = provider.getChildren({ kind: "file", file: reviewFile });
   const icons = new Map(entries.map((node) => [
@@ -178,19 +178,19 @@ test("semantic review tree uses vivid IntentDiff icons for tree entries", () => 
   ]));
 
   assert.equal(themeIconId(icons.get("guardrail")), "circle-slash");
-  assert.equal(themeIconColorId(icons.get("guardrail")), "intentdiff.semanticChanges.guardrail");
+  assert.equal(themeIconColorId(icons.get("guardrail")), "intentumdiff.semanticChanges.guardrail");
   assert.equal(themeIconId(icons.get("schema-status")), "database");
-  assert.equal(themeIconColorId(icons.get("schema-status")), "intentdiff.semanticChanges.schemaStatus");
+  assert.equal(themeIconColorId(icons.get("schema-status")), "intentumdiff.semanticChanges.schemaStatus");
   assert.equal(themeIconId(icons.get("moved-code")), "diff-renamed");
-  assert.equal(themeIconColorId(icons.get("moved-code")), "intentdiff.semanticChanges.movedCode");
+  assert.equal(themeIconColorId(icons.get("moved-code")), "intentumdiff.semanticChanges.movedCode");
   assert.equal(themeIconId(icons.get("refactoring")), "symbol-variable");
-  assert.equal(themeIconColorId(icons.get("refactoring")), "intentdiff.semanticChanges.refactoring");
+  assert.equal(themeIconColorId(icons.get("refactoring")), "intentumdiff.semanticChanges.refactoring");
   assert.equal(themeIconId(icons.get("meaningful")), "sparkle");
-  assert.equal(themeIconColorId(icons.get("meaningful")), "intentdiff.semanticChanges.meaningful");
+  assert.equal(themeIconColorId(icons.get("meaningful")), "intentumdiff.semanticChanges.meaningful");
   assert.equal(themeIconId(icons.get("ignored-style")), "eye-closed");
-  assert.equal(themeIconColorId(icons.get("ignored-style")), "intentdiff.semanticChanges.ignoredStyle");
+  assert.equal(themeIconColorId(icons.get("ignored-style")), "intentumdiff.semanticChanges.ignoredStyle");
   assert.equal(themeIconId(icons.get("noise-suppressed")), "eye-closed");
-  assert.equal(themeIconColorId(icons.get("noise-suppressed")), "intentdiff.semanticChanges.noiseSuppressed");
+  assert.equal(themeIconColorId(icons.get("noise-suppressed")), "intentumdiff.semanticChanges.noiseSuppressed");
 });
 
 test("semantic review tree lists image assets as semantic change entries", () => {
@@ -239,7 +239,7 @@ test("semantic review tree lists image assets as semantic change entries", () =>
 
   const fileItem = provider.getTreeItem({ kind: "file", file: imageFile });
   assert.equal(fileItem.description, "png | 1 group | 1 raw");
-  assert.equal(fileItem.command?.command, "intentdiff.openReviewPanel");
+  assert.equal(fileItem.command?.command, "intentumdiff.openReviewPanel");
 
   const entries = provider.getChildren({ kind: "file", file: imageFile });
   assert.deepEqual(entries.map((node) => node.kind === "entry" ? node.entry.kind : node.kind), ["asset"]);
@@ -250,7 +250,7 @@ test("semantic review tree lists image assets as semantic change entries", () =>
   assert.equal(assetItem.label, "Image asset: hero.png");
   assert.equal(assetItem.description, "asset | image asset review");
   assert.equal(themeIconId(assetItem.iconPath), "file-media");
-  assert.equal(themeIconColorId(assetItem.iconPath), "intentdiff.semanticChanges.meaningful");
+  assert.equal(themeIconColorId(assetItem.iconPath), "intentumdiff.semanticChanges.meaningful");
 
   const evidenceNode = provider.getChildren(assetNode)[0];
   assert.ok(evidenceNode?.kind === "evidence");

@@ -16,7 +16,7 @@ test("debounceSeconds converts milliseconds to seconds", () => {
 test("buildLiveServerArgs includes stdio ref debounce and optional fuel", () => {
   assert.deepEqual(
     buildLiveServerArgs("C:/repo", {
-      executable: "intentdiff",
+      executable: "intentumdiff",
       ref: "origin/main",
       enabled: true,
       debounceMs: 250,
@@ -43,7 +43,7 @@ test("buildLiveServerArgs includes stdio ref debounce and optional fuel", () => 
 test("buildLiveServerArgs omits empty fuel values", () => {
   assert.deepEqual(
     buildLiveServerArgs("/repo", {
-      executable: "intentdiff",
+      executable: "intentumdiff",
       ref: "HEAD",
       enabled: true,
       debounceMs: 100,
@@ -60,7 +60,7 @@ test("buildLiveServerArgs omits empty fuel values", () => {
 test("buildLiveServerEnv maps schema settings to Python env vars", () => {
   assert.deepEqual(
     buildLiveServerEnv({
-      executable: "intentdiff",
+      executable: "intentumdiff",
       ref: "HEAD",
       enabled: true,
       debounceMs: 100,
@@ -71,9 +71,9 @@ test("buildLiveServerEnv maps schema settings to Python env vars", () => {
       schemaAllowPrivateHosts: true,
     }),
     {
-      INTENTDIFF_SCHEMA_FETCH: "cache-only",
-      INTENTDIFF_SCHEMA_CACHE_TTL_SECONDS: "9000",
-      INTENTDIFF_SCHEMA_ALLOW_PRIVATE_HOSTS: "1",
+      INTENTUMDIFF_SCHEMA_FETCH: "cache-only",
+      INTENTUMDIFF_SCHEMA_CACHE_TTL_SECONDS: "9000",
+      INTENTUMDIFF_SCHEMA_ALLOW_PRIVATE_HOSTS: "1",
     },
   );
 });
@@ -82,26 +82,26 @@ test("readTrustedExecutable ignores workspace-provided executable", () => {
   const executable = readTrustedExecutable({
     get: <T>(_section: string, defaultValue: T) => defaultValue,
     inspect: <T>() => ({
-      defaultValue: "intentdiff" as T,
-      globalValue: "C:/Tools/intentdiff.exe" as T,
+      defaultValue: "intentumdiff" as T,
+      globalValue: "C:/Tools/intentumdiff.exe" as T,
       workspaceValue: "C:/repo/malicious.exe" as T,
       workspaceFolderValue: "C:/repo/folder-malicious.exe" as T,
     }),
   });
 
-  assert.equal(executable, "C:/Tools/intentdiff.exe");
+  assert.equal(executable, "C:/Tools/intentumdiff.exe");
 });
 
 test("readTrustedExecutable falls back to default when only workspace value exists", () => {
   const executable = readTrustedExecutable({
     get: <T>(_section: string, defaultValue: T) => defaultValue,
     inspect: <T>() => ({
-      defaultValue: "intentdiff" as T,
+      defaultValue: "intentumdiff" as T,
       workspaceValue: "C:/repo/malicious.exe" as T,
     }),
   });
 
-  assert.equal(executable, "intentdiff");
+  assert.equal(executable, "intentumdiff");
 });
 
 test("readTrustedExecutable never reads workspace value through get when inspection is available", () => {
@@ -112,7 +112,7 @@ test("readTrustedExecutable never reads workspace value through get when inspect
     }),
   });
 
-  assert.equal(executable, "intentdiff");
+  assert.equal(executable, "intentumdiff");
 });
 
 test("schema fetch mode ignores workspace-provided auto value", () => {

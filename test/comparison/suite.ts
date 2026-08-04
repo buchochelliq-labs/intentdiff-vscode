@@ -10,10 +10,10 @@ type SemanticDiffStatus =
   | "semanticdiff_failed";
 
 type PysdStatus =
-  | "intentdiff_semantic"
-  | "intentdiff_style_only"
-  | "intentdiff_fallback"
-  | "intentdiff_failed";
+  | "intentumdiff_semantic"
+  | "intentumdiff_style_only"
+  | "intentumdiff_fallback"
+  | "intentumdiff_failed";
 
 type PysdDiffMode = "full_native_diff" | "semantic_only_native_diff";
 
@@ -37,15 +37,15 @@ interface ScenarioRun {
   source_url: string;
   relative_path: string;
   semanticdiff_status: SemanticDiffStatus;
-  intentdiff_status: PysdStatus;
-  intentdiff_diff_mode: PysdDiffMode;
+  intentumdiff_status: PysdStatus;
+  intentumdiff_diff_mode: PysdDiffMode;
   semanticdiff_screenshot: string;
-  intentdiff_screenshot: string;
+  intentumdiff_screenshot: string;
   performance_ms: {
-    intentdiff_diff_generation: number;
+    intentumdiff_diff_generation: number;
     semanticdiff_render: number;
-    intentdiff_review_wait: number;
-    intentdiff_open: number;
+    intentumdiff_review_wait: number;
+    intentumdiff_open: number;
   };
   notes: string[];
 }
@@ -53,7 +53,7 @@ interface ScenarioRun {
 interface IssueLogEntry {
   language: string;
   scenario_id: string;
-  issue_type: "none" | "intentdiff_parser" | "intentdiff_ui" | "semanticdiff_limitation" | "parity_gap";
+  issue_type: "none" | "intentumdiff_parser" | "intentumdiff_ui" | "semanticdiff_limitation" | "parity_gap";
   severity: IssueSeverity;
   observed_behavior: string;
   expected_or_desired_behavior: string;
@@ -101,11 +101,11 @@ const COMPARISON_IDS = [
 ];
 
 export async function run(): Promise<void> {
-  const repoRoot = requiredEnv("INTENTDIFF_REPO_ROOT");
-  const workspaceRoot = requiredEnv("INTENTDIFF_SEMANTICDIFF_COMPARISON_WORKSPACE");
-  const artifactsRoot = requiredEnv("INTENTDIFF_SEMANTICDIFF_COMPARISON_ARTIFACTS");
-  const semanticDiffExtensionPath = requiredEnv("INTENTDIFF_SEMANTICDIFF_EXTENSION_PATH");
-  const nodeExecutable = requiredEnv("INTENTDIFF_NODE_EXECUTABLE");
+  const repoRoot = requiredEnv("INTENTUMDIFF_REPO_ROOT");
+  const workspaceRoot = requiredEnv("INTENTUMDIFF_SEMANTICDIFF_COMPARISON_WORKSPACE");
+  const artifactsRoot = requiredEnv("INTENTUMDIFF_SEMANTICDIFF_COMPARISON_ARTIFACTS");
+  const semanticDiffExtensionPath = requiredEnv("INTENTUMDIFF_SEMANTICDIFF_EXTENSION_PATH");
+  const nodeExecutable = requiredEnv("INTENTUMDIFF_NODE_EXECUTABLE");
   const lockDir = path.join(path.dirname(workspaceRoot), "semanticdiff-comparison.lock");
   if (!acquireComparisonLock(lockDir)) {
     return;
@@ -114,26 +114,26 @@ export async function run(): Promise<void> {
 
   try {
     fs.mkdirSync(artifactsRoot, { recursive: true });
-    const diffGenerationMs = Number(requiredEnv("INTENTDIFF_DIFF_GENERATION_MS"));
+    const diffGenerationMs = Number(requiredEnv("INTENTUMDIFF_DIFF_GENERATION_MS"));
 
     await ensureWorkspaceFolder(workspaceRoot);
     await activateAndConfigureExtensions(nodeExecutable, semanticDiffExtensionPath);
 
     const reviewStarted = Date.now();
-    await vscode.commands.executeCommand("intentdiff.refreshReview");
+    await vscode.commands.executeCommand("intentumdiff.refreshReview");
     await waitFor(async () => {
       const state = await reviewState();
       return state.pendingReviewCount === 0
         && scenarios.every((scenario) => state.files.some(
           (file) => file.relativePath === relativePathFor(scenario),
         ));
-    }, "IntentDiff review state");
-    const intentdiffReviewWaitMs = Date.now() - reviewStarted;
+    }, "IntentumDiff review state");
+    const intentumdiffReviewWaitMs = Date.now() - reviewStarted;
 
     const scenarioRuns: ScenarioRun[] = [];
     for (const scenario of scenarios) {
       const semantic = await runSemanticDiffScenario(workspaceRoot, artifactsRoot, scenario);
-      const intentdiff = await runPysdScenario(workspaceRoot, artifactsRoot, scenario);
+      const intentumdiff = await runPysdScenario(workspaceRoot, artifactsRoot, scenario);
       scenarioRuns.push({
         scenario_id: scenario.id,
         language: scenario.language,
@@ -141,17 +141,17 @@ export async function run(): Promise<void> {
         source_url: scenario.source.url,
         relative_path: relativePathFor(scenario),
         semanticdiff_status: semantic.status,
-        intentdiff_status: intentdiff.status,
-        intentdiff_diff_mode: intentdiff.diffMode,
+        intentumdiff_status: intentumdiff.status,
+        intentumdiff_diff_mode: intentumdiff.diffMode,
         semanticdiff_screenshot: semantic.screenshot,
-        intentdiff_screenshot: intentdiff.screenshot,
+        intentumdiff_screenshot: intentumdiff.screenshot,
         performance_ms: {
-          intentdiff_diff_generation: diffGenerationMs,
+          intentumdiff_diff_generation: diffGenerationMs,
           semanticdiff_render: semantic.durationMs,
-          intentdiff_review_wait: intentdiffReviewWaitMs,
-          intentdiff_open: intentdiff.durationMs,
+          intentumdiff_review_wait: intentumdiffReviewWaitMs,
+          intentumdiff_open: intentumdiff.durationMs,
         },
-        notes: [...semantic.notes, ...intentdiff.notes],
+        notes: [...semantic.notes, ...intentumdiff.notes],
       });
     }
 
@@ -192,7 +192,7 @@ function readScenarios(repoRoot: string): Scenario[] {
 function prepareWorkspace(workspaceRoot: string, scenarios: Scenario[]): void {
   fs.writeFileSync(
     path.join(workspaceRoot, ".gitignore"),
-    ".semanticdiff-old/\n.intentdiff-comparison-commit-diff.json\n.intentdiff-comparison-input.json\n.intentdiff-comparison-log.jsonl\nlive-server\n",
+    ".semanticdiff-old/\n.intentumdiff-comparison-commit-diff.json\n.intentumdiff-comparison-input.json\n.intentumdiff-comparison-log.jsonl\nlive-server\n",
     "utf8",
   );
   for (const scenario of scenarios) {
@@ -208,9 +208,9 @@ function prepareWorkspace(workspaceRoot: string, scenarios: Scenario[]): void {
   execGit(workspaceRoot, ["add", "."]);
   execGit(workspaceRoot, [
     "-c",
-    "user.name=intentdiff comparison",
+    "user.name=intentumdiff comparison",
     "-c",
-    "user.email=intentdiff-comparison@example.com",
+    "user.email=intentumdiff-comparison@example.com",
     "commit",
     "-m",
     "old scenario fixtures",
@@ -229,8 +229,8 @@ function generatePysdCommitDiff(
   workspaceRoot: string,
   scenarios: Scenario[],
 ): number {
-  const inputPath = path.join(workspaceRoot, ".intentdiff-comparison-input.json");
-  const outputPath = path.join(workspaceRoot, ".intentdiff-comparison-commit-diff.json");
+  const inputPath = path.join(workspaceRoot, ".intentumdiff-comparison-input.json");
+  const outputPath = path.join(workspaceRoot, ".intentumdiff-comparison-commit-diff.json");
   const payload = {
     scenarios: scenarios.map((scenario) => ({
       id: scenario.id,
@@ -243,7 +243,7 @@ function generatePysdCommitDiff(
   fs.writeFileSync(inputPath, JSON.stringify(payload), "utf8");
   const script = [
     "import json, sys",
-    "from intentdiff import SemanticDiffer",
+    "from intentumdiff import SemanticDiffer",
     "payload = json.load(open(sys.argv[1], encoding='utf8'))",
     "differ = SemanticDiffer()",
     "file_diffs = []",
@@ -263,8 +263,8 @@ function generatePysdCommitDiff(
     encoding: "utf8",
     env: {
       ...process.env,
-      INTENTDIFF_ALLOW_VULNERABLE_WASMTIME: "1",
-      UV_CACHE_DIR: requiredEnv("INTENTDIFF_UV_CACHE_DIR"),
+      INTENTUMDIFF_ALLOW_VULNERABLE_WASMTIME: "1",
+      UV_CACHE_DIR: requiredEnv("INTENTUMDIFF_UV_CACHE_DIR"),
     },
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,
@@ -280,9 +280,9 @@ async function activateAndConfigureExtensions(
   nodeExecutable: string,
   semanticDiffExtensionPath: string,
 ): Promise<void> {
-  const intentdiff = vscode.extensions.getExtension("buchochelliq-labs.intentdiff");
-  assert.ok(intentdiff, "IntentDiff extension should be loaded as extensionDevelopmentPath");
-  await intentdiff.activate();
+  const intentumdiff = vscode.extensions.getExtension("buchochelliq-labs.intentumdiff");
+  assert.ok(intentumdiff, "IntentumDiff extension should be loaded as extensionDevelopmentPath");
+  await intentumdiff.activate();
 
   const semanticDiff = vscode.extensions.getExtension("semanticdiff.semanticdiff");
   assert.ok(
@@ -296,13 +296,13 @@ async function activateAndConfigureExtensions(
     assert.ok(commands.includes(command), `SemanticDiff command must be registered: ${command}`);
   }
 
-  const intentdiffConfig = vscode.workspace.getConfiguration("intentdiff");
-  await intentdiffConfig.update("executable", nodeExecutable, vscode.ConfigurationTarget.Workspace);
-  await intentdiffConfig.update("ref", "HEAD", vscode.ConfigurationTarget.Workspace);
-  await intentdiffConfig.update("debounceMs", 50, vscode.ConfigurationTarget.Workspace);
-  await intentdiffConfig.update("review.pollIntervalMs", 500, vscode.ConfigurationTarget.Workspace);
-  await intentdiffConfig.update("enabled", true, vscode.ConfigurationTarget.Workspace);
-  await intentdiffConfig.update("trace", true, vscode.ConfigurationTarget.Workspace);
+  const intentumdiffConfig = vscode.workspace.getConfiguration("intentumdiff");
+  await intentumdiffConfig.update("executable", nodeExecutable, vscode.ConfigurationTarget.Workspace);
+  await intentumdiffConfig.update("ref", "HEAD", vscode.ConfigurationTarget.Workspace);
+  await intentumdiffConfig.update("debounceMs", 50, vscode.ConfigurationTarget.Workspace);
+  await intentumdiffConfig.update("review.pollIntervalMs", 500, vscode.ConfigurationTarget.Workspace);
+  await intentumdiffConfig.update("enabled", true, vscode.ConfigurationTarget.Workspace);
+  await intentumdiffConfig.update("trace", true, vscode.ConfigurationTarget.Workspace);
 
   const semanticConfig = vscode.workspace.getConfiguration("semanticdiff");
   await semanticConfig.update("fallbackDiff", true, vscode.ConfigurationTarget.Workspace);
@@ -379,28 +379,28 @@ async function runPysdScenario(
   let state = await reviewState();
   let entry = state.files.find((file) => file.relativePath === relativePath);
   if (!entry) {
-    await vscode.commands.executeCommand("intentdiff.refreshReview");
+    await vscode.commands.executeCommand("intentumdiff.refreshReview");
     await waitFor(async () => {
       state = await reviewState();
       entry = state.files.find((file) => file.relativePath === relativePath);
       return state.pendingReviewCount === 0 && Boolean(entry);
-    }, `IntentDiff refreshed review entry for ${scenario.id}`);
+    }, `IntentumDiff refreshed review entry for ${scenario.id}`);
   }
-  assert.ok(entry, `IntentDiff review entry should exist for ${scenario.id}`);
+  assert.ok(entry, `IntentumDiff review entry should exist for ${scenario.id}`);
 
   const status: PysdStatus = entry.parseErrorCount > 0
-    ? "intentdiff_fallback"
+    ? "intentumdiff_fallback"
     : entry.isStyleOnly
-      ? "intentdiff_style_only"
+      ? "intentumdiff_style_only"
       : entry.status === "ready" && (entry.changeCount > 0 || entry.groupKinds.length > 0)
-        ? "intentdiff_semantic"
-        : "intentdiff_failed";
-  assert.notEqual(status, "intentdiff_failed", `IntentDiff should render ${scenario.id}`);
+        ? "intentumdiff_semantic"
+        : "intentumdiff_failed";
+  assert.notEqual(status, "intentumdiff_failed", `IntentumDiff should render ${scenario.id}`);
 
   const started = Date.now();
-  const diffMode = intentdiffDiffModeForScenario(scenario);
+  const diffMode = intentumdiffDiffModeForScenario(scenario);
   await vscode.commands.executeCommand(
-    diffMode === "semantic_only_native_diff" ? "intentdiff.openSemanticOnlyDiff" : "intentdiff.openSemanticDiff",
+    diffMode === "semantic_only_native_diff" ? "intentumdiff.openSemanticOnlyDiff" : "intentumdiff.openSemanticDiff",
     openPayload(workspaceRoot, scenario),
   );
   if (await waitForMaybe(isSemanticDiffWebviewActive, 1_000)) {
@@ -413,18 +413,18 @@ async function runPysdScenario(
       }
       return hasVisiblePysdDiff(relativePath);
     },
-    `IntentDiff editors for ${scenario.id}`,
+    `IntentumDiff editors for ${scenario.id}`,
   );
   const durationMs = Date.now() - started;
-  const notes: string[] = [`IntentDiff screenshot mode: ${diffMode}`];
+  const notes: string[] = [`IntentumDiff screenshot mode: ${diffMode}`];
   if (diffMode === "semantic_only_native_diff") {
-    const baseText = visibleTextFor("intentdiff-semantic-base", scenario.filename);
-    const modifiedText = visibleTextFor("intentdiff-semantic-modified", scenario.filename);
+    const baseText = visibleTextFor("intentumdiff-semantic-base", scenario.filename);
+    const modifiedText = visibleTextFor("intentumdiff-semantic-modified", scenario.filename);
     assert.ok(baseText, `semantic-only base editor should contain generated text for ${scenario.id}`);
     assert.ok(modifiedText, `semantic-only modified editor should contain generated text for ${scenario.id}`);
     assert.notEqual(
       baseText,
-      "IntentDiff: no semantic changes match the current filters.",
+      "IntentumDiff: no semantic changes match the current filters.",
       `semantic-only base editor should show real semantic chunks for ${scenario.id}`,
     );
     notes.push(
@@ -432,15 +432,15 @@ async function runPysdScenario(
     );
   }
   if (scenario.id === "css-delete-debug-banner") {
-    const baseScheme = diffMode === "semantic_only_native_diff" ? "intentdiff-semantic-base" : "intentdiff-base";
-    const modifiedScheme = diffMode === "semantic_only_native_diff" ? "intentdiff-semantic-modified" : "file";
+    const baseScheme = diffMode === "semantic_only_native_diff" ? "intentumdiff-semantic-base" : "intentumdiff-base";
+    const modifiedScheme = diffMode === "semantic_only_native_diff" ? "intentumdiff-semantic-modified" : "file";
     const baseSelection = selectedTextFor(baseScheme, scenario.filename);
     assert.equal(
       baseSelection,
       ".debug-banner {",
-      "CSS deletion should select the deleted rule on the IntentDiff base side",
+      "CSS deletion should select the deleted rule on the IntentumDiff base side",
     );
-    notes.push("Deleted CSS rule was selectable on the IntentDiff base side.");
+    notes.push("Deleted CSS rule was selectable on the IntentumDiff base side.");
     assert.notEqual(
       selectedTextFor(modifiedScheme, scenario.filename),
       ".debug-banner {",
@@ -448,7 +448,7 @@ async function runPysdScenario(
     );
   }
 
-  const screenshot = path.join("intentdiff", `${scenario.id}.png`);
+  const screenshot = path.join("intentumdiff", `${scenario.id}.png`);
   await prepareWorkbenchForScreenshot();
   const capture = captureWindowScreenshot(path.join(artifactsRoot, screenshot), scenario.id);
   notes.push(`screenshot captured window: ${capture.title}`);
@@ -456,7 +456,7 @@ async function runPysdScenario(
   return { status, diffMode, screenshot, durationMs, notes };
 }
 
-function intentdiffDiffModeForScenario(scenario: Scenario): PysdDiffMode {
+function intentumdiffDiffModeForScenario(scenario: Scenario): PysdDiffMode {
   return [
     "python-moved-helper-edited-policy",
     "css-delete-debug-banner",
@@ -496,35 +496,35 @@ function issueLogEntry(run: ScenarioRun): IssueLogEntry {
       scenario_id: run.scenario_id,
       issue_type: "semanticdiff_limitation",
       severity: "low",
-      observed_behavior: "SemanticDiff fell back to a text-oriented diff or unsupported-language message; IntentDiff produced structured review output.",
-      expected_or_desired_behavior: "Use this as differentiator material and keep IntentDiff output demonstrably navigable.",
+      observed_behavior: "SemanticDiff fell back to a text-oriented diff or unsupported-language message; IntentumDiff produced structured review output.",
+      expected_or_desired_behavior: "Use this as differentiator material and keep IntentumDiff output demonstrably navigable.",
       suggested_fix: "Promote this scenario in docs and future demos; add viewer polish for operational-code review.",
       labels: ["differentiator", "test-candidate"],
     };
   }
-  if (run.intentdiff_status !== "intentdiff_semantic" && run.intentdiff_status !== "intentdiff_style_only") {
+  if (run.intentumdiff_status !== "intentumdiff_semantic" && run.intentumdiff_status !== "intentumdiff_style_only") {
     return {
       language: run.language,
       scenario_id: run.scenario_id,
-      issue_type: "intentdiff_parser",
+      issue_type: "intentumdiff_parser",
       severity: "high",
-      observed_behavior: `IntentDiff reported ${run.intentdiff_status}.`,
-      expected_or_desired_behavior: "IntentDiff should produce structured semantic output for this fixture.",
+      observed_behavior: `IntentumDiff reported ${run.intentumdiff_status}.`,
+      expected_or_desired_behavior: "IntentumDiff should produce structured semantic output for this fixture.",
       suggested_fix: "Debug parser/classification output for this language and add a focused regression test.",
       labels: ["quality-gap", "test-candidate"],
     };
   }
   const supportedParityLanguages = new Set(["python", "typescript", "css", "json", "go", "rust", "html", "vue", "csharp"]);
   if (supportedParityLanguages.has(run.language)) {
-    const usesSemanticOnly = run.intentdiff_diff_mode === "semantic_only_native_diff";
+    const usesSemanticOnly = run.intentumdiff_diff_mode === "semantic_only_native_diff";
     return {
       language: run.language,
       scenario_id: run.scenario_id,
-      issue_type: "intentdiff_ui",
+      issue_type: "intentumdiff_ui",
       severity: "low",
       observed_behavior: usesSemanticOnly
-        ? "IntentDiff produced semantic output in native semantic-only VS Code diff mode; remaining parity gap is richer context/minimap polish."
-        : "IntentDiff produced semantic output in full native VS Code diff mode; semantic-only mode should be considered for this scenario if compact review is more useful.",
+        ? "IntentumDiff produced semantic output in native semantic-only VS Code diff mode; remaining parity gap is richer context/minimap polish."
+        : "IntentumDiff produced semantic output in full native VS Code diff mode; semantic-only mode should be considered for this scenario if compact review is more useful.",
       expected_or_desired_behavior: "Keep native semantic-only review available and add the remaining context/minimap controls that SemanticDiff exposes.",
       suggested_fix: usesSemanticOnly
         ? "Use this scenario as visual regression coverage for semantic-only native diff polish."
@@ -537,7 +537,7 @@ function issueLogEntry(run: ScenarioRun): IssueLogEntry {
     scenario_id: run.scenario_id,
     issue_type: "none",
     severity: "none",
-    observed_behavior: "No IntentDiff parser or UI issue recorded for this comparison pass.",
+    observed_behavior: "No IntentumDiff parser or UI issue recorded for this comparison pass.",
     expected_or_desired_behavior: "Keep this scenario green as smoke coverage.",
     suggested_fix: "No fix required; retain as regression coverage.",
     labels: ["test-candidate"],
@@ -568,10 +568,10 @@ function summarizePerformance(scenarios: ScenarioRun[]): Record<string, number> 
   return {
     semanticdiff_render_total: sum(scenarios.map((scenario) => scenario.performance_ms.semanticdiff_render)),
     semanticdiff_render_avg: average(scenarios.map((scenario) => scenario.performance_ms.semanticdiff_render)),
-    intentdiff_open_total: sum(scenarios.map((scenario) => scenario.performance_ms.intentdiff_open)),
-    intentdiff_open_avg: average(scenarios.map((scenario) => scenario.performance_ms.intentdiff_open)),
-    intentdiff_review_wait: scenarios[0]?.performance_ms.intentdiff_review_wait ?? 0,
-    intentdiff_diff_generation: scenarios[0]?.performance_ms.intentdiff_diff_generation ?? 0,
+    intentumdiff_open_total: sum(scenarios.map((scenario) => scenario.performance_ms.intentumdiff_open)),
+    intentumdiff_open_avg: average(scenarios.map((scenario) => scenario.performance_ms.intentumdiff_open)),
+    intentumdiff_review_wait: scenarios[0]?.performance_ms.intentumdiff_review_wait ?? 0,
+    intentumdiff_diff_generation: scenarios[0]?.performance_ms.intentumdiff_diff_generation ?? 0,
   };
 }
 
@@ -587,7 +587,7 @@ function validateReport(
     const run = runs.find((item) => item.scenario_id === scenario.id);
     assert.ok(run, `missing report entry for ${scenario.id}`);
     assert.ok(fs.existsSync(path.join(artifactsRoot, run.semanticdiff_screenshot)));
-    assert.ok(fs.existsSync(path.join(artifactsRoot, run.intentdiff_screenshot)));
+    assert.ok(fs.existsSync(path.join(artifactsRoot, run.intentumdiff_screenshot)));
     const issue = issueLog.find((item) => item.scenario_id === scenario.id && item.language === scenario.language);
     assert.ok(issue, `missing language issue log entry for ${scenario.language}/${scenario.id}`);
     assert.ok(["none", "low", "medium", "high"].includes(issue.severity));
@@ -613,7 +613,7 @@ async function ensureWorkspaceFolder(workspaceRoot: string): Promise<void> {
   const changed = vscode.workspace.updateWorkspaceFolders(
     0,
     existing.length,
-    { uri, name: "intentdiff-semanticdiff-comparison" },
+    { uri, name: "intentumdiff-semanticdiff-comparison" },
   );
   if (!changed) {
     const folders = vscode.workspace.workspaceFolders ?? [];
@@ -632,7 +632,7 @@ async function ensureWorkspaceFolder(workspaceRoot: string): Promise<void> {
 }
 
 async function reviewState(): Promise<ReviewState> {
-  return await vscode.commands.executeCommand("intentdiff.test.getReviewState") as ReviewState;
+  return await vscode.commands.executeCommand("intentumdiff.test.getReviewState") as ReviewState;
 }
 
 function activeWebviewType(): string | undefined {
@@ -682,7 +682,7 @@ function hasVisiblePysdDiff(relativePath: string): boolean {
   const hasEditors = vscode.window.visibleTextEditors.some(
     (editor) => editor.document.uri.path.endsWith(normalized) || editor.document.uri.path.endsWith(path.basename(normalized)),
   ) && vscode.window.visibleTextEditors.some(
-    (editor) => (editor.document.uri.scheme === "intentdiff-base" || editor.document.uri.scheme === "intentdiff-semantic-base")
+    (editor) => (editor.document.uri.scheme === "intentumdiff-base" || editor.document.uri.scheme === "intentumdiff-semantic-base")
       && (editor.document.uri.path.endsWith(normalized) || editor.document.uri.path.endsWith(path.basename(normalized))),
   );
   if (hasEditors) {
@@ -690,7 +690,7 @@ function hasVisiblePysdDiff(relativePath: string): boolean {
   }
   const tab = vscode.window.tabGroups.activeTabGroup.activeTab;
   return !isSemanticDiffWebviewActive()
-    && (tab?.label.includes("IntentDiff:") === true || tab?.label.includes(path.basename(normalized)) === true);
+    && (tab?.label.includes("IntentumDiff:") === true || tab?.label.includes(path.basename(normalized)) === true);
 }
 
 async function prepareWorkbenchForScreenshot(): Promise<void> {
@@ -760,7 +760,7 @@ function captureWindowScreenshot(targetPath: string, expectedMarker: string): Sc
     "      if (!IsWindowVisible(hWnd)) { return true; }",
     "      string title = GetTitle(hWnd);",
     "      if (String.IsNullOrEmpty(title)) { return true; }",
-    "      bool isComparisonHost = Contains(title, expectedMarker) || Contains(title, \"intentdiff-semanticdiff-comparison\") || Contains(title, \"semanticdiff-comparison-workspace\") || Contains(title, \"Extension Development Host\");",
+    "      bool isComparisonHost = Contains(title, expectedMarker) || Contains(title, \"intentumdiff-semanticdiff-comparison\") || Contains(title, \"semanticdiff-comparison-workspace\") || Contains(title, \"Extension Development Host\");",
     "      if (!isComparisonHost) { return true; }",
     "      RECT rect;",
     "      if (!GetWindowRect(hWnd, out rect)) { return true; }",
@@ -770,11 +770,11 @@ function captureWindowScreenshot(targetPath: string, expectedMarker: string): Sc
     "      int area = width * height;",
     "      int score = 0;",
     "      if (Contains(title, expectedMarker)) { score += 1000; }",
-    "      if (Contains(title, \"intentdiff-semanticdiff-comparison\")) { score += 900; }",
+    "      if (Contains(title, \"intentumdiff-semanticdiff-comparison\")) { score += 900; }",
     "      if (Contains(title, \"semanticdiff-comparison-workspace\")) { score += 850; }",
     "      if (Contains(title, \"Extension Development Host\")) { score += 800; }",
     "      if (Contains(title, \"Visual Studio Code\")) { score += 50; }",
-    "      if (Contains(title, \"IntentDiff\") && !Contains(title, \"Extension Development Host\") && !Contains(title, \"intentdiff-semanticdiff-comparison\")) { score -= 1000; }",
+    "      if (Contains(title, \"IntentumDiff\") && !Contains(title, \"Extension Development Host\") && !Contains(title, \"intentumdiff-semanticdiff-comparison\")) { score -= 1000; }",
     "      if (score > bestScore || (score == bestScore && area > bestArea)) { best = hWnd; bestScore = score; bestArea = area; }",
     "      return true;",
     "    }, IntPtr.Zero);",
@@ -786,7 +786,7 @@ function captureWindowScreenshot(targetPath: string, expectedMarker: string): Sc
     "if ($handle -eq [IntPtr]::Zero -or $null -eq $handle) { throw \"No comparison Extension Development Host window found for screenshot marker '$expectedMarker'.\" }",
     "$title = [NativeWindowCapture]::GetTitle($handle)",
     "$accepted = $false",
-    "foreach ($marker in @($expectedMarker, 'intentdiff-semanticdiff-comparison', 'semanticdiff-comparison-workspace')) {",
+    "foreach ($marker in @($expectedMarker, 'intentumdiff-semanticdiff-comparison', 'semanticdiff-comparison-workspace')) {",
     "  if ($marker -and $title.IndexOf($marker, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { $accepted = $true }",
     "}",
     "if (-not $accepted) { throw \"Refusing to capture non-comparison VS Code window: $title\" }",
@@ -803,7 +803,7 @@ function captureWindowScreenshot(targetPath: string, expectedMarker: string): Sc
     "$foregroundHandle = [NativeWindowCapture]::GetForegroundWindow()",
     "$foregroundTitle = [NativeWindowCapture]::GetTitle($foregroundHandle)",
     "$foregroundAccepted = $false",
-    "foreach ($marker in @($expectedMarker, 'intentdiff-semanticdiff-comparison', 'semanticdiff-comparison-workspace')) {",
+    "foreach ($marker in @($expectedMarker, 'intentumdiff-semanticdiff-comparison', 'semanticdiff-comparison-workspace')) {",
     "  if ($marker -and $foregroundTitle.IndexOf($marker, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { $foregroundAccepted = $true }",
     "}",
     "if (-not $foregroundAccepted) {",
@@ -839,7 +839,7 @@ function captureWindowScreenshot(targetPath: string, expectedMarker: string): Sc
   const metadata = JSON.parse(metadataText) as ScreenshotCapture;
   assert.ok(
     metadata.title.includes("Extension Development Host")
-      || metadata.title.includes("intentdiff-semanticdiff-comparison")
+      || metadata.title.includes("intentumdiff-semanticdiff-comparison")
       || metadata.title.includes("semanticdiff-comparison-workspace")
       || metadata.title.includes(expectedMarker),
     `screenshot captured wrong window: ${metadata.title}`,
@@ -910,7 +910,7 @@ function refArg() {
 }
 
 function commitDiff() {
-  return JSON.parse(fs.readFileSync(".intentdiff-comparison-commit-diff.json", "utf8"));
+  return JSON.parse(fs.readFileSync(".intentumdiff-comparison-commit-diff.json", "utf8"));
 }
 
 write({

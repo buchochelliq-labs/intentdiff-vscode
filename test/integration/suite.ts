@@ -53,22 +53,22 @@ export async function run(): Promise<void> {
 }
 
 async function integrationScenario(): Promise<void> {
-  const fixture = requiredEnv("INTENTDIFF_VSCODE_FIXTURE");
-  const logPath = requiredEnv("INTENTDIFF_VSCODE_LOG");
-  const nodeExecutable = requiredEnv("INTENTDIFF_NODE_EXECUTABLE");
-  const repoRoot = requiredEnv("INTENTDIFF_REPO_ROOT");
+  const fixture = requiredEnv("INTENTUMDIFF_VSCODE_FIXTURE");
+  const logPath = requiredEnv("INTENTUMDIFF_VSCODE_LOG");
+  const nodeExecutable = requiredEnv("INTENTUMDIFF_NODE_EXECUTABLE");
+  const repoRoot = requiredEnv("INTENTUMDIFF_REPO_ROOT");
   fs.rmSync(logPath, { force: true });
   const languageSmokeFiles = buildLanguageSmokeFiles(readSupportedLanguages(repoRoot));
   await setupReviewFixture(fixture, languageSmokeFiles);
 
   await ensureWorkspaceFolder(fixture);
 
-  const extension = vscode.extensions.getExtension("buchochelliq-labs.intentdiff");
+  const extension = vscode.extensions.getExtension("buchochelliq-labs.intentumdiff");
   assert.ok(extension, "extension should be discoverable in the Extension Host");
   await extension.activate();
 
-  const config = vscode.workspace.getConfiguration("intentdiff");
-  // `intentdiff.executable` is declared scope:"machine" in package.json, which
+  const config = vscode.workspace.getConfiguration("intentumdiff");
+  // `intentumdiff.executable` is declared scope:"machine" in package.json, which
   // current VS Code stable only permits writing to the User (Global) target.
   // Writing it to Workspace throws CodeExpectedError and aborts setup.
   await config.update("executable", nodeExecutable, vscode.ConfigurationTarget.Global);
@@ -86,24 +86,24 @@ async function integrationScenario(): Promise<void> {
   // SKIPPED: live-server diffActiveFile requires a Python binary not in the
   // test path. We jump straight to the semantic-only diff that exercises the
   // webview fixes (chevron, palette, line numbers).
-  if (process.env.INTENTDIFF_SKIP_LIVE_DIFF === "1") {
+  if (process.env.INTENTUMDIFF_SKIP_LIVE_DIFF === "1") {
     await openSemanticDiffForBooPy(fixture);
     return;
   }
 
   await replaceDocument(document, "guardrail: true\nvalue: changed\n");
-  await vscode.commands.executeCommand("intentdiff.diffActiveFile");
+  await vscode.commands.executeCommand("intentumdiff.diffActiveFile");
   await waitFor(() => hasRequest(logPath, "diff"), "diff request");
   await waitFor(
     () => vscode.languages.getDiagnostics(sampleUri).some((item) => item.code === "prod-host"),
     "guardrail diagnostic",
   );
 
-  await vscode.commands.executeCommand("intentdiff.diffActiveFile");
+  await vscode.commands.executeCommand("intentumdiff.diffActiveFile");
   await waitFor(() => hasRequest(logPath, "cancel"), "cancel request");
 
   await replaceDocument(document, "clean: true\n");
-  await vscode.commands.executeCommand("intentdiff.diffActiveFile");
+  await vscode.commands.executeCommand("intentumdiff.diffActiveFile");
   await waitFor(
     () => vscode.languages.getDiagnostics(sampleUri).length === 0,
     "clean diff clears diagnostics",
@@ -126,7 +126,7 @@ async function integrationScenario(): Promise<void> {
   );
 
   await replaceDocument(document, "server-error: true\n");
-  await vscode.commands.executeCommand("intentdiff.diffActiveFile");
+  await vscode.commands.executeCommand("intentumdiff.diffActiveFile");
   await waitFor(
     () => readLog(logPath).some(
       (entry) => entry.payload?.op === "diff"
@@ -144,8 +144,8 @@ async function integrationScenario(): Promise<void> {
   );
 
   const reviewsBeforeAuto = countRequests(logPath, "review");
-  await vscode.commands.executeCommand("intentdiff.clearReview");
-  await vscode.commands.executeCommand("intentdiff.semanticChanges.focus");
+  await vscode.commands.executeCommand("intentumdiff.clearReview");
+  await vscode.commands.executeCommand("intentumdiff.semanticChanges.focus");
   await waitFor(
     () => countRequests(logPath, "review") > reviewsBeforeAuto,
     "semantic view auto review request",
@@ -203,7 +203,7 @@ async function integrationScenario(): Promise<void> {
 
   const folderUri = vscode.Uri.file(fixture).toString();
   const reviewUri = vscode.Uri.file(path.join(fixture, "review-guardrail.yaml"));
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", {
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", {
     folderUri,
     relativePath: "review-guardrail.yaml",
     position: { start_line: 0, start_col: 0, end_line: 0, end_col: 16 },
@@ -214,12 +214,12 @@ async function integrationScenario(): Promise<void> {
   );
   await waitFor(
     () => vscode.window.visibleTextEditors.some(
-      (editor) => editor.document.uri.scheme === "intentdiff-base",
+      (editor) => editor.document.uri.scheme === "intentumdiff-base",
     ),
     "semantic base diff editor",
   );
   const baseEditor = vscode.window.visibleTextEditors.find(
-    (editor) => editor.document.uri.scheme === "intentdiff-base",
+    (editor) => editor.document.uri.scheme === "intentumdiff-base",
   );
   assert.match(baseEditor?.document.getText() ?? "", /guardrail: false/u);
 
@@ -230,7 +230,7 @@ async function integrationScenario(): Promise<void> {
     () => hasDiffRequestForAfter(logPath, "review-clean.yaml", deletedReviewedFileStart),
     "deleted reviewed file incremental diff request",
   );
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", {
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", {
     folderUri,
     relativePath: "review-clean.yaml",
     position: deletedReviewedFilePosition,
@@ -246,7 +246,7 @@ async function integrationScenario(): Promise<void> {
     },
   });
   await waitFor(
-    () => selectedTextFor("intentdiff-base", "review-clean.yaml") === "base: false",
+    () => selectedTextFor("intentumdiff-base", "review-clean.yaml") === "base: false",
     "incrementally deleted file selects removed text on base side",
   );
 
@@ -254,7 +254,7 @@ async function integrationScenario(): Promise<void> {
   const readmeDeletionChange = {
     change_type: "DELETION",
     description: "Delete text on line 73: ' Optional'",
-    text_diff: "| `intentdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override [+for active-file live diffs. Set `null` to use `intentdiff.yaml`. ]|",
+    text_diff: "| `intentumdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override [+for active-file live diffs. Set `null` to use `intentumdiff.yaml`. ]|",
     old_node: {
       node_type: "text_span",
       label: " Optional",
@@ -264,7 +264,7 @@ async function integrationScenario(): Promise<void> {
   const readmeReviewNode = {
     kind: "entry",
     file: {
-      folderName: "intentdiff-fixture",
+      folderName: "intentumdiff-fixture",
       folderUri,
       relativePath: "review-readme.md",
       status: "ready",
@@ -279,20 +279,20 @@ async function integrationScenario(): Promise<void> {
       change: readmeDeletionChange,
     },
   };
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", readmeReviewNode);
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", readmeReviewNode);
   await waitFor(
-    () => selectedTextFor("intentdiff-base", "review-readme.md") === " Optional",
+    () => selectedTextFor("intentumdiff-base", "review-readme.md") === " Optional",
     "README deletion selects removed text on base side from tree node",
   );
   assert.equal(
-    vscode.window.visibleTextEditors.some((editor) => editor.document.uri.scheme === "intentdiff-semantic-base"),
+    vscode.window.visibleTextEditors.some((editor) => editor.document.uri.scheme === "intentumdiff-semantic-base"),
     false,
     "default semantic diff mode should remain the full VS Code diff",
   );
   await captureEditorScreenshot(
     "delete-selection-base-side.png",
     "Delete selection target",
-    editorProofState("intentdiff-base", "review-readme.md", 72, "left/base"),
+    editorProofState("intentumdiff-base", "review-readme.md", 72, "left/base"),
     editorProofState("file", "review-readme.md", 72, "right/current"),
   );
   await captureEditorScreenshot(
@@ -306,44 +306,44 @@ async function integrationScenario(): Promise<void> {
     "README deletion must not select the replacement value on the modified side",
   );
 
-  await vscode.commands.executeCommand("intentdiff.openSemanticOnlyDiff", readmeReviewNode);
+  await vscode.commands.executeCommand("intentumdiff.openSemanticOnlyDiff", readmeReviewNode);
   await waitFor(
-    () => selectedTextFor("intentdiff-semantic-base", "review-readme.md") === " Optional",
+    () => selectedTextFor("intentumdiff-semantic-base", "review-readme.md") === " Optional",
     "semantic-only tree command selects removed text on semantic base side",
   );
-  await vscode.commands.executeCommand("intentdiff.nextSemanticChange");
+  await vscode.commands.executeCommand("intentumdiff.nextSemanticChange");
   await waitFor(
-    () => selectedTextFor("intentdiff-semantic-modified", "review-readme.md") === "\"i",
+    () => selectedTextFor("intentumdiff-semantic-modified", "review-readme.md") === "\"i",
     "next semantic change selects the first modified-side semantic chunk",
   );
-  await vscode.commands.executeCommand("intentdiff.previousSemanticChange");
+  await vscode.commands.executeCommand("intentumdiff.previousSemanticChange");
   await waitFor(
-    () => selectedTextFor("intentdiff-semantic-base", "review-readme.md") === " Optional",
+    () => selectedTextFor("intentumdiff-semantic-base", "review-readme.md") === " Optional",
     "previous semantic change returns to base-side deletion in semantic-only diff",
   );
-  await vscode.commands.executeCommand("intentdiff.collapseSemanticDiffContext");
+  await vscode.commands.executeCommand("intentumdiff.collapseSemanticDiffContext");
   await waitFor(
     async () => (await activeDiffState())?.contextLines === 2,
     "semantic-only context collapse updates the active semantic-only diff",
   );
-  await vscode.commands.executeCommand("intentdiff.expandSemanticDiffContext");
+  await vscode.commands.executeCommand("intentumdiff.expandSemanticDiffContext");
   await waitFor(
     async () => (await activeDiffState())?.contextLines === 3,
     "semantic-only context expand updates the active semantic-only diff",
   );
-  await vscode.commands.executeCommand("intentdiff.openFullDiff", readmeReviewNode);
+  await vscode.commands.executeCommand("intentumdiff.openFullDiff", readmeReviewNode);
   await waitFor(
-    () => selectedTextFor("intentdiff-base", "review-readme.md") === " Optional",
+    () => selectedTextFor("intentumdiff-base", "review-readme.md") === " Optional",
     "full diff tree command preserves base-side deletion selection",
   );
 
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", {
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", {
     folderUri,
     relativePath: "review-readme.md",
     position: readmeDeletionPosition,
   });
   await waitFor(
-    () => selectedTextFor("intentdiff-base", "review-readme.md") === " Optional",
+    () => selectedTextFor("intentumdiff-base", "review-readme.md") === " Optional",
     "README deletion infers base side when positionSide is missing",
   );
 
@@ -357,7 +357,7 @@ async function integrationScenario(): Promise<void> {
       position: deletedLinePosition,
     },
   };
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", {
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", {
     folderUri,
     relativePath: "review-deleted.yaml",
     position: deletedLinePosition,
@@ -365,12 +365,12 @@ async function integrationScenario(): Promise<void> {
     change: deletedLineChange,
   });
   await waitFor(
-    () => selectedTextFor("intentdiff-base", "review-deleted.yaml") === "gone: true",
+    () => selectedTextFor("intentumdiff-base", "review-deleted.yaml") === "gone: true",
     "deleted file selects removed text on base side",
   );
   await waitFor(
     () => vscode.window.visibleTextEditors.some(
-      (editor) => editor.document.uri.scheme === "intentdiff-empty"
+      (editor) => editor.document.uri.scheme === "intentumdiff-empty"
         && editor.document.uri.path.endsWith("review-deleted.yaml"),
     ),
     "deleted file opens an empty modified side",
@@ -379,37 +379,37 @@ async function integrationScenario(): Promise<void> {
   await captureEditorScreenshot(
     "deleted-file-selection-base-side.png",
     "Deleted file selection target",
-    editorProofState("intentdiff-base", "review-deleted.yaml", 0, "left/base"),
-    editorProofState("intentdiff-empty", "review-deleted.yaml", 0, "right/deleted"),
+    editorProofState("intentumdiff-base", "review-deleted.yaml", 0, "left/base"),
+    editorProofState("intentumdiff-empty", "review-deleted.yaml", 0, "right/deleted"),
   );
   await captureInlineDiffScreenshot(
     "deleted-file-selection-inline-diff.png",
     "Deleted file inline diff target",
-    editorProofState("intentdiff-base", "review-deleted.yaml", 0, "base"),
-    editorProofState("intentdiff-empty", "review-deleted.yaml", 0, "deleted"),
+    editorProofState("intentumdiff-base", "review-deleted.yaml", 0, "base"),
+    editorProofState("intentumdiff-empty", "review-deleted.yaml", 0, "deleted"),
   );
-  await vscode.commands.executeCommand("intentdiff.openSemanticOnlyDiff");
+  await vscode.commands.executeCommand("intentumdiff.openSemanticOnlyDiff");
   await waitFor(
-    () => selectedTextFor("intentdiff-semantic-base", "review-deleted.yaml") === "gone: true",
+    () => selectedTextFor("intentumdiff-semantic-base", "review-deleted.yaml") === "gone: true",
     "deleted file semantic-only diff selects removed text on semantic base side",
   );
   await config.update("visualization.showAdditions", false, vscode.ConfigurationTarget.Workspace);
   await config.update("visualization.showModifications", false, vscode.ConfigurationTarget.Workspace);
   await config.update("visualization.showDeletions", false, vscode.ConfigurationTarget.Workspace);
   await waitFor(
-    () => textDocumentTextFor("intentdiff-semantic-base", "review-readme.md") === "IntentDiff: no semantic changes match the current filters."
-      && textDocumentTextFor("intentdiff-semantic-base", "review-deleted.yaml") === "IntentDiff: no semantic changes match the current filters.",
+    () => textDocumentTextFor("intentumdiff-semantic-base", "review-readme.md") === "IntentumDiff: no semantic changes match the current filters."
+      && textDocumentTextFor("intentumdiff-semantic-base", "review-deleted.yaml") === "IntentumDiff: no semantic changes match the current filters.",
     "all open semantic-only diffs refresh to the no-matching-changes message when filters hide every change",
   );
   await config.update("visualization.showAdditions", true, vscode.ConfigurationTarget.Workspace);
   await config.update("visualization.showModifications", true, vscode.ConfigurationTarget.Workspace);
   await config.update("visualization.showDeletions", true, vscode.ConfigurationTarget.Workspace);
   await waitFor(
-    () => selectedTextFor("intentdiff-semantic-base", "review-deleted.yaml") === "gone: true",
+    () => selectedTextFor("intentumdiff-semantic-base", "review-deleted.yaml") === "gone: true",
     "semantic-only deleted file restores removed-text selection after filters are shown",
   );
 
-  await vscode.commands.executeCommand("intentdiff.openChange", {
+  await vscode.commands.executeCommand("intentumdiff.openChange", {
     folderUri,
     relativePath: "review-guardrail.yaml",
     crossFileChange: {
@@ -434,7 +434,7 @@ async function integrationScenario(): Promise<void> {
   await runStaleIncrementalResponseScenario(fixture, logPath);
   await runPendingFullReviewNoResendScenario(fixture, logPath);
 
-  await vscode.commands.executeCommand("intentdiff.clearReview");
+  await vscode.commands.executeCommand("intentumdiff.clearReview");
 }
 
 /** git object/pack files are read-only on Windows; rmSync alone EPERMs. */
@@ -472,7 +472,7 @@ function removeGitDirectory(target: string): void {
 }
 
 async function setupReviewFixture(fixture: string, languageSmokeFiles: LanguageSmokeFile[]): Promise<void> {
-  // INTENTDIFF_FIXTURE_DIR may point at a not-yet-created directory (the
+  // INTENTUMDIFF_FIXTURE_DIR may point at a not-yet-created directory (the
   // documented OneDrive-escape path) — the suite populates it from scratch.
   fs.mkdirSync(fixture, { recursive: true });
   // The extension spawns `<executable> live-server ...` with cwd pinned to the
@@ -487,8 +487,8 @@ async function setupReviewFixture(fixture: string, languageSmokeFiles: LanguageS
   fs.writeFileSync(path.join(extensionRoot, "live-server"), fs.readFileSync(stubSource));
   removeGitDirectory(path.join(fixture, ".git"));
   for (const generatedFile of [
-    ".intentdiff-language-smoke.json",
-    ".intentdiff-last-commit-refresh-state.json",
+    ".intentumdiff-language-smoke.json",
+    ".intentumdiff-last-commit-refresh-state.json",
     "review-added.yaml",
     "review-renamed-target.yaml",
     "review-slow.yaml",
@@ -521,19 +521,19 @@ async function setupReviewFixture(fixture: string, languageSmokeFiles: LanguageS
   }
   fs.writeFileSync(
     path.join(fixture, "review-readme.md"),
-    readmeFixtureContent("| `intentdiff.fuel` | `null` | Optional `--fuel` override |"),
+    readmeFixtureContent("| `intentumdiff.fuel` | `null` | Optional `--fuel` override |"),
     "utf8",
   );
-  fs.writeFileSync(path.join(fixture, ".gitignore"), ".intentdiff-fake-log.jsonl\n.intentdiff-language-smoke.json\n", "utf8");
+  fs.writeFileSync(path.join(fixture, ".gitignore"), ".intentumdiff-fake-log.jsonl\n.intentumdiff-language-smoke.json\n", "utf8");
   fs.rmSync(path.join(fixture, "binary.dat"), { force: true });
 
   await execGit(fixture, ["init"]);
   await execGit(fixture, ["add", "."]);
   await execGit(fixture, [
     "-c",
-    "user.name=intentdiff test",
+    "user.name=intentumdiff test",
     "-c",
-    "user.email=intentdiff@example.com",
+    "user.email=intentumdiff@example.com",
     "commit",
     "-m",
     "baseline",
@@ -544,7 +544,7 @@ async function setupReviewFixture(fixture: string, languageSmokeFiles: LanguageS
   fs.writeFileSync(path.join(fixture, "review-stale.yaml"), "stale: true\n", "utf8");
   fs.writeFileSync(
     path.join(fixture, "review-readme.md"),
-    readmeFixtureContent("| `intentdiff.fuel` | `\"inf\"` | `--fuel` override for active-file live diffs. Set `null` to use `intentdiff.yaml`. |"),
+    readmeFixtureContent("| `intentumdiff.fuel` | `\"inf\"` | `--fuel` override for active-file live diffs. Set `null` to use `intentumdiff.yaml`. |"),
     "utf8",
   );
   fs.rmSync(path.join(fixture, "review-deleted.yaml"), { force: true });
@@ -552,16 +552,16 @@ async function setupReviewFixture(fixture: string, languageSmokeFiles: LanguageS
 }
 
 function readSupportedLanguages(repoRoot: string): string[] {
-  const encodedLanguages = process.env.INTENTDIFF_SUPPORTED_LANGUAGES;
+  const encodedLanguages = process.env.INTENTUMDIFF_SUPPORTED_LANGUAGES;
   if (encodedLanguages) {
     const languages = JSON.parse(encodedLanguages) as unknown;
-    assert.ok(Array.isArray(languages), "INTENTDIFF_SUPPORTED_LANGUAGES should be a JSON string array");
-    assert.ok(languages.every((item) => typeof item === "string"), "INTENTDIFF_SUPPORTED_LANGUAGES should only contain strings");
+    assert.ok(Array.isArray(languages), "INTENTUMDIFF_SUPPORTED_LANGUAGES should be a JSON string array");
+    assert.ok(languages.every((item) => typeof item === "string"), "INTENTUMDIFF_SUPPORTED_LANGUAGES should only contain strings");
     assert.ok(languages.length > 0, "runtime supported language list should not be empty");
     return languages;
   }
   const pyproject = fs.readFileSync(path.join(repoRoot, "pyproject.toml"), "utf8");
-  const section = pyproject.match(/\[project\.entry-points\."intentdiff\.parsers"\]\r?\n(?<body>[\s\S]*?)(?:\r?\n\[|$)/u);
+  const section = pyproject.match(/\[project\.entry-points\."intentumdiff\.parsers"\]\r?\n(?<body>[\s\S]*?)(?:\r?\n\[|$)/u);
   const languages = new Set(section?.groups?.body
     .split(/\r?\n/u)
     .map((line) => line.match(/^\s*([a-z0-9-]+)\s*=/iu)?.[1])
@@ -604,12 +604,12 @@ async function runLanguageSmokeScenario(
 ): Promise<void> {
   prepareLanguageSmokeWorkingTree(fixture, files);
   fs.writeFileSync(
-    path.join(fixture, ".intentdiff-language-smoke.json"),
+    path.join(fixture, ".intentumdiff-language-smoke.json"),
     JSON.stringify({ files }, null, 2),
     "utf8",
   );
   const reviewsBefore = countRequests(logPath, "review");
-  await vscode.commands.executeCommand("intentdiff.refreshReview");
+  await vscode.commands.executeCommand("intentumdiff.refreshReview");
   await waitFor(
     () => countRequests(logPath, "review") > reviewsBefore,
     "language smoke review request",
@@ -639,9 +639,9 @@ async function runLanguageSmokeScenario(
 
   await openSmokeRepresentative(folderUri, files, "modification", "file", "new value");
   await openSmokeRepresentative(folderUri, files, "addition", "file", "new value");
-  await openSmokeRepresentative(folderUri, files, "deletion", "intentdiff-base", "old value");
+  await openSmokeRepresentative(folderUri, files, "deletion", "intentumdiff-base", "old value");
   const guardrail = requireSmokeKind(files, "guardrail");
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", {
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", {
     folderUri,
     relativePath: guardrail.path,
     position: { start_line: 0, start_col: 0, end_line: 0, end_col: 8 },
@@ -652,7 +652,7 @@ async function runLanguageSmokeScenario(
     "language smoke guardrail diagnostic",
   );
   const style = requireSmokeKind(files, "style");
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", {
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", {
     folderUri,
     relativePath: style.path,
   });
@@ -682,11 +682,11 @@ async function openSmokeRepresentative(
   expectedSelection: string,
 ): Promise<void> {
   const item = requireSmokeKind(files, kind);
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", {
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", {
     folderUri,
     relativePath: item.path,
     position: { start_line: 0, start_col: 0, end_line: 0, end_col: expectedSelection.length },
-    positionSide: scheme === "intentdiff-base" ? "base" : "modified",
+    positionSide: scheme === "intentumdiff-base" ? "base" : "modified",
     change: kind === "deletion"
       ? {
         change_type: "DELETION",
@@ -716,14 +716,14 @@ async function runCommitRefreshScenario(
   logPath: string,
   folderUri: string,
 ): Promise<void> {
-  fs.rmSync(path.join(fixture, ".intentdiff-language-smoke.json"), { force: true });
+  fs.rmSync(path.join(fixture, ".intentumdiff-language-smoke.json"), { force: true });
   const reviewsBeforeCommitRefresh = countRequests(logPath, "review");
   await execGit(fixture, ["add", "-A"]);
   await execGit(fixture, [
     "-c",
-    "user.name=intentdiff test",
+    "user.name=intentumdiff test",
     "-c",
-    "user.email=intentdiff@example.com",
+    "user.email=intentumdiff@example.com",
     "commit",
     "-m",
     "commit semantic review changes",
@@ -742,16 +742,16 @@ async function runCommitRefreshScenario(
   await waitFor(asyncPredicate(async () => {
     const state = await reviewState();
     return !state.files.some(
-      (file) => file.folderUri === folderUri && file.relativePath !== ".intentdiff-review",
+      (file) => file.folderUri === folderUri && file.relativePath !== ".intentumdiff-review",
     );
   }), "committed files removed from Semantic Changes");
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", {
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", {
     folderUri,
     relativePath: "review-guardrail.yaml",
   });
   await waitFor(
     () => vscode.window.visibleTextEditors.some(
-      (editor) => editor.document.uri.scheme === "intentdiff-base"
+      (editor) => editor.document.uri.scheme === "intentumdiff-base"
         && editor.document.uri.path.endsWith("review-guardrail.yaml")
         && editor.document.getText().includes("extra: changed"),
     ),
@@ -770,7 +770,7 @@ async function runStaleIncrementalResponseScenario(fixture: string, logPath: str
     () => hasDiffRequestForAfter(logPath, "review-slow.yaml", slowStart),
     "slow incremental review request",
   );
-  await vscode.commands.executeCommand("intentdiff.clearReview");
+  await vscode.commands.executeCommand("intentumdiff.clearReview");
   fs.rmSync(slowPath, { force: true });
   await delay(900);
   const state = await reviewState();
@@ -783,12 +783,12 @@ async function runStaleIncrementalResponseScenario(fixture: string, logPath: str
 
 async function runPendingFullReviewNoResendScenario(fixture: string, logPath: string): Promise<void> {
   await waitFor(async () => (await reviewState()).pendingReviewCount === 0, "review idle before slow full review");
-  const markerPath = path.join(fixture, ".git", "intentdiff-slow-review");
+  const markerPath = path.join(fixture, ".git", "intentumdiff-slow-review");
   fs.writeFileSync(markerPath, "1", "utf8");
   try {
-    await vscode.commands.executeCommand("intentdiff.clearReview");
+    await vscode.commands.executeCommand("intentumdiff.clearReview");
     const reviewsBefore = countRequests(logPath, "review");
-    await vscode.commands.executeCommand("intentdiff.refreshReview");
+    await vscode.commands.executeCommand("intentumdiff.refreshReview");
     await waitFor(
       () => countRequests(logPath, "review") === reviewsBefore + 1,
       "slow full review request",
@@ -884,7 +884,7 @@ async function ensureWorkspaceFolder(fixture: string): Promise<void> {
   const changed = vscode.workspace.updateWorkspaceFolders(
     0,
     existing.length,
-    { uri, name: "intentdiff-fixture" },
+    { uri, name: "intentumdiff-fixture" },
   );
   assert.equal(changed, true, "fixture workspace folder should be added");
   await waitFor(
@@ -905,8 +905,8 @@ async function openSemanticDiffForBooPy(fixture: string): Promise<void> {
     "boo.py must exist in the fixture for the semantic-only test path"
   );
 
-  const extension = vscode.extensions.getExtension("buchochelliq-labs.intentdiff");
-  assert.ok(extension, "IntentDiff extension must be discoverable");
+  const extension = vscode.extensions.getExtension("buchochelliq-labs.intentumdiff");
+  assert.ok(extension, "IntentumDiff extension must be discoverable");
   await extension.activate();
 
   const document = await vscode.workspace.openTextDocument(booUri);
@@ -916,7 +916,7 @@ async function openSemanticDiffForBooPy(fixture: string): Promise<void> {
   const reviewNode = {
     kind: "entry",
     file: {
-      folderName: "intentdiff-fixture",
+      folderName: "intentumdiff-fixture",
       folderUri: vscode.Uri.file(fixture).toString(),
       relativePath: "boo.py",
       status: "ready",
@@ -934,7 +934,7 @@ async function openSemanticDiffForBooPy(fixture: string): Promise<void> {
       },
     },
   };
-  await vscode.commands.executeCommand("intentdiff.openSemanticDiff", reviewNode);
+  await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", reviewNode);
   console.log("[suite] openSemanticDiff invoked for boo.py");
 }
 
@@ -1019,11 +1019,11 @@ function textDocumentTextFor(scheme: string, fileName: string): string | undefin
 }
 
 async function reviewState(): Promise<TestReviewState> {
-  return await vscode.commands.executeCommand("intentdiff.test.getReviewState") as TestReviewState;
+  return await vscode.commands.executeCommand("intentumdiff.test.getReviewState") as TestReviewState;
 }
 
 async function activeDiffState(): Promise<TestActiveDiffState | undefined> {
-  return await vscode.commands.executeCommand("intentdiff.test.getActiveDiffState") as TestActiveDiffState | undefined;
+  return await vscode.commands.executeCommand("intentumdiff.test.getActiveDiffState") as TestActiveDiffState | undefined;
 }
 
 async function waitForReviewFile(relativePath: string): Promise<void> {
@@ -1116,7 +1116,7 @@ async function captureInlineDiffScreenshot(
   base: ProofPanel,
   modified: ProofPanel,
 ): Promise<void> {
-  const screenshotDir = process.env.INTENTDIFF_SCREENSHOT_DIR;
+  const screenshotDir = process.env.INTENTUMDIFF_SCREENSHOT_DIR;
   if (!screenshotDir || process.platform !== "win32") {
     return;
   }
@@ -1125,7 +1125,7 @@ async function captureInlineDiffScreenshot(
   // The intermediate model JSON goes to the system temp dir: screenshotDir may
   // be OneDrive-synced, where a fresh write is not reliably visible to the
   // child powershell process yet.
-  const modelPath = path.join(os.tmpdir(), `intentdiff-proof-${Date.now()}-${fileName}.json`);
+  const modelPath = path.join(os.tmpdir(), `intentumdiff-proof-${Date.now()}-${fileName}.json`);
   fs.writeFileSync(modelPath, JSON.stringify({
     width: 1280,
     height: 420,
@@ -1220,7 +1220,7 @@ async function captureInlineDiffScreenshot(
 }
 
 async function captureWindowScreenshot(fileName: string): Promise<void> {
-  const screenshotDir = process.env.INTENTDIFF_SCREENSHOT_DIR;
+  const screenshotDir = process.env.INTENTUMDIFF_SCREENSHOT_DIR;
   if (!screenshotDir || process.platform !== "win32") {
     return;
   }
@@ -1255,7 +1255,7 @@ async function captureWindowScreenshot(fileName: string): Promise<void> {
     "      StringBuilder text = new StringBuilder(length + 1);",
     "      GetWindowText(hWnd, text, text.Capacity);",
     "      string title = text.ToString();",
-    "      if (title.IndexOf(\"Visual Studio Code\", StringComparison.OrdinalIgnoreCase) < 0 && title.IndexOf(\"Extension Development Host\", StringComparison.OrdinalIgnoreCase) < 0 && title.IndexOf(\"intentdiff-fixture\", StringComparison.OrdinalIgnoreCase) < 0) { return true; }",
+    "      if (title.IndexOf(\"Visual Studio Code\", StringComparison.OrdinalIgnoreCase) < 0 && title.IndexOf(\"Extension Development Host\", StringComparison.OrdinalIgnoreCase) < 0 && title.IndexOf(\"intentumdiff-fixture\", StringComparison.OrdinalIgnoreCase) < 0) { return true; }",
     "      RECT rect;",
     "      if (!GetWindowRect(hWnd, out rect)) { return true; }",
     "      int width = rect.Right - rect.Left;",
@@ -1306,7 +1306,7 @@ async function captureWindowScreenshot(fileName: string): Promise<void> {
 }
 
 async function captureProofScreenshot(fileName: string, model: { title: string; panels: ProofPanel[] }): Promise<void> {
-  const screenshotDir = process.env.INTENTDIFF_SCREENSHOT_DIR;
+  const screenshotDir = process.env.INTENTUMDIFF_SCREENSHOT_DIR;
   if (!screenshotDir || process.platform !== "win32") {
     return;
   }
@@ -1315,7 +1315,7 @@ async function captureProofScreenshot(fileName: string, model: { title: string; 
   // The intermediate model JSON goes to the system temp dir: screenshotDir may
   // be OneDrive-synced, where a fresh write is not reliably visible to the
   // child powershell process yet.
-  const modelPath = path.join(os.tmpdir(), `intentdiff-proof-${Date.now()}-${fileName}.json`);
+  const modelPath = path.join(os.tmpdir(), `intentumdiff-proof-${Date.now()}-${fileName}.json`);
   fs.writeFileSync(modelPath, JSON.stringify({
     width: 1280,
     height: 420,

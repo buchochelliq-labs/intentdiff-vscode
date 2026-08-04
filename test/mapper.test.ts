@@ -252,7 +252,7 @@ test("README row deletions do not reuse old columns on the modified side", () =>
       {
         change_type: "ADDITION",
         description: "Insert text on line 73: '\"i'",
-        text_diff: "| `intentdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override |",
+        text_diff: "| `intentumdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override |",
         new_node: {
           node_type: "text_span",
           label: "\"i",
@@ -262,7 +262,7 @@ test("README row deletions do not reuse old columns on the modified side", () =>
       {
         change_type: "MODIFICATION",
         description: "Update line 73",
-        text_diff: "| `intentdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override |",
+        text_diff: "| `intentumdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override |",
         old_node: {
           node_type: "text_span",
           label: "ull",
@@ -277,7 +277,7 @@ test("README row deletions do not reuse old columns on the modified side", () =>
       {
         change_type: "DELETION",
         description: "Delete text on line 73: ' Optional'",
-        text_diff: "| `intentdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override |",
+        text_diff: "| `intentumdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override |",
         old_node: {
           node_type: "text_span",
           label: " Optional",
@@ -428,15 +428,15 @@ test("typescript entity additions keep their full decoration range", () => {
 });
 
 test("statusText prioritizes guardrails style-only clean and change counts", () => {
-  assert.equal(statusText(sampleDiff), "IntentDiff: 1 guardrail");
-  assert.equal(statusText({ parse_errors: ["FUEL_EXCEEDED: 1.0K"], changes: [] }), "IntentDiff: fuel exceeded");
-  assert.equal(statusText({ parse_errors: ["recoverable parser warning"], changes: [] }), "IntentDiff: 1 parser warning");
-  assert.equal(statusText({ is_fallback: true, changes: [] }), "IntentDiff: parser fallback");
+  assert.equal(statusText(sampleDiff), "IntentumDiff: 1 guardrail");
+  assert.equal(statusText({ parse_errors: ["FUEL_EXCEEDED: 1.0K"], changes: [] }), "IntentumDiff: fuel exceeded");
+  assert.equal(statusText({ parse_errors: ["recoverable parser warning"], changes: [] }), "IntentumDiff: 1 parser warning");
+  assert.equal(statusText({ is_fallback: true, changes: [] }), "IntentumDiff: parser fallback");
   assert.equal(statusText({
     metadata: { engine_telemetry: { fuel_hotspots: [{ language: "typescript", function: "process" }] } },
     changes: [],
-  }), "IntentDiff: 1 fuel warning");
-  assert.equal(statusText({ is_style_only: true, changes: [] }), "IntentDiff: style-only");
-  assert.equal(statusText({ changes: [] }), "IntentDiff: clean");
-  assert.equal(statusText({ changes: [{ change_type: "MODIFICATION" }] }), "IntentDiff: 1 changes");
+  }), "IntentumDiff: 1 fuel warning");
+  assert.equal(statusText({ is_style_only: true, changes: [] }), "IntentumDiff: style-only");
+  assert.equal(statusText({ changes: [] }), "IntentumDiff: clean");
+  assert.equal(statusText({ changes: [{ change_type: "MODIFICATION" }] }), "IntentumDiff: 1 changes");
 });

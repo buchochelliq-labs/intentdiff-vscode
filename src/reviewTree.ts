@@ -95,7 +95,7 @@ export class SemanticReviewTreeProvider implements vscode.TreeDataProvider<Revie
 
   /**
    * The command a tree node fires to open its diff. Honours the
-   * `intentdiff.review.diffSurface` setting: "native" opens VS Code's native
+   * `intentumdiff.review.diffSurface` setting: "native" opens VS Code's native
    * diff editor at the representative line; "panel" opens the rich semantic
    * review panel. Image assets and asset entries always use the panel.
    */
@@ -107,13 +107,13 @@ export class SemanticReviewTreeProvider implements vscode.TreeDataProvider<Revie
   ): vscode.Command {
     if (forcePanel || this.diffSurface === "panel" || isImageReviewFile(file)) {
       return {
-        command: "intentdiff.openReviewPanel",
-        title: "Open IntentDiff Review",
+        command: "intentumdiff.openReviewPanel",
+        title: "Open IntentumDiff Review",
         arguments: [panelArg],
       };
     }
     return {
-      command: "intentdiff.openSemanticDiff",
+      command: "intentumdiff.openSemanticDiff",
       title: "Open Semantic Change",
       arguments: [payloadArgs],
     };
@@ -134,8 +134,8 @@ export class SemanticReviewTreeProvider implements vscode.TreeDataProvider<Revie
   getTreeItem(element: ReviewTreeNode): vscode.TreeItem {
     if (element.kind === "root") {
       const item = new vscode.TreeItem(element.folderName, vscode.TreeItemCollapsibleState.Expanded);
-      item.contextValue = "intentdiffReviewRoot";
-      item.iconPath = new vscode.ThemeIcon("repo", themeColor("intentdiff.semanticChanges.root"));
+      item.contextValue = "intentumdiffReviewRoot";
+      item.iconPath = new vscode.ThemeIcon("repo", themeColor("intentumdiff.semanticChanges.root"));
       return item;
     }
     if (element.kind === "file") {
@@ -148,7 +148,7 @@ export class SemanticReviewTreeProvider implements vscode.TreeDataProvider<Revie
       );
       item.description = fileDescription(element.file);
       item.tooltip = tooltipForReviewFile(element.file);
-      item.contextValue = "intentdiffReviewFile";
+      item.contextValue = "intentumdiffReviewFile";
       item.iconPath = fileIcon(element.file);
       if (!isReviewStatusFile(element.file)) {
         item.resourceUri = vscode.Uri.file(
@@ -162,7 +162,7 @@ export class SemanticReviewTreeProvider implements vscode.TreeDataProvider<Revie
       const item = new vscode.TreeItem(element.group.label, vscode.TreeItemCollapsibleState.Expanded);
       item.description = element.group.description;
       item.tooltip = tooltipForReviewFileGroup(element.group);
-      item.contextValue = "intentdiffReviewFileGroup";
+      item.contextValue = "intentumdiffReviewFileGroup";
       item.iconPath = fileGroupIcon(element.group);
       return item;
     }
@@ -171,15 +171,15 @@ export class SemanticReviewTreeProvider implements vscode.TreeDataProvider<Revie
       item.description = element.entry.description;
       item.tooltip = [element.entry.label, element.entry.description].filter(Boolean).join("\n");
       item.contextValue = element.entry.relativePath
-        ? "intentdiffReviewCrossFile"
-        : "intentdiffReviewCrossFile.summary";
+        ? "intentumdiffReviewCrossFile"
+        : "intentumdiffReviewCrossFile.summary";
       item.iconPath = new vscode.ThemeIcon(
         element.entry.relativePath ? "symbol-method" : "symbol-namespace",
-        themeColor("intentdiff.semanticChanges.crossFile"),
+        themeColor("intentumdiff.semanticChanges.crossFile"),
       );
       if (element.entry.relativePath) {
         item.command = {
-          command: "intentdiff.openSemanticDiff",
+          command: "intentumdiff.openSemanticDiff",
           title: "Open Semantic Change",
           arguments: [{
             folderUri: element.folderUri,
@@ -196,7 +196,7 @@ export class SemanticReviewTreeProvider implements vscode.TreeDataProvider<Revie
       const item = new vscode.TreeItem(treeEntryLabel(element.entry, true), vscode.TreeItemCollapsibleState.None);
       item.description = treeEntryDescription(element.entry, true);
       item.tooltip = tooltipForReviewEntry(element.entry);
-      item.contextValue = "intentdiffReviewEntry.evidence";
+      item.contextValue = "intentumdiffReviewEntry.evidence";
       item.iconPath = entryIcon(element.entry);
       if (!isReviewStatusFile(element.file)) {
         // "native" opens the native diff at the representative line; "panel"
@@ -211,7 +211,7 @@ export class SemanticReviewTreeProvider implements vscode.TreeDataProvider<Revie
     );
     item.description = treeEntryDescription(element.entry);
     item.tooltip = tooltipForReviewEntry(element.entry);
-    item.contextValue = `intentdiffReviewEntry.${element.entry.kind}`;
+    item.contextValue = `intentumdiffReviewEntry.${element.entry.kind}`;
     item.iconPath = entryIcon(element.entry);
     if (!isReviewStatusFile(element.file)) {
       // Intent groups open the diff at their representative line; "panel" mode
@@ -310,7 +310,7 @@ function payloadFor(file: ReviewFile, entry?: ReviewEntry): OpenReviewPayload {
 }
 
 function isReviewStatusFile(file: ReviewFile): boolean {
-  return file.relativePath === ".intentdiff-review";
+  return file.relativePath === ".intentumdiff-review";
 }
 
 function isImageReviewFile(file: ReviewFile): boolean {
@@ -366,25 +366,25 @@ function compactFileDescription(file: ReviewFile, summary: ReviewSummary): strin
 
 function fileIcon(file: ReviewFile): vscode.ThemeIcon {
   if ((file.diff?.guardrail_violations?.length ?? 0) > 0 || file.status === "error") {
-    return new vscode.ThemeIcon("shield", themeColor("intentdiff.semanticChanges.guardrail"));
+    return new vscode.ThemeIcon("shield", themeColor("intentumdiff.semanticChanges.guardrail"));
   }
   if ((file.diff?.change_groups?.length ?? 0) > 0) {
-    return new vscode.ThemeIcon("diff", themeColor("intentdiff.semanticChanges.fileWithGroups"));
+    return new vscode.ThemeIcon("diff", themeColor("intentumdiff.semanticChanges.fileWithGroups"));
   }
   if ((file.diff?.changes?.length ?? 0) > 0) {
-    return new vscode.ThemeIcon("diff", themeColor("intentdiff.semanticChanges.rawChange"));
+    return new vscode.ThemeIcon("diff", themeColor("intentumdiff.semanticChanges.rawChange"));
   }
   if (file.status === "skipped") {
-    return new vscode.ThemeIcon("circle-slash", themeColor("intentdiff.semanticChanges.muted"));
+    return new vscode.ThemeIcon("circle-slash", themeColor("intentumdiff.semanticChanges.muted"));
   }
-  return new vscode.ThemeIcon("check", themeColor("intentdiff.semanticChanges.ignoredStyle"));
+  return new vscode.ThemeIcon("check", themeColor("intentumdiff.semanticChanges.ignoredStyle"));
 }
 
 function fileGroupIcon(group: ReviewFileGroup): vscode.ThemeIcon {
   if (group.schema) {
-    return new vscode.ThemeIcon("database", themeColor("intentdiff.semanticChanges.schemaStatus"));
+    return new vscode.ThemeIcon("database", themeColor("intentumdiff.semanticChanges.schemaStatus"));
   }
-  return new vscode.ThemeIcon("folder-library", themeColor("intentdiff.semanticChanges.root"));
+  return new vscode.ThemeIcon("folder-library", themeColor("intentumdiff.semanticChanges.root"));
 }
 
 function tooltipForReviewFileGroup(group: ReviewFileGroup): string {
@@ -432,47 +432,47 @@ function treeEntryDescription(entry: ReviewEntry, evidenceChild = false): string
 function entryIcon(entry: ReviewEntry): vscode.ThemeIcon {
   if (entry.kind === "guardrail") {
     if (entry.violation?.severity === "immutable") {
-      return new vscode.ThemeIcon("circle-slash", themeColor("intentdiff.semanticChanges.guardrail"));
+      return new vscode.ThemeIcon("circle-slash", themeColor("intentumdiff.semanticChanges.guardrail"));
     }
     return new vscode.ThemeIcon(
       entry.severity === "error" ? "error" : "warning",
-      themeColor("intentdiff.semanticChanges.guardrail"),
+      themeColor("intentumdiff.semanticChanges.guardrail"),
     );
   }
   if (entry.kind === "schema-status") {
-    return new vscode.ThemeIcon("database", themeColor("intentdiff.semanticChanges.schemaStatus"));
+    return new vscode.ThemeIcon("database", themeColor("intentumdiff.semanticChanges.schemaStatus"));
   }
   if (entry.kind === "asset") {
-    return new vscode.ThemeIcon("file-media", themeColor("intentdiff.semanticChanges.meaningful"));
+    return new vscode.ThemeIcon("file-media", themeColor("intentumdiff.semanticChanges.meaningful"));
   }
   if (entry.kind === "refactoring") {
-    return new vscode.ThemeIcon("symbol-variable", themeColor("intentdiff.semanticChanges.refactoring"));
+    return new vscode.ThemeIcon("symbol-variable", themeColor("intentumdiff.semanticChanges.refactoring"));
   }
   if (entry.kind === "moved-code") {
-    return new vscode.ThemeIcon("diff-renamed", themeColor("intentdiff.semanticChanges.movedCode"));
+    return new vscode.ThemeIcon("diff-renamed", themeColor("intentumdiff.semanticChanges.movedCode"));
   }
   if (entry.kind === "meaningful") {
-    return new vscode.ThemeIcon("sparkle", themeColor("intentdiff.semanticChanges.meaningful"));
+    return new vscode.ThemeIcon("sparkle", themeColor("intentumdiff.semanticChanges.meaningful"));
   }
   if (entry.kind === "ignored-style") {
-    return new vscode.ThemeIcon("eye-closed", themeColor("intentdiff.semanticChanges.ignoredStyle"));
+    return new vscode.ThemeIcon("eye-closed", themeColor("intentumdiff.semanticChanges.ignoredStyle"));
   }
   if (entry.kind === "noise-suppressed") {
-    return new vscode.ThemeIcon("eye-closed", themeColor("intentdiff.semanticChanges.noiseSuppressed"));
+    return new vscode.ThemeIcon("eye-closed", themeColor("intentumdiff.semanticChanges.noiseSuppressed"));
   }
   if (entry.kind === "raw-evidence") {
-    return new vscode.ThemeIcon("list-tree", themeColor("intentdiff.semanticChanges.rawChange"));
+    return new vscode.ThemeIcon("list-tree", themeColor("intentumdiff.semanticChanges.rawChange"));
   }
   if (entry.kind === "change" || entry.kind === "evidence") {
     return rawChangeIcon(entry);
   }
   if (entry.kind === "skipped") {
-    return new vscode.ThemeIcon("circle-slash", themeColor("intentdiff.semanticChanges.muted"));
+    return new vscode.ThemeIcon("circle-slash", themeColor("intentumdiff.semanticChanges.muted"));
   }
   if (entry.kind === "error") {
-    return new vscode.ThemeIcon("error", themeColor("intentdiff.semanticChanges.guardrail"));
+    return new vscode.ThemeIcon("error", themeColor("intentumdiff.semanticChanges.guardrail"));
   }
-  return new vscode.ThemeIcon("check", themeColor("intentdiff.semanticChanges.ignoredStyle"));
+  return new vscode.ThemeIcon("check", themeColor("intentumdiff.semanticChanges.ignoredStyle"));
 }
 
 function themeColor(id: string): vscode.ThemeColor {
@@ -496,22 +496,22 @@ function collapsibleStateForEntry(entry: ReviewEntry): vscode.TreeItemCollapsibl
 function rawChangeIcon(entry: ReviewEntry): vscode.ThemeIcon {
   const changeType = entry.change?.change_type;
   if (changeType === "ADDITION") {
-    return new vscode.ThemeIcon("diff-added", themeColor("intentdiff.semanticChanges.addition"));
+    return new vscode.ThemeIcon("diff-added", themeColor("intentumdiff.semanticChanges.addition"));
   }
   if (changeType === "DELETION") {
-    return new vscode.ThemeIcon("diff-removed", themeColor("intentdiff.semanticChanges.deletion"));
+    return new vscode.ThemeIcon("diff-removed", themeColor("intentumdiff.semanticChanges.deletion"));
   }
   if (changeType === "MOVE") {
-    return new vscode.ThemeIcon("diff-renamed", themeColor("intentdiff.semanticChanges.movedCode"));
+    return new vscode.ThemeIcon("diff-renamed", themeColor("intentumdiff.semanticChanges.movedCode"));
   }
   if (changeType === "REFACTORING") {
-    return new vscode.ThemeIcon("symbol-method", themeColor("intentdiff.semanticChanges.refactoring"));
+    return new vscode.ThemeIcon("symbol-method", themeColor("intentumdiff.semanticChanges.refactoring"));
   }
   if (changeType === "REORDER") {
-    return new vscode.ThemeIcon("list-ordered", themeColor("intentdiff.semanticChanges.reorder"));
+    return new vscode.ThemeIcon("list-ordered", themeColor("intentumdiff.semanticChanges.reorder"));
   }
   if (changeType === "MODIFICATION") {
-    return new vscode.ThemeIcon("diff-modified", themeColor("intentdiff.semanticChanges.modification"));
+    return new vscode.ThemeIcon("diff-modified", themeColor("intentumdiff.semanticChanges.modification"));
   }
-  return new vscode.ThemeIcon("diff-modified", themeColor("intentdiff.semanticChanges.rawChange"));
+  return new vscode.ThemeIcon("diff-modified", themeColor("intentumdiff.semanticChanges.rawChange"));
 }

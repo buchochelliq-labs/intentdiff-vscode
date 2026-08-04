@@ -63,14 +63,14 @@ async function main(): Promise<void> {
     ],
     extensionTestsEnv: {
       ELECTRON_RUN_AS_NODE: undefined,
-      INTENTDIFF_NODE_EXECUTABLE: process.execPath,
-      INTENTDIFF_REPO_ROOT: repoRoot,
-      INTENTDIFF_UV_CACHE_DIR: uvCacheDir,
-      INTENTDIFF_DIFF_GENERATION_MS: String(diffGenerationMs),
-      INTENTDIFF_SEMANTICDIFF_EXTENSION_PATH: semanticDiffExtensionPath,
-      INTENTDIFF_SEMANTICDIFF_COMPARISON_WORKSPACE: fixtureWorkspace,
-      INTENTDIFF_SEMANTICDIFF_COMPARISON_ARTIFACTS: artifactsDir,
-      INTENTDIFF_VSCODE_LOG: path.join(fixtureWorkspace, ".intentdiff-comparison-log.jsonl"),
+      INTENTUMDIFF_NODE_EXECUTABLE: process.execPath,
+      INTENTUMDIFF_REPO_ROOT: repoRoot,
+      INTENTUMDIFF_UV_CACHE_DIR: uvCacheDir,
+      INTENTUMDIFF_DIFF_GENERATION_MS: String(diffGenerationMs),
+      INTENTUMDIFF_SEMANTICDIFF_EXTENSION_PATH: semanticDiffExtensionPath,
+      INTENTUMDIFF_SEMANTICDIFF_COMPARISON_WORKSPACE: fixtureWorkspace,
+      INTENTUMDIFF_SEMANTICDIFF_COMPARISON_ARTIFACTS: artifactsDir,
+      INTENTUMDIFF_VSCODE_LOG: path.join(fixtureWorkspace, ".intentumdiff-comparison-log.jsonl"),
     },
   });
 }
@@ -88,7 +88,7 @@ function prepareComparisonWorkspace(
   fs.mkdirSync(artifactsDir, { recursive: true });
   fs.writeFileSync(
     path.join(workspaceRoot, ".gitignore"),
-    ".semanticdiff-old/\n.intentdiff-comparison-commit-diff.json\n.intentdiff-comparison-input.json\n.intentdiff-comparison-log.jsonl\nlive-server\n",
+    ".semanticdiff-old/\n.intentumdiff-comparison-commit-diff.json\n.intentumdiff-comparison-input.json\n.intentumdiff-comparison-log.jsonl\nlive-server\n",
     "utf8",
   );
   for (const scenario of scenarios) {
@@ -104,9 +104,9 @@ function prepareComparisonWorkspace(
   execGit(workspaceRoot, ["add", "."]);
   execGit(workspaceRoot, [
     "-c",
-    "user.name=intentdiff comparison",
+    "user.name=intentumdiff comparison",
     "-c",
-    "user.email=intentdiff-comparison@example.com",
+    "user.email=intentumdiff-comparison@example.com",
     "commit",
     "-m",
     "old scenario fixtures",
@@ -140,8 +140,8 @@ function generatePysdCommitDiff(
   scenarios: Scenario[],
   uvCacheDir: string,
 ): number {
-  const inputPath = path.join(workspaceRoot, ".intentdiff-comparison-input.json");
-  const outputPath = path.join(workspaceRoot, ".intentdiff-comparison-commit-diff.json");
+  const inputPath = path.join(workspaceRoot, ".intentumdiff-comparison-input.json");
+  const outputPath = path.join(workspaceRoot, ".intentumdiff-comparison-commit-diff.json");
   fs.writeFileSync(
     inputPath,
     JSON.stringify({
@@ -157,7 +157,7 @@ function generatePysdCommitDiff(
   );
   const script = [
     "import json, sys",
-    "from intentdiff import SemanticDiffer",
+    "from intentumdiff import SemanticDiffer",
     "payload = json.load(open(sys.argv[1], encoding='utf8'))",
     "differ = SemanticDiffer()",
     "file_diffs = []",
@@ -177,7 +177,7 @@ function generatePysdCommitDiff(
     encoding: "utf8",
     env: {
       ...process.env,
-      INTENTDIFF_ALLOW_VULNERABLE_WASMTIME: "1",
+      INTENTUMDIFF_ALLOW_VULNERABLE_WASMTIME: "1",
       UV_CACHE_DIR: uvCacheDir,
     },
     stdio: ["ignore", "pipe", "pipe"],
@@ -221,7 +221,7 @@ function refArg() {
 }
 
 function commitDiff() {
-  return JSON.parse(fs.readFileSync(".intentdiff-comparison-commit-diff.json", "utf8"));
+  return JSON.parse(fs.readFileSync(".intentumdiff-comparison-commit-diff.json", "utf8"));
 }
 
 write({

@@ -223,7 +223,7 @@ export interface LiveServerSettings {
 export interface DiagnosticLike {
   severity: "error" | "warning" | "information";
   message: string;
-  source: "IntentDiff";
+  source: "IntentumDiff";
   position?: NodePosition | null;
   code?: string;
 }

@@ -1,17 +1,17 @@
 ---
-name: intentdiff-release-notes
+name: intentumdiff-release-notes
 description: >-
-  How IntentDiff turns a semantic diff into human intent — the deterministic "what/why/risk"
+  How IntentumDiff turns a semantic diff into human intent — the deterministic "what/why/risk"
   explainer, the release-notes buckets, and the opt-in BYOK LLM narrative. Use this whenever
   you work on release notes, intent explanations, the "why" text shown in CodeLens/hover/Peek,
   risk categorisation, or the LLM narrative — files `plugins/vscode/src/releaseNotes.ts`,
   `intentExplain.ts`, `intentLlmPrompt.ts`, `intentLlmExplainer.ts`. It covers the bucket
   model, how risk is derived, the anti-redundancy rules for "what — why", NodeFacts-driven
-  wording, and the privacy-safe LLM path. Read intentdiff-vscode and intentdiff-engine first;
+  wording, and the privacy-safe LLM path. Read intentumdiff-vscode and intentumdiff-engine first;
   the LLM path must obey the BYOK/privacy invariants.
 ---
 
-# IntentDiff — Intent explanations & release notes
+# IntentumDiff — Intent explanations & release notes
 
 Two layers: a **deterministic explainer** (always on, offline) that turns each change into a
 readable `{ what, why, risk }`, and **release notes** that bucket those by derived risk. An
@@ -38,10 +38,10 @@ source by default.
 **NodeFacts are the honest source.** Prefer `node.facts` (engine-emitted: `param_count`,
 `returns`, `body`, `is_async`, `is_generator`) over reverse-engineering the tree. A
 `def ccc(): pass` must read "no parameters; returns nothing; empty no-op body", not "takes a
-parameter" or "now available to callers." See `intentdiff-engine` for NodeFacts.
+parameter" or "now available to callers." See `intentumdiff-engine` for NodeFacts.
 
 **Content-awareness:** gate all code framing on `contentClass === "code"`. On docs/config/data/
-text, drop "New public API", function nouns, and behavior claims (see `intentdiff-vscode` →
+text, drop "New public API", function nouns, and behavior claims (see `intentumdiff-vscode` →
 `contentClass.ts`).
 
 ## Release notes (`releaseNotes.ts`)
@@ -62,14 +62,14 @@ docs/chore · G guardrail". `releaseNotesToMarkdown` (Copy-as-Markdown) and `rel
 **Ungrouped-change coverage (index-space contract):** notes must cover changes owned by no
 group. `buildReleaseNotes` uses `coveredChangeIndices(groups, changes.length)` and classifies
 any uncovered change via `kindForChange` — not only when the engine emits zero groups. Skip
-out-of-range indices everywhere. (See `intentdiff-engine` → `references/index-space-contract.md`.)
+out-of-range indices everywhere. (See `intentumdiff-engine` → `references/index-space-contract.md`.)
 
 ## Opt-in LLM narrative (BYOK — obey privacy invariants)
 
 `IntentLlmExplainer` + prompt builders in `intentLlmPrompt.ts`
 (`buildExplainPrompt`, `buildReleaseNarrativePrompt`, `renderFactSheet`):
 
-- Gated on `intentdiff.intent.explainer === "llm"`; deterministic is the fallback on any
+- Gated on `intentumdiff.intent.explainer === "llm"`; deterministic is the fallback on any
   error/refusal/no-model/offline. Never blocks the UI (hover/CodeLens show deterministic
   immediately, upgrade when the LLM resolves; results cached by content hash).
 - Providers: `vscode-lm` (Copilot, no key, VS Code's own consent), `anthropic` (BYOK), and

@@ -109,7 +109,7 @@ foreach ($entry in $screenshots) {
   if ($entry.capture_command -notlike "*-Scene $($entry.surface) *" -and $entry.capture_command -notlike "*-Scene `"$($entry.surface)`" *") {
     throw "Visual proof surface '$($entry.surface)' capture_command does not match the surface."
   }
-  if ($entry.screenshot_path -notlike "*intentdiff-vscode-$($entry.surface).png") {
+  if ($entry.screenshot_path -notlike "*intentumdiff-vscode-$($entry.surface).png") {
     throw "Visual proof surface '$($entry.surface)' has unexpected screenshot filename '$($entry.screenshot_path)'."
   }
 

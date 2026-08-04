@@ -3,7 +3,7 @@
 Guardrails flag changes to **protected** symbols and settings — the things you almost
 never mean to touch (API keys, immutable config, security-sensitive values).
 
-When a guardrail is violated, IntentDiff:
+When a guardrail is violated, IntentumDiff:
 
 - raises a **Problem** (Diagnostic) in the Problems panel, and
 - **pins** the affected file and change to the top of the Semantic Changes tree.

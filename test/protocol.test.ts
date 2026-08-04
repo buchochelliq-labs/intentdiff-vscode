@@ -58,7 +58,7 @@ test("unsupported ready protocol emits structured error", () => {
     seq: 0,
     error: {
       code: "unsupported_protocol",
-      message: "IntentDiff live-server did not report protocol version 2",
+      message: "IntentumDiff live-server did not report protocol version 2",
     },
   });
 });

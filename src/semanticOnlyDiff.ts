@@ -1,14 +1,14 @@
 import type { DecorationLike, NodePosition, SemanticChange, SemanticDiff } from "./types";
 
-export const SEMANTIC_BASE_SCHEME = "intentdiff-semantic-base";
-export const SEMANTIC_MODIFIED_SCHEME = "intentdiff-semantic-modified";
-export const SEMANTIC_EMPTY_MESSAGE = "IntentDiff: no semantic changes match the current filters.";
+export const SEMANTIC_BASE_SCHEME = "intentumdiff-semantic-base";
+export const SEMANTIC_MODIFIED_SCHEME = "intentumdiff-semantic-modified";
+export const SEMANTIC_EMPTY_MESSAGE = "IntentumDiff: no semantic changes match the current filters.";
 /**
  * @deprecated The gap row in the projection is now an empty line. The webview
  * renders the collapsed-gap affordance via a deltaDecoration. The token is
  * retained only so external consumers (tests, plugins) keep compiling.
  */
-export const SEMANTIC_GAP_TOKEN = "IntentDiffGap:";
+export const SEMANTIC_GAP_TOKEN = "IntentumDiffGap:";
 
 export type SemanticOnlySide = "base" | "modified";
 
@@ -303,7 +303,7 @@ function generateSide(
       const gapSide = side === "base" ? gap.base : gap.modified;
       // The gap row is intentionally an empty line so Monaco's diff engine does
       // not paint a fake insert/delete highlight on it; the webview renders the
-      // collapsed-gap affordance via a deltaDecoration (.intentdiff-gap-line)
+      // collapsed-gap affordance via a deltaDecoration (.intentumdiff-gap-line)
       // and a centred chevron overlay. We still record the 1-based projected
       // line of the gap row so the chevron, the gap tint, and the
       // reconstruction algorithm can locate it.

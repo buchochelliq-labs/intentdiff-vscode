@@ -1,4 +1,4 @@
-# Building intentdiff-vscode
+# Building intentumdiff-vscode
 
 Toolchain: **Node 20**.
 
@@ -35,6 +35,6 @@ The recorder (`scripts/record-release-demo.ps1`) regenerates screenshots; the CI
 ## VSIX packaging
 
 The release VSIX bundles, per platform: the compiled extension, the native
-`intentdiff-live-server` binary (staged under `/live-server`), and the parser component set.
+`intentumdiff-live-server` binary (staged under `/live-server`), and the parser component set.
 Bundling is release-channel work driven by the publish pipeline; local development runs the
 extension host against a locally built live-server instead.

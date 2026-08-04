@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
-  <title id="title">IntentDiff icon</title>
+  <title id="title">IntentumDiff icon</title>
   <desc id="desc">A dark split diff tile with a semantic intent curve, review check, and compact diff marks.</desc>
   <defs>
     <linearGradient id="tile" x1="34" y1="12" x2="220" y2="238" gradientUnits="userSpaceOnUse">

@@ -1,26 +1,26 @@
 ---
-name: intentdiff-vscode
+name: intentumdiff-vscode
 description: >-
-  Architecture of the IntentDiff VS Code extension (native-first). Use this whenever you work
+  Architecture of the IntentumDiff VS Code extension (native-first). Use this whenever you work
   in `plugins/vscode/` — the diff surfaces, CodeLens/Peek/decorations, the review panel
   webview, intent explanation, content classes, the Semantic Changes tree, theme styling, or
   privacy/BYOK plumbing. It tells you which file owns what, the native-diff-not-Monaco rule,
   the theme-native and privacy invariants you must not break, and how to build/test/verify the
-  extension (including the panel-render harness). Read intentdiff-architecture first; hand off
-  to intentdiff-release-notes for notes/intent-"why" and intentdiff-perceptual-asset-diff for
+  extension (including the panel-render harness). Read intentumdiff-architecture first; hand off
+  to intentumdiff-release-notes for notes/intent-"why" and intentumdiff-perceptual-asset-diff for
   images. Trigger on any extension UI work even if the user doesn't name a file.
 ---
 
-# IntentDiff — VS Code Extension (native-first)
+# IntentumDiff — VS Code Extension (native-first)
 
 The extension is TypeScript, compiled with `tsc` only (no bundler). It consumes the engine
-over the LiveServer protocol (`intentdiff live-server --stdio`, protocol v2) and renders
+over the LiveServer protocol (`intentumdiff live-server --stdio`, protocol v2) and renders
 intent natively in the editor plus one review webview.
 
 ## Native-first diff (do not rebuild a diff editor)
 
 The **native VS Code diff editor is the primary surface**:
-- Open with `vscode.diff`: left = read-only `intentdiff-base:` document
+- Open with `vscode.diff`: left = read-only `intentumdiff-base:` document
   (`git show <ref>:<path>` via a content provider), right = the **real working-tree file**
   (editable). Native `diffEditor.hideUnchangedRegions` handles collapse/expand.
 - Editing the right pane re-runs the engine (debounced `scheduleDocument → diffDocument →
@@ -39,7 +39,7 @@ Intent is surfaced via **CodeLens + Peek + decorations**, not a bespoke editor.
 | CodeLens / Peek / hover / inlay (intent on the diff) | `intentCodeLens.ts` (pure logic), `intentCodeLensProvider.ts` (vscode provider) |
 | Intent "what/why/risk" (deterministic) | `intentExplain.ts` |
 | LLM explainer (BYOK / vscode-lm) | `intentLlmExplainer.ts`, `intentLlmPrompt.ts` |
-| Release notes | `releaseNotes.ts` (see intentdiff-release-notes) |
+| Release notes | `releaseNotes.ts` (see intentumdiff-release-notes) |
 | Content class (code/docs/config/data/text) | `contentClass.ts` |
 | Change → review entry mapping | `mapper.ts`, `reviewModel.ts` |
 | Semantic Changes tree | `reviewTree.ts` |
@@ -52,7 +52,7 @@ editable semantic-diff view with per-hunk staging, and the **perceptual asset di
 images. Key model builders: `buildReviewPanelModel`, `renderPanelHtml`, `dashboardEntry`
 (attaches an `IntentExplanation` per entry), `entryCard`, `assetModeViewer`.
 
-Risk is *derived* (see `intentdiff-engine`): `MEANINGFUL→Behavior`, `REFACTORING/MOVED→
+Risk is *derived* (see `intentumdiff-engine`): `MEANINGFUL→Behavior`, `REFACTORING/MOVED→
 Internal`, non-code content → `Content`, style/noise excluded, guardrails → critical.
 
 ## Content classes (`contentClass.ts`)
@@ -72,18 +72,18 @@ A change owned by no `change_group` is a real ungrouped change, not evidence to 
 `reviewEntriesForFile` **promotes** ungrouped changes to first-class Meaningful/Refactor/Moved
 entries when a *modified* file has no shown intent groups (the ungrouped changes are the
 story), and otherwise leaves them in the collapsed "Raw evidence" bucket. See
-`intentdiff-engine` → `references/index-space-contract.md`.
+`intentumdiff-engine` → `references/index-space-contract.md`.
 
 ## Theme-native styling (hard rule)
 
 Bind to the editor theme, never a bespoke palette:
 - Chrome uses `--vscode-*` variables; change categories use the contributed
-  `intentdiff.semanticChanges.*` color IDs (+ `--vscode-diffEditor-*` for line backgrounds).
+  `intentumdiff.semanticChanges.*` color IDs (+ `--vscode-diffEditor-*` for line backgrounds).
 - **No hardcoded chrome hex literals. No bundled Google Fonts / JetBrains Mono `<link>`s** —
   use the editor's font vars. Must read in Dark+, Light+, and High-Contrast.
 - **Codicons only** (`codicon codicon-*`); never ship custom chrome SVG for icons.
 - **Guardrail reality (verify, don't assume):** `test/themeColors.test.ts` checks that the
-  contributed `intentdiff.semanticChanges.*` color IDs exist in `package.json` and that
+  contributed `intentumdiff.semanticChanges.*` color IDs exist in `package.json` and that
   overview-ruler decorations use them — it does **not** scan the rendered panel/diagnostics HTML
   for chrome hex literals or custom SVG icons. That gap is real: `reviewWebviewModel.ts`
   `styles()` and `extension.ts` `renderDiagnosticsReportHtml` currently ship a bespoke dark
@@ -95,7 +95,7 @@ Bind to the editor theme, never a bespoke palette:
 ## Privacy / BYOK (hard rule — see also `plugins/vscode/PRIVACY.md`)
 
 - Never bundle an API key or run a paid proxy. The LLM explainer is opt-in
-  (`intentdiff.intent.explainer: "llm"`), BYOK or `vscode-lm`/Copilot.
+  (`intentumdiff.intent.explainer: "llm"`), BYOK or `vscode-lm`/Copilot.
 - Keys live in VS Code **SecretStorage**, never settings.json. A cloud consent modal precedes
   any send.
 - Default `codeSharing: "signatures"` sends a locally-derived fact sheet (symbol/type names +
@@ -110,7 +110,7 @@ cd plugins/vscode
 npm run lint          # tsc --noEmit
 npm run test          # node --test on compiled out/  (unit; no network)
 ```
-Integration tests gate on `INTENTDIFF_SKIP_LIVE_DIFF=1`.
+Integration tests gate on `INTENTUMDIFF_SKIP_LIVE_DIFF=1`.
 
 **Panel-render harness (fast visual check without launching VS Code):** compile, then run a
 small node script that imports `out/src/reviewWebviewModel.js`, calls `buildReviewPanelModel`

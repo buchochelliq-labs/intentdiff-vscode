@@ -19,7 +19,7 @@ param(
   [string]$Ffprobe = "ffprobe",
   [string]$CodeCommand = "code",
   [string]$UvCommand = "uv",
-  [string]$DemoRoot = "C:\tmp\intentdiff-release-demo",
+  [string]$DemoRoot = "C:\tmp\intentumdiff-release-demo",
   [string]$ManifestPath = "artifacts\release-media-review\manifest.json",
   [switch]$AutoStage,
   [switch]$KeepVideo,
@@ -129,9 +129,9 @@ function Resolve-DefaultOutput {
     [string]$SceneName
   )
   if ($DemoName -eq "vscode") {
-    return Join-Path $RepoRoot "plugins\vscode\media\intentdiff-vscode-$SceneName-recording.gif"
+    return Join-Path $RepoRoot "plugins\vscode\media\intentumdiff-vscode-$SceneName-recording.gif"
   }
-  return Join-Path $RepoRoot "docs\media\intentdiff-cli-recording.gif"
+  return Join-Path $RepoRoot "docs\media\intentumdiff-cli-recording.gif"
 }
 
 function Resolve-DefaultScreenshotOutput {
@@ -143,7 +143,7 @@ function Resolve-DefaultScreenshotOutput {
     [Parameter(Mandatory = $true)]
     [string]$SceneName
   )
-  return Join-Path $DemoRootPath "samples\intentdiff-$DemoName-$SceneName.png"
+  return Join-Path $DemoRootPath "samples\intentumdiff-$DemoName-$SceneName.png"
 }
 
 function New-VisualProofManifest {
@@ -445,7 +445,7 @@ function Disable-VsCodeTestHostUpdateCheck {
   Write-Host "  Disabled VS Code test-host update mutex check: $productPath"
 }
 
-function New-IntentDiffRunnerExe {
+function New-IntentumDiffRunnerExe {
   param(
     [Parameter(Mandatory = $true)]
     [string]$RunnerPath,
@@ -471,7 +471,7 @@ public static class Program
 
     public static int Main(string[] args)
     {
-        var fixedArgs = new[] { "run", "--no-sync", "python", "-m", "intentdiff.cli" };
+        var fixedArgs = new[] { "run", "--no-sync", "python", "-m", "intentumdiff.cli" };
         var allArgs = fixedArgs.Concat(args).Select(QuoteArg);
         var process = Process.Start(new ProcessStartInfo
         {
@@ -482,7 +482,7 @@ public static class Program
         });
         if (process == null)
         {
-            Console.Error.WriteLine("Could not start uv for IntentDiff demo runner.");
+            Console.Error.WriteLine("Could not start uv for IntentumDiff demo runner.");
             return 1;
         }
         process.WaitForExit();
@@ -505,7 +505,7 @@ public static class Program
 "@
   Add-Type -TypeDefinition $source -OutputAssembly $RunnerPath -OutputType ConsoleApplication
   if (-not (Test-Path -LiteralPath $RunnerPath)) {
-    throw "IntentDiff demo runner was not created: $RunnerPath"
+    throw "IntentumDiff demo runner was not created: $RunnerPath"
   }
 }
 
@@ -601,11 +601,11 @@ function Install-VsixIntoIsolatedExtensionDir {
 }
 
 function Initialize-WindowMover {
-  if ("IntentDiffReleaseDemo.Window" -as [type]) {
+  if ("IntentumDiffReleaseDemo.Window" -as [type]) {
     return
   }
   Add-Type -TypeDefinition @"
-namespace IntentDiffReleaseDemo {
+namespace IntentumDiffReleaseDemo {
   using System;
   using System.Diagnostics;
   using System.Runtime.InteropServices;
@@ -737,7 +737,7 @@ function Move-DemoWindow {
   for ($attempt = 0; $attempt -lt 30; $attempt++) {
     $Process.Refresh()
     if ($Process.MainWindowHandle -ne [IntPtr]::Zero) {
-      [IntentDiffReleaseDemo.Window]::PlaceWindow(
+      [IntentumDiffReleaseDemo.Window]::PlaceWindow(
         $Process.MainWindowHandle,
         $Region.X,
         $Region.Y,
@@ -764,10 +764,10 @@ function Wait-VsCodeWindowByTitle {
   Initialize-WindowMover
   $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
   while ((Get-Date) -lt $deadline) {
-    $candidate = [IntentDiffReleaseDemo.Window]::FindVisibleWindow($TitlePattern, $PathPattern)
+    $candidate = [IntentumDiffReleaseDemo.Window]::FindVisibleWindow($TitlePattern, $PathPattern)
     if ($null -ne $candidate) {
       if ($null -ne $Region) {
-        [IntentDiffReleaseDemo.Window]::PlaceWindow(
+        [IntentumDiffReleaseDemo.Window]::PlaceWindow(
           $candidate.Handle,
           $Region.X,
           $Region.Y,
@@ -824,7 +824,7 @@ function Move-LatestVsCodeWindow {
   for ($attempt = 0; $attempt -lt 80; $attempt++) {
     $candidate = Get-IsolatedVsCodeWindow -StartedAt $StartedAt -ExecutablePath $ExecutablePath
     if ($null -ne $candidate) {
-      [IntentDiffReleaseDemo.Window]::PlaceWindow(
+      [IntentumDiffReleaseDemo.Window]::PlaceWindow(
         $candidate.MainWindowHandle,
         $Region.X,
         $Region.Y,
@@ -879,7 +879,7 @@ def calculate_invoice_total(invoice):
   $uvLiteral = ConvertTo-PSQuotedString -Value $UvPath
   Set-Content -LiteralPath $demoScript -Encoding UTF8 -Value @"
 `$ErrorActionPreference = "Continue"
-`$Host.UI.RawUI.WindowTitle = "IntentDiff CLI demo"
+`$Host.UI.RawUI.WindowTitle = "IntentumDiff CLI demo"
 Set-Location $repoLiteral
 `$BeforePath = $beforeLiteral
 `$AfterPath = $afterLiteral
@@ -889,35 +889,35 @@ Clear-Host
 function Write-Step {
   param([string]`$Text)
   Write-Host ""
-  Write-Host "intentdiff> " -ForegroundColor Cyan -NoNewline
+  Write-Host "intentumdiff> " -ForegroundColor Cyan -NoNewline
   Write-Host `$Text -ForegroundColor White
   Start-Sleep -Milliseconds 900
 }
 
-function Invoke-IntentDiff {
+function Invoke-IntentumDiff {
   param([string[]]`$IntentArgs)
-  `$command = Get-Command "intentdiff" -ErrorAction SilentlyContinue
+  `$command = Get-Command "intentumdiff" -ErrorAction SilentlyContinue
   if (`$null -ne `$command) {
     & `$command.Source @IntentArgs
     return
   }
-  & $uvLiteral run --no-sync python -m intentdiff.cli @IntentArgs
+  & $uvLiteral run --no-sync python -m intentumdiff.cli @IntentArgs
 }
 
-Write-Host "IntentDiff" -ForegroundColor Cyan
+Write-Host "IntentumDiff" -ForegroundColor Cyan
 Write-Host "Semantic review shell" -ForegroundColor Yellow
 Write-Host "Diff with meaning." -ForegroundColor DarkCyan
 
-Write-Step "intentdiff --version"
-Invoke-IntentDiff @("--version")
+Write-Step "intentumdiff --version"
+Invoke-IntentumDiff @("--version")
 
 Start-Sleep -Seconds 1
-Write-Step "intentdiff file before.py after.py --format terminal"
-Invoke-IntentDiff @("--no-banner", "file", `$BeforePath, `$AfterPath, "--format", "terminal")
+Write-Step "intentumdiff file before.py after.py --format terminal"
+Invoke-IntentumDiff @("--no-banner", "file", `$BeforePath, `$AfterPath, "--format", "terminal")
 
 Start-Sleep -Seconds 1
-Write-Step "pip install intentdiff"
-Write-Host "Install the beta from PyPI, then run IntentDiff from any repository." -ForegroundColor Gray
+Write-Step "pip install intentumdiff"
+Write-Host "Install the beta from PyPI, then run IntentumDiff from any repository." -ForegroundColor Gray
 Start-Sleep -Seconds $HoldSeconds
 "@
   return $demoScript
@@ -998,7 +998,7 @@ function New-SchemaCacheEntry {
     [Parameter(Mandatory = $true)]
     [string[]]$IdentityFields
   )
-  $cacheRoot = Join-Path $LocalAppDataDir "intentdiff\schemas"
+  $cacheRoot = Join-Path $LocalAppDataDir "intentumdiff\schemas"
   New-Item -ItemType Directory -Force -Path $cacheRoot | Out-Null
   $sha = [System.Security.Cryptography.SHA256]::Create()
   try {
@@ -1043,7 +1043,7 @@ function Initialize-VsCodeDemoSceneBaseline {
   )
   New-Item -ItemType Directory -Force -Path (Join-Path $Workspace ".vscode") | Out-Null
   Write-DemoTextFile -Workspace $Workspace -RelativePath "README.md" -Value @'
-# IntentDiff release demo workspace
+# IntentumDiff release demo workspace
 
 This temporary workspace is generated by the release recording script.
 '@
@@ -1065,7 +1065,7 @@ def total_for_invoice(invoice):
       }
     }
     "guardrails" {
-      Write-DemoTextFile -Workspace $Workspace -RelativePath "intentdiff.yaml" -Value @'
+      Write-DemoTextFile -Workspace $Workspace -RelativePath "intentumdiff.yaml" -Value @'
 guardrails:
   protected:
     - id: production-api-host
@@ -1078,7 +1078,7 @@ guardrails:
 '@
       Write-DemoTextFile -Workspace $Workspace -RelativePath "config\service.yaml" -Value @'
 service:
-  host: api.production.intentdiff.local
+  host: api.production.intentumdiff.local
   timeout_seconds: 30
   retries: 2
 '@
@@ -1107,12 +1107,12 @@ resources:
             notebook_path: ./notebooks/validate
 '@
       Write-DemoTextFile -Workspace $Workspace -RelativePath "dbt_project.yml" -Value @'
-name: intentdiff_demo
+name: intentumdiff_demo
 version: 1.0.0
 profile: demo
 
 models:
-  intentdiff_demo:
+  intentumdiff_demo:
     +materialized: table
 '@
       Write-DemoTextFile -Workspace $Workspace -RelativePath "factory\pipeline.json" -Value @'
@@ -1133,7 +1133,7 @@ models:
     }
     "language-sweep" {
       Write-DemoTextFile -Workspace $Workspace -RelativePath "LANGUAGE_SWEEP.md" -Value @'
-# IntentDiff language sweep
+# IntentumDiff language sweep
 
 This demo workspace changes representative Python, TypeScript, Go, Rust, SQL,
 JSON, YAML, Dockerfile, Markdown, and shell files so the review tree shows
@@ -1192,15 +1192,15 @@ echo "deploy"
     }
     "binary-image" {
       Write-DemoTextFile -Workspace $Workspace -RelativePath "README.md" -Value @'
-# IntentDiff perceptual asset demo
+# IntentumDiff perceptual asset demo
 
 This scene stages a real PNG asset change. The Binary/Image tab consumes
 Rust-produced perceptual asset JSON when attached by the release workflow.
 '@
-      Write-DemoBase64File -Workspace $Workspace -RelativePath "assets\intentdiff-card.png" -Base64Value "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFklEQVR4nGNkYPjPgAkwMaACUvkVAABf1gQFnH4XnAAAAABJRU5ErkJggg=="
+      Write-DemoBase64File -Workspace $Workspace -RelativePath "assets\intentumdiff-card.png" -Base64Value "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFklEQVR4nGNkYPjPgAkwMaACUvkVAABf1gQFnH4XnAAAAABJRU5ErkJggg=="
       return [ordered]@{
         FocusPath = "README.md"
-        DiffPath = "assets/intentdiff-card.png"
+        DiffPath = "assets/intentumdiff-card.png"
         PositionLine = 1
       }
     }
@@ -1233,7 +1233,7 @@ REVIEW_MODE = "semantic"
     "guardrails" {
       Write-DemoTextFile -Workspace $Workspace -RelativePath "config\service.yaml" -Value @'
 service:
-  host: api.staging.intentdiff.local
+  host: api.staging.intentumdiff.local
   timeout_seconds: 45
   retries: 2
 '@
@@ -1254,12 +1254,12 @@ resources:
             notebook_path: ./notebooks/validate_v2
 '@
       Write-DemoTextFile -Workspace $Workspace -RelativePath "dbt_project.yml" -Value @'
-name: intentdiff_demo
+name: intentumdiff_demo
 version: 1.0.0
 profile: demo
 
 models:
-  intentdiff_demo:
+  intentumdiff_demo:
     +materialized: incremental
 '@
       Write-DemoTextFile -Workspace $Workspace -RelativePath "factory\pipeline.json" -Value @'
@@ -1317,7 +1317,7 @@ where status in ('open', 'held');
 '@
       Write-DemoTextFile -Workspace $Workspace -RelativePath "Dockerfile" -Value @'
 FROM python:3.12-slim
-ENV INTENTDIFF_DEMO=1
+ENV INTENTUMDIFF_DEMO=1
 CMD ["python", "-m", "app"]
 '@
       Write-DemoTextFile -Workspace $Workspace -RelativePath "scripts\deploy.sh" -Value @'
@@ -1327,7 +1327,7 @@ echo "verify semantic review"
 '@
     }
     "binary-image" {
-      Write-DemoBase64File -Workspace $Workspace -RelativePath "assets\intentdiff-card.png" -Base64Value "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFklEQVR4nGNk+M+ABTAxoAJS+RUAAF8BBAWcfhecAAAAAElFTkSuQmCC"
+      Write-DemoBase64File -Workspace $Workspace -RelativePath "assets\intentumdiff-card.png" -Base64Value "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAFklEQVR4nGNk+M+ABTAxoAJS+RUAAF8BBAWcfhecAAAAAElFTkSuQmCC"
     }
   }
 }
@@ -1370,10 +1370,10 @@ function Start-VsCodeAutoStage {
   $userDataDir = Join-Path $demoRootFull "vscode-user-data"
   $extensionsDir = Join-Path $demoRootFull "vscode-extensions"
   $localAppDataDir = Join-Path $demoRootFull "local-app-data"
-  $driverDir = Join-Path $extensionsDir "intentdiff.intentdiff-demo-driver-0.0.0"
-  $driverVsixPath = Join-Path $demoRootFull "intentdiff-demo-driver.vsix"
-  $intentdiffExe = Join-Path $demoRootFull "intentdiff-demo-runner.exe"
-  $vsixPath = Join-Path $demoRootFull "intentdiff-vscode-recording.vsix"
+  $driverDir = Join-Path $extensionsDir "intentumdiff.intentumdiff-demo-driver-0.0.0"
+  $driverVsixPath = Join-Path $demoRootFull "intentumdiff-demo-driver.vsix"
+  $intentumdiffExe = Join-Path $demoRootFull "intentumdiff-demo-runner.exe"
+  $vsixPath = Join-Path $demoRootFull "intentumdiff-vscode-recording.vsix"
   $extensionDir = Join-Path $RepoRoot "plugins\vscode"
 
   Stop-DemoProcessesUnderRoot -DemoRootPath $demoRootFull
@@ -1392,22 +1392,22 @@ function Start-VsCodeAutoStage {
     -Scene $contentScene `
     -LocalAppDataDir $localAppDataDir
   Invoke-External -Label "Initializing demo git repository" -FilePath $gitPath -Arguments @("init") -WorkingDirectory $workspace
-  Invoke-External -Label "Configuring demo git author" -FilePath $gitPath -Arguments @("config", "user.name", "IntentDiff Demo") -WorkingDirectory $workspace
-  Invoke-External -Label "Configuring demo git email" -FilePath $gitPath -Arguments @("config", "user.email", "demo@intentdiff.local") -WorkingDirectory $workspace
+  Invoke-External -Label "Configuring demo git author" -FilePath $gitPath -Arguments @("config", "user.name", "IntentumDiff Demo") -WorkingDirectory $workspace
+  Invoke-External -Label "Configuring demo git email" -FilePath $gitPath -Arguments @("config", "user.email", "demo@intentumdiff.local") -WorkingDirectory $workspace
   Invoke-External -Label "Committing demo baseline" -FilePath $gitPath -Arguments @("add", ".") -WorkingDirectory $workspace
   Invoke-External -Label "Creating demo baseline commit" -FilePath $gitPath -Arguments @("commit", "-m", "baseline") -WorkingDirectory $workspace
   Update-VsCodeDemoSceneWorkingTree -Workspace $workspace -Scene $contentScene
 
-  Write-Host "  Creating isolated IntentDiff runner executable"
-  New-IntentDiffRunnerExe -RunnerPath $intentdiffExe -RepoRoot $RepoRoot -UvPath $uvPath
-  Invoke-External -Label "Verifying isolated IntentDiff runner" -FilePath $intentdiffExe -Arguments @("--version")
+  Write-Host "  Creating isolated IntentumDiff runner executable"
+  New-IntentumDiffRunnerExe -RunnerPath $intentumdiffExe -RepoRoot $RepoRoot -UvPath $uvPath
+  Invoke-External -Label "Verifying isolated IntentumDiff runner" -FilePath $intentumdiffExe -Arguments @("--version")
 
   Invoke-External -Label "Compiling VS Code extension" -FilePath $npmPath -Arguments @("run", "compile") -WorkingDirectory $extensionDir
   Invoke-External -Label "Packaging VSIX to temp directory" -FilePath $npxPath -Arguments @(
     "@vscode/vsce", "package",
     "--out", $vsixPath,
-    "--baseContentUrl", "https://github.com/buchochelliq-labs/intentdiff/blob/HEAD/plugins/vscode",
-    "--baseImagesUrl", "https://github.com/buchochelliq-labs/intentdiff/raw/HEAD/plugins/vscode"
+    "--baseContentUrl", "https://github.com/buchochelliq-labs/intentumdiff/blob/HEAD/plugins/vscode",
+    "--baseImagesUrl", "https://github.com/buchochelliq-labs/intentumdiff/raw/HEAD/plugins/vscode"
   ) -WorkingDirectory $extensionDir
   $extensionPackage = Get-Content -LiteralPath (Join-Path $extensionDir "package.json") -Raw | ConvertFrom-Json
   $extensionIdentifier = "$($extensionPackage.publisher).$($extensionPackage.name)"
@@ -1416,17 +1416,17 @@ function Start-VsCodeAutoStage {
     -ExtensionsDir $extensionsDir `
     -Identifier $extensionIdentifier `
     -Version $extensionPackage.version
-  Write-Host "  Registered isolated IntentDiff extension: $installedExtensionDir"
+  Write-Host "  Registered isolated IntentumDiff extension: $installedExtensionDir"
 
   New-Item -ItemType Directory -Force -Path (Join-Path $userDataDir "User") | Out-Null
   [ordered]@{
-    "intentdiff.executable" = $intentdiffExe
-    "intentdiff.ref" = "HEAD"
-    "intentdiff.review.pollIntervalMs" = 500
-    "intentdiff.debounceMs" = 100
-    "intentdiff.schemas.fetchMode" = "cache-only"
-    "intentdiff.schemas.allowPrivateHosts" = $false
-    "intentdiff.trace" = $false
+    "intentumdiff.executable" = $intentumdiffExe
+    "intentumdiff.ref" = "HEAD"
+    "intentumdiff.review.pollIntervalMs" = 500
+    "intentumdiff.debounceMs" = 100
+    "intentumdiff.schemas.fetchMode" = "cache-only"
+    "intentumdiff.schemas.allowPrivateHosts" = $false
+    "intentumdiff.trace" = $false
     "scm.showHistoryGraph" = $false
     "scm.showGraph" = $false
     "scm.graph.enabled" = $false
@@ -1477,22 +1477,22 @@ function Start-VsCodeAutoStage {
       "diffEditor.removedTextBackground" = "#f8514933"
       "diffEditor.insertedLineBackground" = "#2ea0431f"
       "diffEditor.removedLineBackground" = "#f8514926"
-      "intentdiff.semanticChanges.root" = "#0969da"
-      "intentdiff.semanticChanges.fileWithGroups" = "#0969da"
-      "intentdiff.semanticChanges.movedCode" = "#0f766e"
-      "intentdiff.semanticChanges.refactoring" = "#6741d9"
-      "intentdiff.semanticChanges.meaningful" = "#9a6700"
-      "intentdiff.semanticChanges.ignoredStyle" = "#1a7f37"
-      "intentdiff.semanticChanges.noiseSuppressed" = "#6f849e"
-      "intentdiff.semanticChanges.rawChange" = "#6741d9"
-      "intentdiff.semanticChanges.addition" = "#1a7f37"
-      "intentdiff.semanticChanges.deletion" = "#cf222e"
-      "intentdiff.semanticChanges.modification" = "#9a6700"
-      "intentdiff.semanticChanges.reorder" = "#6f849e"
-      "intentdiff.semanticChanges.crossFile" = "#bc4c00"
-      "intentdiff.semanticChanges.guardrail" = "#cf222e"
-      "intentdiff.semanticChanges.schemaStatus" = "#0969da"
-      "intentdiff.semanticChanges.muted" = "#6f849e"
+      "intentumdiff.semanticChanges.root" = "#0969da"
+      "intentumdiff.semanticChanges.fileWithGroups" = "#0969da"
+      "intentumdiff.semanticChanges.movedCode" = "#0f766e"
+      "intentumdiff.semanticChanges.refactoring" = "#6741d9"
+      "intentumdiff.semanticChanges.meaningful" = "#9a6700"
+      "intentumdiff.semanticChanges.ignoredStyle" = "#1a7f37"
+      "intentumdiff.semanticChanges.noiseSuppressed" = "#6f849e"
+      "intentumdiff.semanticChanges.rawChange" = "#6741d9"
+      "intentumdiff.semanticChanges.addition" = "#1a7f37"
+      "intentumdiff.semanticChanges.deletion" = "#cf222e"
+      "intentumdiff.semanticChanges.modification" = "#9a6700"
+      "intentumdiff.semanticChanges.reorder" = "#6f849e"
+      "intentumdiff.semanticChanges.crossFile" = "#bc4c00"
+      "intentumdiff.semanticChanges.guardrail" = "#cf222e"
+      "intentumdiff.semanticChanges.schemaStatus" = "#0969da"
+      "intentumdiff.semanticChanges.muted" = "#6f849e"
     } } else { [ordered]@{
       "activityBar.background" = "#111827"
       "activityBar.foreground" = "#7ee787"
@@ -1516,36 +1516,36 @@ function Start-VsCodeAutoStage {
       "diffEditor.removedTextBackground" = "#7f1d1d42"
       "diffEditor.insertedLineBackground" = "#123f2d55"
       "diffEditor.removedLineBackground" = "#4a162255"
-      "intentdiff.semanticChanges.root" = "#4fd6ff"
-      "intentdiff.semanticChanges.fileWithGroups" = "#4fd6ff"
-      "intentdiff.semanticChanges.movedCode" = "#56d6c2"
-      "intentdiff.semanticChanges.refactoring" = "#b58cff"
-      "intentdiff.semanticChanges.meaningful" = "#f7c14d"
-      "intentdiff.semanticChanges.ignoredStyle" = "#7ee787"
-      "intentdiff.semanticChanges.noiseSuppressed" = "#9aa4b2"
-      "intentdiff.semanticChanges.rawChange" = "#d2a8ff"
-      "intentdiff.semanticChanges.addition" = "#7ee787"
-      "intentdiff.semanticChanges.deletion" = "#ff6b6b"
-      "intentdiff.semanticChanges.modification" = "#f7c14d"
-      "intentdiff.semanticChanges.reorder" = "#9aa4b2"
-      "intentdiff.semanticChanges.crossFile" = "#ffab70"
-      "intentdiff.semanticChanges.guardrail" = "#ff6b6b"
-      "intentdiff.semanticChanges.schemaStatus" = "#4fd6ff"
-      "intentdiff.semanticChanges.muted" = "#8b949e"
+      "intentumdiff.semanticChanges.root" = "#4fd6ff"
+      "intentumdiff.semanticChanges.fileWithGroups" = "#4fd6ff"
+      "intentumdiff.semanticChanges.movedCode" = "#56d6c2"
+      "intentumdiff.semanticChanges.refactoring" = "#b58cff"
+      "intentumdiff.semanticChanges.meaningful" = "#f7c14d"
+      "intentumdiff.semanticChanges.ignoredStyle" = "#7ee787"
+      "intentumdiff.semanticChanges.noiseSuppressed" = "#9aa4b2"
+      "intentumdiff.semanticChanges.rawChange" = "#d2a8ff"
+      "intentumdiff.semanticChanges.addition" = "#7ee787"
+      "intentumdiff.semanticChanges.deletion" = "#ff6b6b"
+      "intentumdiff.semanticChanges.modification" = "#f7c14d"
+      "intentumdiff.semanticChanges.reorder" = "#9aa4b2"
+      "intentumdiff.semanticChanges.crossFile" = "#ffab70"
+      "intentumdiff.semanticChanges.guardrail" = "#ff6b6b"
+      "intentumdiff.semanticChanges.schemaStatus" = "#4fd6ff"
+      "intentumdiff.semanticChanges.muted" = "#8b949e"
     } }
   } | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath (Join-Path $userDataDir "User\settings.json") -Encoding UTF8
 
   New-Item -ItemType Directory -Force -Path $driverDir | Out-Null
   Set-Utf8NoBomContent -PathValue (Join-Path $driverDir "package.json") -Value @'
 {
-  "name": "intentdiff-demo-driver",
-  "displayName": "IntentDiff Demo Driver",
-  "publisher": "intentdiff",
+  "name": "intentumdiff-demo-driver",
+  "displayName": "IntentumDiff Demo Driver",
+  "publisher": "intentumdiff",
   "version": "0.0.0",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buchochelliq-labs/intentdiff"
+    "url": "https://github.com/buchochelliq-labs/intentumdiff"
   },
   "engines": { "vscode": "^1.90.0" },
   "activationEvents": ["*"],
@@ -1558,9 +1558,9 @@ function Start-VsCodeAutoStage {
 }
 '@
   Set-Utf8NoBomContent -PathValue (Join-Path $driverDir "README.md") -Value @'
-# IntentDiff Demo Driver
+# IntentumDiff Demo Driver
 
-Temporary extension used only by the IntentDiff release recording script.
+Temporary extension used only by the IntentumDiff release recording script.
 '@
   Set-Utf8NoBomContent -PathValue (Join-Path $driverDir "LICENSE.txt") -Value @'
 MIT
@@ -1612,15 +1612,15 @@ async function waitForStartMarker(output) {
 }
 
 async function activate() {
-  const output = vscode.window.createOutputChannel("IntentDiff Demo Driver");
-  output.appendLine("Starting IntentDiff real recording driver.");
+  const output = vscode.window.createOutputChannel("IntentumDiff Demo Driver");
+  output.appendLine("Starting IntentumDiff real recording driver.");
   await sleep($driverStartMs);
-  const extension = vscode.extensions.getExtension("buchochelliq-labs.intentdiff");
+  const extension = vscode.extensions.getExtension("buchochelliq-labs.intentumdiff");
   if (extension) {
     void extension.activate();
-    output.appendLine("Requested IntentDiff activation.");
+    output.appendLine("Requested IntentumDiff activation.");
   } else {
-    output.appendLine("IntentDiff extension was not found.");
+    output.appendLine("IntentumDiff extension was not found.");
   }
   const folder = vscode.workspace.workspaceFolders?.[0];
   if (!folder) {
@@ -1630,14 +1630,14 @@ async function activate() {
   const document = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(folder.uri, ...focusPathSegments));
   await vscode.window.showTextDocument(document, { preview: false });
   output.appendLine("Opened " + focusPathSegments.join("/") + ".");
-  await vscode.commands.executeCommand("workbench.view.extension.intentdiffActivity");
-  await vscode.commands.executeCommand("intentdiff.review.focus");
+  await vscode.commands.executeCommand("workbench.view.extension.intentumdiffActivity");
+  await vscode.commands.executeCommand("intentumdiff.review.focus");
   await waitForStartMarker(output);
-  await vscode.commands.executeCommand("intentdiff.refreshReview");
+  await vscode.commands.executeCommand("intentumdiff.refreshReview");
   output.appendLine("Requested Semantic Changes review.");
   await sleep($driverReviewMs);
   if (openSemanticDiff) {
-    await vscode.commands.executeCommand("intentdiff.openSemanticDiff", {
+    await vscode.commands.executeCommand("intentumdiff.openSemanticDiff", {
       folderUri: folder.uri.toString(),
       relativePath: diffPath,
       position: {
@@ -1652,7 +1652,7 @@ async function activate() {
   }
   if (openCustomPanel) {
     await sleep(700);
-    await vscode.commands.executeCommand("intentdiff.openReviewPanel", {
+    await vscode.commands.executeCommand("intentumdiff.openReviewPanel", {
       folderUri: folder.uri.toString(),
       relativePath: diffPath,
       position: {
@@ -1664,7 +1664,7 @@ async function activate() {
       positionSide: "modified"
     });
     await sleep(700);
-    await vscode.commands.executeCommand("intentdiff.reviewPanel.setView", reviewView);
+    await vscode.commands.executeCommand("intentumdiff.reviewPanel.setView", reviewView);
     output.appendLine("Opened custom review panel view: " + reviewView + ".");
   }
   await sleep($driverHoldMs);
@@ -1685,7 +1685,7 @@ module.exports = { activate, deactivate };
   Invoke-External -Label "Packaging demo driver VSIX" -FilePath $driverVscePath -Arguments $driverVsceArgs -WorkingDirectory $driverDir
   Register-IsolatedExtension `
     -ExtensionsDir $extensionsDir `
-    -Identifier "intentdiff.intentdiff-demo-driver" `
+    -Identifier "intentumdiff.intentumdiff-demo-driver" `
     -Version "0.0.0" `
     -ExtensionDir $driverDir
   Write-Host "  Registered isolated demo driver extension: $driverDir"
@@ -1747,7 +1747,7 @@ module.exports = { activate, deactivate };
   Write-Host "  user data:  $userDataDir"
   Write-Host "  extensions: $extensionsDir"
   Write-Host "  schema cache: $localAppDataDir"
-  Write-Host "  intentdiff: $intentdiffExe"
+  Write-Host "  intentumdiff: $intentumdiffExe"
   if ($null -ne $readyWindow) {
     Write-Host "  ready:      $($readyWindow.MainWindowTitle)"
   } else {
@@ -1791,7 +1791,7 @@ $captureRegionLabel = if ($null -ne $region) {
 $tempDir = Resolve-OutputPath -PathValue $DemoRoot -BaseDir $repoRoot
 $ManifestPath = Resolve-OutputPath -PathValue $ManifestPath -BaseDir $repoRoot
 $startMarkerPath = if ($AutoStage -and $Demo -eq "vscode" -and $CaptureMode -eq "record") {
-  Join-Path $tempDir "intentdiff-vscode-$Scene-recording-start.marker"
+  Join-Path $tempDir "intentumdiff-vscode-$Scene-recording-start.marker"
 } else {
   $null
 }
@@ -1810,10 +1810,10 @@ if ($CaptureMode -eq "screenshot") {
 }
 $safeTimestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 if (-not $OutputVideo) {
-  $OutputVideo = Join-Path $tempDir "intentdiff-$Demo-$Scene-$safeTimestamp.mp4"
+  $OutputVideo = Join-Path $tempDir "intentumdiff-$Demo-$Scene-$safeTimestamp.mp4"
 }
 $OutputVideo = Resolve-OutputPath -PathValue $OutputVideo -BaseDir $repoRoot
-$palettePath = Join-Path $tempDir "intentdiff-$Demo-$safeTimestamp-palette.png"
+$palettePath = Join-Path $tempDir "intentumdiff-$Demo-$safeTimestamp-palette.png"
 
 $captureArgs = @(
   "-y",
@@ -1879,7 +1879,7 @@ $gifArgs = @(
   $OutputGif
 )
 
-Write-Host "IntentDiff release demo recording"
+Write-Host "IntentumDiff release demo recording"
 Write-Host "  demo:       $Demo"
 if ($Demo -eq "vscode") {
   Write-Host "  scene:      $Scene"

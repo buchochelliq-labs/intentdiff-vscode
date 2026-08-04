@@ -203,8 +203,8 @@ export function renderDiagnosticsReportHtml(report: DiagnosticsReport, options: 
   <style nonce="${options.nonce}">
     body{margin:0;padding:18px;background:var(--vscode-editor-background);color:var(--vscode-editor-foreground);font:13px/1.45 var(--vscode-font-family,system-ui,sans-serif)}
     main{display:grid;gap:12px;max-width:1180px;margin:auto}h1,h2,p{margin:0}.summary,.file{border:1px solid var(--vscode-panel-border);border-radius:8px;background:var(--vscode-editorWidget-background);padding:12px}.file.hot{border-color:var(--vscode-errorForeground)}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}.metrics span{display:grid;border:1px solid var(--vscode-panel-border);border-radius:7px;padding:8px;background:var(--vscode-input-background)}.metrics small{color:var(--vscode-descriptionForeground)}header{display:flex;justify-content:space-between;gap:12px}li{margin-top:4px;color:var(--vscode-foreground)}
-  </style><title>IntentDiff Diagnostics</title></head><body><main>
-    <h1>IntentDiff Diagnostics</h1>
+  </style><title>IntentumDiff Diagnostics</title></head><body><main>
+    <h1>IntentumDiff Diagnostics</h1>
     <section class="summary"><h2>Fuel policy</h2><p>Generated ${escapeHtml(report.generatedAt)}</p><div class="metrics">
       <span>${escapeHtml(formatFuel(report.aggregate.peakFuel))}<small>peak</small></span>
       <span>${escapeHtml(formatFuel(report.aggregate.totalFuel))}<small>total</small></span>
@@ -217,7 +217,7 @@ export function renderDiagnosticsReportHtml(report: DiagnosticsReport, options: 
 
 export function diagnosticsReportMarkdown(report: DiagnosticsReport): string {
   const lines = [
-    "# IntentDiff Diagnostics",
+    "# IntentumDiff Diagnostics",
     "",
     `Generated: ${report.generatedAt}`,
     "",

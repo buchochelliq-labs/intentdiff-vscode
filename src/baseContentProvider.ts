@@ -73,7 +73,7 @@ export class BaseContentProvider implements vscode.TextDocumentContentProvider, 
       }
       return await repository.show(identity.ref, identity.relativePath) as string;
     } catch (error) {
-      this.output.appendLine(`IntentDiff base git-extension read failed: ${messageOf(error)}`);
+      this.output.appendLine(`IntentumDiff base git-extension read failed: ${messageOf(error)}`);
       return undefined;
     }
   }

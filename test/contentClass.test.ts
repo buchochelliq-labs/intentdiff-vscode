@@ -5,7 +5,7 @@ import type { SemanticChange, SemanticDiff } from "../src/types";
 
 const codeNode: SemanticChange = { change_type: "ADDITION", new_node: { node_type: "function_definition", label: "f" } };
 const rustNode: SemanticChange = { change_type: "ADDITION", new_node: { node_type: "function_item", label: "f" } };
-const textNode: SemanticChange = { change_type: "ADDITION", new_node: { node_type: "text_line", label: "/.intentdiff" } };
+const textNode: SemanticChange = { change_type: "ADDITION", new_node: { node_type: "text_line", label: "/.intentumdiff" } };
 
 test("contentClassForParts maps languages and node shapes", () => {
   assert.equal(contentClassForParts("gitignore", undefined, [textNode]), "config");

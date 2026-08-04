@@ -11,10 +11,10 @@ async function main(): Promise<void> {
   const supportedLanguages = readSupportedLanguages(repoRoot, uvCacheDir);
   // Allow relocating the mutable fixture outside OneDrive-synced paths, where
   // sync locks cause EPERM during the suite's rmSync/mkdir fixture setup. Set
-  // INTENTDIFF_FIXTURE_DIR to a non-synced directory (the suite git-inits and
+  // INTENTUMDIFF_FIXTURE_DIR to a non-synced directory (the suite git-inits and
   // populates it from scratch).
-  const fixtureWorkspace = process.env.INTENTDIFF_FIXTURE_DIR
-    ? path.resolve(process.env.INTENTDIFF_FIXTURE_DIR)
+  const fixtureWorkspace = process.env.INTENTUMDIFF_FIXTURE_DIR
+    ? path.resolve(process.env.INTENTUMDIFF_FIXTURE_DIR)
     : path.join(
         extensionDevelopmentPath,
         "test",
@@ -40,13 +40,13 @@ async function main(): Promise<void> {
     try {
       const product = JSON.parse(fs.readFileSync(productJsonPath, "utf8"));
       const orig = product.nameShort || product.name || "Code";
-      product.nameShort = "IntentDiffTestVSCode";
-      product.name = "IntentDiffTestVSCode";
-      product.applicationName = "intentdiff-test-vscode";
+      product.nameShort = "IntentumDiffTestVSCode";
+      product.name = "IntentumDiffTestVSCode";
+      product.applicationName = "intentumdiff-test-vscode";
       // productQuality is read by the app for the singleton mutex seed.
-      product.quality = "intentdiff-test-" + Date.now();
+      product.quality = "intentumdiff-test-" + Date.now();
       fs.writeFileSync(productJsonPath, JSON.stringify(product, null, "	"), "utf8");
-      console.log("[runTests] patched product.json: " + orig + " -> IntentDiffTestVSCode");
+      console.log("[runTests] patched product.json: " + orig + " -> IntentumDiffTestVSCode");
     } catch (e) {
       console.warn("[runTests] could not patch product.json: " + e);
     }
@@ -64,31 +64,31 @@ async function main(): Promise<void> {
       // extension host starts in empty-workspace mode and updateWorkspaceFolders
       // is a no-op, causing the test to time out. The folder must exist BEFORE
       // launch — VS Code silently drops a nonexistent workspace path (the
-      // INTENTDIFF_FIXTURE_DIR relocation starts from nothing).
+      // INTENTUMDIFF_FIXTURE_DIR relocation starts from nothing).
       (fs.mkdirSync(fixtureWorkspace, { recursive: true }), fixtureWorkspace),
     ],
     extensionTestsEnv: {
       ELECTRON_RUN_AS_NODE: undefined,
-      INTENTDIFF_NODE_EXECUTABLE: process.execPath,
-      INTENTDIFF_REPO_ROOT: repoRoot,
-      INTENTDIFF_SUPPORTED_LANGUAGES: JSON.stringify(supportedLanguages),
-      INTENTDIFF_UV_CACHE_DIR: uvCacheDir,
-      INTENTDIFF_VSCODE_FIXTURE: fixtureWorkspace,
-      INTENTDIFF_VSCODE_LOG: path.join(fixtureWorkspace, ".intentdiff-fake-log.jsonl"),
-      INTENTDIFF_SCREENSHOT_DIR: path.join(extensionDevelopmentPath, "artifacts"),
+      INTENTUMDIFF_NODE_EXECUTABLE: process.execPath,
+      INTENTUMDIFF_REPO_ROOT: repoRoot,
+      INTENTUMDIFF_SUPPORTED_LANGUAGES: JSON.stringify(supportedLanguages),
+      INTENTUMDIFF_UV_CACHE_DIR: uvCacheDir,
+      INTENTUMDIFF_VSCODE_FIXTURE: fixtureWorkspace,
+      INTENTUMDIFF_VSCODE_LOG: path.join(fixtureWorkspace, ".intentumdiff-fake-log.jsonl"),
+      INTENTUMDIFF_SCREENSHOT_DIR: path.join(extensionDevelopmentPath, "artifacts"),
     },
   });
 }
 
 function readSupportedLanguages(repoRoot: string, uvCacheDir: string): string[] {
-  const script = "from intentdiff import SemanticDiffer; print(chr(10).join(SemanticDiffer().supported_languages()))";
+  const script = "from intentumdiff import SemanticDiffer; print(chr(10).join(SemanticDiffer().supported_languages()))";
   try {
     const output = execFileSync("uv", ["run", "--no-sync", "python", "-c", script], {
       cwd: repoRoot,
       encoding: "utf8",
       env: {
         ...process.env,
-        INTENTDIFF_ALLOW_VULNERABLE_WASMTIME: "1",
+        INTENTUMDIFF_ALLOW_VULNERABLE_WASMTIME: "1",
         UV_CACHE_DIR: uvCacheDir,
       },
       stdio: ["ignore", "pipe", "pipe"],
@@ -106,7 +106,7 @@ function readSupportedLanguages(repoRoot: string, uvCacheDir: string): string[] 
 
 function readParserEntryPointLanguages(repoRoot: string): string[] {
   const pyproject = fs.readFileSync(path.join(repoRoot, "pyproject.toml"), "utf8");
-  const section = pyproject.match(/\[project\.entry-points\."intentdiff\.parsers"\]\r?\n(?<body>[\s\S]*?)(?:\r?\n\[|$)/u);
+  const section = pyproject.match(/\[project\.entry-points\."intentumdiff\.parsers"\]\r?\n(?<body>[\s\S]*?)(?:\r?\n\[|$)/u);
   const languages = new Set(section?.groups?.body
     .split(/\r?\n/u)
     .map((line) => line.match(/^\s*([a-z0-9-]+)\s*=/iu)?.[1])

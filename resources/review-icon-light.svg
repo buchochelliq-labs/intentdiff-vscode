@@ -1,20 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="IntentDiff custom review">
-  <title>IntentDiff custom review</title>
-  <desc>Compact IntentDiff pillar with segmented semantic diff trails.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="IntentumDiff custom review">
+  <title>IntentumDiff custom review</title>
+  <desc>Compact IntentumDiff pillar with segmented semantic diff trails.</desc>
   <defs>
-    <linearGradient id="intentdiff-review-light-pillar" x1="5" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+    <linearGradient id="intentumdiff-review-light-pillar" x1="5" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#05a889"/>
       <stop offset=".55" stop-color="#0078c8"/>
       <stop offset="1" stop-color="#6741d9"/>
     </linearGradient>
-    <linearGradient id="intentdiff-review-light-trail" x1="11" y1="6" x2="22" y2="18" gradientUnits="userSpaceOnUse">
+    <linearGradient id="intentumdiff-review-light-trail" x1="11" y1="6" x2="22" y2="18" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#05a889" stop-opacity=".36"/>
       <stop offset=".55" stop-color="#0078c8"/>
       <stop offset="1" stop-color="#6741d9"/>
     </linearGradient>
   </defs>
-  <path fill="url(#intentdiff-review-light-pillar)" d="M6.5 2.5h5a1.8 1.8 0 0 1 1.8 1.8v15.4a1.8 1.8 0 0 1-1.8 1.8h-5a1.8 1.8 0 0 1-1.8-1.8v-2.4a1.8 1.8 0 0 1 1.8-1.8h1.2v-7H6.5a1.8 1.8 0 0 1-1.8-1.8V4.3a1.8 1.8 0 0 1 1.8-1.8Z"/>
-  <path stroke="url(#intentdiff-review-light-trail)" stroke-linecap="round" stroke-width="1.7" d="M12.6 6.2h6.5M12.6 10.1h4.7M19.2 10.1h2.8M12.6 14h7.2M12.6 17.9h4.2M19 17.9h2.4"/>
+  <path fill="url(#intentumdiff-review-light-pillar)" d="M6.5 2.5h5a1.8 1.8 0 0 1 1.8 1.8v15.4a1.8 1.8 0 0 1-1.8 1.8h-5a1.8 1.8 0 0 1-1.8-1.8v-2.4a1.8 1.8 0 0 1 1.8-1.8h1.2v-7H6.5a1.8 1.8 0 0 1-1.8-1.8V4.3a1.8 1.8 0 0 1 1.8-1.8Z"/>
+  <path stroke="url(#intentumdiff-review-light-trail)" stroke-linecap="round" stroke-width="1.7" d="M12.6 6.2h6.5M12.6 10.1h4.7M19.2 10.1h2.8M12.6 14h7.2M12.6 17.9h4.2M19 17.9h2.4"/>
   <circle cx="20.9" cy="6.2" r=".9" fill="#0969da"/>
   <circle cx="20.9" cy="14" r=".85" fill="#6741d9"/>
   <circle cx="22.7" cy="14" r=".75" fill="#5b3fd9"/>

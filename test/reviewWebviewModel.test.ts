@@ -349,7 +349,7 @@ test("dashboard aggregates fuel diagnostics and renders task-manager history", (
         ...sampleFile.diff?.metadata,
         engine_telemetry: {
           calls: [{
-            plugin: "src/intentdiff/wasm/js_ts_parser.wasm",
+            plugin: "src/intentumdiff/wasm/js_ts_parser.wasm",
             function: "process",
             language: "typescript",
             filename: "apps/review-shell/src/main.ts",
@@ -695,15 +695,15 @@ test("a non-code file (.gitignore) reads as content, not code behavior", () => {
     status: "ready",
     diff: {
       language: "gitignore",
-      change_groups: [{ kind: "MEANINGFUL_CHANGE", raw_change_indices: [0], new_labels: ["/.intentdiff"] }],
+      change_groups: [{ kind: "MEANINGFUL_CHANGE", raw_change_indices: [0], new_labels: ["/.intentumdiff"] }],
       changes: [{
         change_type: "ADDITION",
-        new_node: { label: "/.intentdiff", node_type: "text_line", position: { start_line: 85, start_col: 0, end_line: 85, end_col: 11 } },
+        new_node: { label: "/.intentumdiff", node_type: "text_line", position: { start_line: 85, start_col: 0, end_line: 85, end_col: 11 } },
       }],
     },
   };
   const panelHtml = renderPanelHtml(
-    buildReviewPanelModel(gitignoreFile, "node_modules\n", "node_modules\n/.intentdiff\n", "HEAD"),
+    buildReviewPanelModel(gitignoreFile, "node_modules\n", "node_modules\n/.intentumdiff\n", "HEAD"),
     { nonce: "abc123", cspSource: "vscode-resource:" },
   );
   // Content pill, not a Behavior/code claim.
@@ -749,7 +749,7 @@ test("rendered webviews escape labels and source text and include a nonce CSP", 
   assert.match(panelHtml, /class="diff-table"/u);
   assert.doesNotMatch(panelHtml, /id="monaco-diff-host"/u);
   assert.doesNotMatch(panelHtml, /class="product-brand"/u);
-  assert.doesNotMatch(panelHtml, />IntentDiff<\/span>/u);
+  assert.doesNotMatch(panelHtml, />IntentumDiff<\/span>/u);
   assert.match(panelHtml, /class="product-context"/u);
   assert.match(panelHtml, /<strong>src\/&lt;img src=x onerror=alert\(1\)&gt;\.py<\/strong>/u);
   assert.match(panelHtml, /data-review-view="semantic"/u);
@@ -863,7 +863,7 @@ test("dashboard renders compact cockpit with hover-pin docks and top signals onl
           change_type: "ADDITION",
           description: "Add review command",
           new_node: {
-            label: "intentdiff.openReviewPanel",
+            label: "intentumdiff.openReviewPanel",
             position: { start_line: 4, start_col: 0, end_line: 4, end_col: 8 },
           },
         },
@@ -978,7 +978,7 @@ test("panel diagnostics tab renders fuel telemetry, hotspots, and trace events",
         ...sampleFile.diff?.metadata,
         engine_telemetry: {
           calls: [{
-            plugin: "src/intentdiff/wasm/js_ts_parser.wasm",
+            plugin: "src/intentumdiff/wasm/js_ts_parser.wasm",
             function: "process",
             language: "typescript",
             filename: "apps/review-shell/src/main.ts",

@@ -112,7 +112,7 @@ export function modelFromArtifact(artifact: ReviewArtifact): ReviewShellModel {
   const summary = artifact.summary ?? {};
   const fileModels = files.map((file) => fileModel(file));
   return {
-    title: "IntentDiff Review",
+    title: "IntentumDiff Review",
     checkedFiles: Number(summary.checked_files ?? files.length),
     semanticChanges: Number(summary.semantic_changes ?? 0),
     guardrailViolations: Number(summary.guardrail_violations ?? 0),

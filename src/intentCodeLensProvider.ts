@@ -213,7 +213,7 @@ export class IntentHoverProvider implements vscode.HoverProvider {
     const md = new vscode.MarkdownString(undefined, true);
     md.isTrusted = true;
     const risk = riskSuffix(category);
-    md.appendMarkdown(`$(${category.icon}) **IntentDiff — ${category.label}**${risk}\n\n`);
+    md.appendMarkdown(`$(${category.icon}) **IntentumDiff — ${category.label}**${risk}\n\n`);
     // What changed (bold) + why it matters.
     md.appendMarkdown(`**${explanation?.what ?? intent.why}**\n\n`);
     // Prefer a cached LLM explanation; otherwise show deterministic + populate the
@@ -242,8 +242,8 @@ export class IntentHoverProvider implements vscode.HoverProvider {
     }];
     const panelArgs = [{ folderUri: context.folderUri, relativePath: context.relativePath }];
     md.appendMarkdown(
-      `[$(search) Peek before/after](${commandUri("intentdiff.peekIntent", peekArgs)})`
-      + ` · [$(list-tree) Open review panel](${commandUri("intentdiff.openReviewPanel", panelArgs)})`,
+      `[$(search) Peek before/after](${commandUri("intentumdiff.peekIntent", peekArgs)})`
+      + ` · [$(list-tree) Open review panel](${commandUri("intentumdiff.openReviewPanel", panelArgs)})`,
     );
     return new vscode.Hover(md);
   }
@@ -276,13 +276,13 @@ export class IntentCodeActionProvider implements vscode.CodeActionProvider {
     };
     return [
       action(
-        `IntentDiff: Explain intent (${intent.category.label})`,
-        "intentdiff.peekIntent",
+        `IntentumDiff: Explain intent (${intent.category.label})`,
+        "intentumdiff.peekIntent",
         [{ ...file, side: context.side, line: range.start.line, groupIndex: intent.groupIndex }],
       ),
-      action("IntentDiff: Open review panel", "intentdiff.openReviewPanel", [file]),
-      action("IntentDiff: Stage file", "intentdiff.reviewPanel.stageFile", [file]),
-      action("IntentDiff: Revert file", "intentdiff.reviewPanel.revertFile", [file]),
+      action("IntentumDiff: Open review panel", "intentumdiff.openReviewPanel", [file]),
+      action("IntentumDiff: Stage file", "intentumdiff.reviewPanel.stageFile", [file]),
+      action("IntentumDiff: Revert file", "intentumdiff.reviewPanel.revertFile", [file]),
     ];
   }
 }
@@ -320,7 +320,7 @@ export class IntentCodeLensProvider implements vscode.CodeLensProvider {
       return new vscode.CodeLens(range, {
         title: lensTitle(lens, explanation),
         tooltip: explanation ? `${stripCode(explanation.what)} — ${explanation.why}` : `${lens.category.label} — Peek intent`,
-        command: "intentdiff.peekIntent",
+        command: "intentumdiff.peekIntent",
         arguments: [{
           folderUri: context.folderUri,
           relativePath: context.relativePath,

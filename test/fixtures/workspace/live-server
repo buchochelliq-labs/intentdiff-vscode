@@ -3,12 +3,12 @@ const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const readline = require("node:readline");
 
-const logPath = process.env.INTENTDIFF_VSCODE_LOG;
+const logPath = process.env.INTENTUMDIFF_VSCODE_LOG;
 // argv: [node, <script>, <workspaceRoot>, --stdio, ...] - the extension spawns
 // with cwd pinned to the EXTENSION path (executable-hijack hardening), so the
 // workspace root must come from argv, never from process.cwd().
 const repoRoot = require("node:path").resolve(process.argv[2] || process.cwd());
-const LANGUAGE_SMOKE_FILE = ".intentdiff-language-smoke.json";
+const LANGUAGE_SMOKE_FILE = ".intentumdiff-language-smoke.json";
 
 function log(entry) {
   if (!logPath) {
@@ -70,7 +70,7 @@ lines.on("line", (line) => {
       },
       commit_diff: fakeCommitDiff(),
     });
-    if (fs.existsSync(path.join(repoRoot, ".git", "intentdiff-slow-review"))) {
+    if (fs.existsSync(path.join(repoRoot, ".git", "intentumdiff-slow-review"))) {
       setTimeout(sendReview, 1800);
       return;
     }
@@ -185,7 +185,7 @@ function fakeCommitDiff() {
   }
   const fileDiffs = [];
   for (const entry of gitStatusEntries()) {
-    if (entry.path === "binary.dat" || entry.path.startsWith(".intentdiff-")) {
+    if (entry.path === "binary.dat" || entry.path.startsWith(".intentumdiff-")) {
       continue;
     }
     if (entry.path === "review-readme.md") {
@@ -410,7 +410,7 @@ function fakeDeletedFileDiff(file, language = "yaml", explicitLabel) {
 }
 
 function fakeReadmeDiff() {
-  const textDiff = "| `intentdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override [+for active-file live diffs. Set `null` to use `intentdiff.yaml`. ]|";
+  const textDiff = "| `intentumdiff.fuel` | `[+\"i]n[-ull][+f\"]` |[- Optional] `--fuel` override [+for active-file live diffs. Set `null` to use `intentumdiff.yaml`. ]|";
   return {
     old_filename: "review-readme.md",
     new_filename: "review-readme.md",

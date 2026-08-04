@@ -26,7 +26,7 @@ export function diffToDiagnostics(diff: SemanticDiff): DiagnosticLike[] {
     diagnostics.push({
       severity: violation.severity === "immutable" ? "error" : "warning",
       message: violation.message,
-      source: "IntentDiff",
+      source: "IntentumDiff",
       position: violation.position,
       code: violation.rule_id,
     });
@@ -37,7 +37,7 @@ export function diffToDiagnostics(diff: SemanticDiff): DiagnosticLike[] {
     diagnostics.push({
       severity: isFuel ? "error" : "warning",
       message: parseError,
-      source: "IntentDiff",
+      source: "IntentumDiff",
       position: { start_line: 0, start_col: 0, end_line: 0, end_col: 1 },
       code: isFuel ? "fuel_exceeded" : "parse_error",
     });
@@ -46,7 +46,7 @@ export function diffToDiagnostics(diff: SemanticDiff): DiagnosticLike[] {
     diagnostics.push({
       severity: "warning",
       message: "Parser fallback used; semantic precision may be reduced.",
-      source: "IntentDiff",
+      source: "IntentumDiff",
       position: { start_line: 0, start_col: 0, end_line: 0, end_col: 1 },
       code: "parser_fallback",
     });
@@ -55,7 +55,7 @@ export function diffToDiagnostics(diff: SemanticDiff): DiagnosticLike[] {
     diagnostics.push({
       severity: "warning",
       message: fuelHotspotMessage(hotspot),
-      source: "IntentDiff",
+      source: "IntentumDiff",
       position: { start_line: 0, start_col: 0, end_line: 0, end_col: 1 },
       code: "fuel_hotspot",
     });
@@ -67,7 +67,7 @@ export function diffToDiagnostics(diff: SemanticDiff): DiagnosticLike[] {
       diagnostics.push({
         severity: "information",
         message: `Refactoring detected: ${label}`,
-        source: "IntentDiff",
+        source: "IntentumDiff",
         code: "refactoring",
       });
     }
@@ -266,28 +266,28 @@ export function diffToBaseDecorations(diff: SemanticDiff): DecorationLike[] {
 export function statusText(diff: SemanticDiff): string {
   const summary = summarizeDiff(diff);
   if (summary.guardrailCount > 0) {
-    return `IntentDiff: ${summary.guardrailCount} guardrail`;
+    return `IntentumDiff: ${summary.guardrailCount} guardrail`;
   }
   if ((diff.parse_errors ?? []).some((error) => error.includes("FUEL_EXCEEDED"))) {
-    return "IntentDiff: fuel exceeded";
+    return "IntentumDiff: fuel exceeded";
   }
   if ((diff.parse_errors?.length ?? 0) > 0) {
-    return `IntentDiff: ${diff.parse_errors?.length ?? 0} parser warning`;
+    return `IntentumDiff: ${diff.parse_errors?.length ?? 0} parser warning`;
   }
   if (diff.is_fallback === true) {
-    return "IntentDiff: parser fallback";
+    return "IntentumDiff: parser fallback";
   }
   const hotspotCount = fuelHotspots(diff).length;
   if (hotspotCount > 0) {
-    return `IntentDiff: ${hotspotCount} fuel warning${hotspotCount === 1 ? "" : "s"}`;
+    return `IntentumDiff: ${hotspotCount} fuel warning${hotspotCount === 1 ? "" : "s"}`;
   }
   if (summary.styleOnly) {
-    return "IntentDiff: style-only";
+    return "IntentumDiff: style-only";
   }
   if (summary.changeCount === 0) {
-    return "IntentDiff: clean";
+    return "IntentumDiff: clean";
   }
-  return `IntentDiff: ${summary.changeCount} changes`;
+  return `IntentumDiff: ${summary.changeCount} changes`;
 }
 
 function fuelHotspots(diff: SemanticDiff): Record<string, unknown>[] {

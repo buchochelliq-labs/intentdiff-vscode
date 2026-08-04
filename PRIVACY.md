@@ -1,6 +1,6 @@
-# IntentDiff Privacy Policy — your code stays yours
+# IntentumDiff Privacy Policy — your code stays yours
 
-**Privacy-first, by design.** IntentDiff is built so that your source code stays
+**Privacy-first, by design.** IntentumDiff is built so that your source code stays
 on your machine. In its default configuration, **nothing about your code — not
 the files, not the diffs, not the semantic analysis — leaves your computer.** We
 do not run a server that sees your code, we do not bundle an API key, and we do
@@ -15,7 +15,7 @@ ever reach the network, and the controls you have over both.
 
 Everything that matters runs locally:
 
-- **The semantic diff engine** (`intentdiff` / LiveServer) parses and compares
+- **The semantic diff engine** (`intentumdiff` / LiveServer) parses and compares
   your code as a local process. Your files never go to a remote service.
 - **Semantic decorations, the Semantic Changes tree, guardrails, and the review
   panel** are all rendered locally from that local analysis.
@@ -24,7 +24,7 @@ Everything that matters runs locally:
   the structure of the change (added/removed/renamed, no-op stub, returns a
   value, etc.). No network, no LLM, no code leaving the machine.
 
-If you never change a setting, IntentDiff is a fully local tool.
+If you never change a setting, IntentumDiff is a fully local tool.
 
 > The "fuel telemetry" you may see in the **Diagnostics** view is local
 > performance data from the diff engine (how much parser budget a file used). It
@@ -34,14 +34,14 @@ If you never change a setting, IntentDiff is a fully local tool.
 
 ## 2. The opt-in LLM intent explainer (OFF by default)
 
-IntentDiff can *optionally* use a language model to write richer intent
+IntentumDiff can *optionally* use a language model to write richer intent
 explanations. It is **off by default** and only does anything after you
-explicitly enable it (`intentdiff.intent.explainer: "llm"`).
+explicitly enable it (`intentumdiff.intent.explainer: "llm"`).
 
 **Even when enabled, we never send your raw source code to a cloud model by
 default.** The model is grounded in a **locally-derived fact sheet** — the
 *semantics* of a change, not the code itself. This is controlled by
-`intentdiff.intent.llm.codeSharing`:
+`intentumdiff.intent.llm.codeSharing`:
 
 | Level | What is sent to the model | Symbol names / types | Function bodies / literal values |
 |---|---|:---:|:---:|
@@ -58,7 +58,7 @@ nothing, empty no-op body") without revealing your code.
 
 **The hard guarantee for `full`:** verbatim source code is **only ever sent to a
 local endpoint** (a `localhost` model such as Ollama, LM Studio, or vLLM). If you
-select `full` while pointing at a **cloud** provider (or GitHub Copilot), IntentDiff
+select `full` while pointing at a **cloud** provider (or GitHub Copilot), IntentumDiff
 **automatically downgrades to `signatures`** so your raw code never leaves the
 machine. The only way source is transmitted at all is to a model running on your
 own hardware, where it does not leave your machine anyway.
@@ -73,9 +73,9 @@ Additional protections when the explainer is enabled:
 - **Bring Your Own Key (BYOK).** We never bundle an API key and never run a paid
   proxy. If you use a cloud BYOK provider, your key is stored in **VS Code
   SecretStorage** (never in `settings.json`, so it is not synced or committed) via
-  **IntentDiff: Set Intent Explainer Key**, and can be removed with **IntentDiff:
+  **IntentumDiff: Set Intent Explainer Key**, and can be removed with **IntentumDiff:
   Clear Intent Explainer Key**.
-- **Use your existing Copilot.** With the `vscode-lm` provider, IntentDiff uses
+- **Use your existing Copilot.** With the `vscode-lm` provider, IntentumDiff uses
   the model you already have through VS Code's Language Model API — VS Code shows
   its own consent prompt, and no API key is needed. (Copilot is a cloud service,
   so `full` is downgraded to `signatures` there too.)
@@ -100,12 +100,12 @@ cleanly.
 
 ## 3. Schema fetching (no code, default cache-only)
 
-For JSON/YAML review, IntentDiff can resolve a file's `$schema` to improve review
-quality. This is controlled by `intentdiff.schemas.fetchMode` and **defaults to
+For JSON/YAML review, IntentumDiff can resolve a file's `$schema` to improve review
+quality. This is controlled by `intentumdiff.schemas.fetchMode` and **defaults to
 `cache-only`** (no network requests). When set to `auto`, it fetches **schema
 definitions by URL** — it sends the schema URL to fetch a public schema, **never
 your file contents or diffs**. Set it to `off` to disable entirely, and
-`intentdiff.schemas.allowPrivateHosts` (default `false`) blocks private/internal
+`intentumdiff.schemas.allowPrivateHosts` (default `false`) blocks private/internal
 hosts.
 
 ---

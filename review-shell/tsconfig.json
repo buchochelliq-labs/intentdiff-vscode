@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "outDir": "out",
     "rootDir": "src",
-    // Stop the upward node_modules walk: nested inside intentdiff-vscode, tsc would
+    // Stop the upward node_modules walk: nested inside intentumdiff-vscode, tsc would
     // otherwise pick up the extension's @types (jsdom/parse5 clash the standalone
     // monorepo layout never had).
     "typeRoots": ["./node_modules/@types"]

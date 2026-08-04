@@ -81,12 +81,12 @@ export class ReviewPollingService {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.host.output.appendLine(`IntentDiff git status watcher unavailable: ${message}`);
+      this.host.output.appendLine(`IntentumDiff git status watcher unavailable: ${message}`);
     }
   }
 
   private pollIntervalMs(): number {
-    const value = vscode.workspace.getConfiguration("intentdiff").get("review.pollIntervalMs", 5000);
+    const value = vscode.workspace.getConfiguration("intentumdiff").get("review.pollIntervalMs", 5000);
     return Math.max(500, Number.isFinite(value) ? value : 5000);
   }
 }

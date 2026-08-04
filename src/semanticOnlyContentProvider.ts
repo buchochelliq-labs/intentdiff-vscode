@@ -114,7 +114,7 @@ export class SemanticOnlyContentProvider implements vscode.TextDocumentContentPr
     assertSafeRelativePath(identity.relativePath);
     const session = this.sessions.get(identity.id);
     if (!session) {
-      return "IntentDiff: semantic-only diff session expired.";
+      return "IntentumDiff: semantic-only diff session expired.";
     }
     return identity.side === "base" ? session.pair.baseText : session.pair.modifiedText;
   }
