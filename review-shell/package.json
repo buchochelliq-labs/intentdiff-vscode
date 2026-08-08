@@ -9,7 +9,7 @@
     "build:web": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "electron": "^42.4.0"
+    "electron": "^42.5.1"
   },
   "devDependencies": {
     "typescript": "^5.4.5"
