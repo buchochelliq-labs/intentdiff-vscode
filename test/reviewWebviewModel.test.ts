@@ -957,8 +957,11 @@ test("panel renders beta product pages and folds image review into the Diff tab"
   assert.match(panelHtml, /data-diff-mode="asset"/u);
   assert.match(panelHtml, /class="file-mode-badge">Perceptual diff<\/span>/u);
   assert.match(panelHtml, /class="pill filter-pill mode-pill" type="button" data-filter="diff-mode">visual diff<\/button>/u);
-  assert.match(panelHtml, /Perceptual image data unavailable/u);
-  assert.match(panelHtml, /Run the asset diff command for this image/u);
+  // An image with no engine answer yet says the comparison is running, not that data is
+  // permanently missing and the user should go run something.
+  assert.match(panelHtml, /Comparing this image/u);
+  // Nor does it tell the reader to go and run something: the review already asked the engine.
+  assert.doesNotMatch(panelHtml, /Run the asset diff command/u);
   assert.doesNotMatch(panelHtml, /Attach asset JSON/u);
   assert.match(panelHtml, /No image-processing logic runs in the VS Code webview/u);
   assert.doesNotMatch(panelHtml, /Binary \/ Image/u);
@@ -1193,26 +1196,13 @@ test("asset viewer enables onion-skin with before/after layers and numbered hots
   assert.match(panelHtml, /function selectAssetHotspot/u);
 });
 
-test("panel renders changed image asset preview before perceptual artifacts exist", () => {
+function imagePanelHtml(metadata: Record<string, unknown>): string {
   const imageFile: ReviewFile = {
     ...sampleFile,
     relativePath: "image.png",
-    diff: {
-      ...sampleFile.diff,
-      language: "png",
-      metadata: {
-        asset_diff: {
-          status: "preview",
-          summary: "image.png is a changed image asset.",
-          artifacts: {
-            changed: "C:\\repo\\image.png",
-          },
-        },
-      },
-    },
+    diff: { ...sampleFile.diff, language: "png", metadata },
   };
-
-  const panelHtml = renderPanelHtml(
+  return renderPanelHtml(
     buildReviewPanelModel(imageFile, "", "", "HEAD"),
     {
       nonce: "abc123",
@@ -1220,12 +1210,55 @@ test("panel renders changed image asset preview before perceptual artifacts exis
       resolveResourceUri: (resourcePath) => `vscode-resource:${resourcePath.replaceAll("\\", "/")}`,
     },
   );
+}
+
+test("panel reports the engine's reason when an image has nothing to compare against", () => {
+  // An added image genuinely has no before version. The engine says so, and the panel repeats
+  // it — the state this replaced instead claimed perceptual evidence was on its way and then
+  // never produced any, because nothing had asked the engine for it.
+  const panelHtml = imagePanelHtml({
+    working_tree_image: "C:\\repo\\image.png",
+    asset_diff: {
+      kind: "asset_diff",
+      status: "skipped",
+      change_type: "A",
+      reason: "Added image has no before asset for perceptual comparison.",
+    },
+  });
 
   assert.match(panelHtml, /Image asset review/u);
+  assert.match(panelHtml, /Nothing to compare against/u);
+  assert.match(panelHtml, /Added image has no before asset/u);
+  // The user's own file is still shown, so the reviewer can see what was added.
   assert.match(panelHtml, /Working tree image/u);
   assert.match(panelHtml, /vscode-resource:C:\/repo\/image\.png/u);
-  assert.match(panelHtml, /Perceptual diff pending/u);
-  assert.doesNotMatch(panelHtml, /Perceptual image data unavailable/u);
+  assert.doesNotMatch(panelHtml, /Perceptual diff pending/u);
+});
+
+test("panel says the comparison is running, and invents nothing, before the engine answers", () => {
+  const panelHtml = imagePanelHtml({ working_tree_image: "C:\\repo\\image.png" });
+
+  assert.match(panelHtml, /Comparing this image/u);
+  // No metrics, no artifacts, no hotspots until the engine has actually produced them.
+  // (Assert on rendered copy, not class names — the stylesheet mentions every class.)
+  assert.doesNotMatch(panelHtml, /Pixels changed/u);
+  assert.doesNotMatch(panelHtml, /Changed-region hotspots/u);
+  assert.doesNotMatch(panelHtml, /Channel histogram/u);
+});
+
+test("panel reports a failed perceptual request as unavailable, not as a comparison", () => {
+  const panelHtml = imagePanelHtml({
+    working_tree_image: "C:\\repo\\image.png",
+    asset_diff: {
+      kind: "asset_diff",
+      status: "unavailable",
+      reason: "asset diff failed: image decoded dimensions too large",
+    },
+  });
+
+  assert.match(panelHtml, /Perceptual comparison unavailable/u);
+  assert.match(panelHtml, /image decoded dimensions too large/u);
+  assert.doesNotMatch(panelHtml, /Pixels changed/u);
 });
 
 test("message guard accepts only whitelisted webview commands", () => {

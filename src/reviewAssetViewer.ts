@@ -28,6 +28,7 @@ export function assetDiffFromMetadata(metadata: Record<string, unknown> | undefi
   return {
     status: typeof raw.status === "string" ? raw.status : undefined,
     summary: typeof raw.summary === "string" ? raw.summary : undefined,
+    reason: typeof raw.reason === "string" ? raw.reason : undefined,
     changed_pixel_percentage: typeof raw.changed_pixel_percentage === "number" ? raw.changed_pixel_percentage : null,
     mean_absolute_error: typeof raw.mean_absolute_error === "number" ? raw.mean_absolute_error : null,
     root_mean_squared_error: typeof raw.root_mean_squared_error === "number" ? raw.root_mean_squared_error : null,

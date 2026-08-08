@@ -1,0 +1,8 @@
+{
+    "intentdiff.ref": "HEAD",
+    "intentdiff.debounceMs": 50,
+    "intentdiff.review.pollIntervalMs": 500,
+    "intentdiff.diff.contextLines": 3,
+    "intentdiff.trace": true,
+    "intentdiff.enabled": true
+}

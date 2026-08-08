@@ -225,6 +225,12 @@ export interface ReviewPanelModel {
   /** Optional AI-drafted release narrative (BYOK/Copilot). Filled asynchronously. */
   releaseNarrative?: string;
   assetDiff?: ReviewAssetDiff;
+  /**
+   * The changed image itself, on disk. NOT an engine artifact — it is shown only when the
+   * engine has no comparison to offer (an added or deleted image), so the reader still sees
+   * the file under review. Everything in `assetDiff` comes from the engine.
+   */
+  workingTreeImage?: string;
   semanticBaseText?: string;
   semanticModifiedText?: string;
   semanticGaps?: SemanticGap[];
@@ -242,6 +248,8 @@ export interface ReviewPanelModel {
 export interface ReviewAssetDiff {
   status?: string;
   summary?: string;
+  /** Why there is no comparison, when the engine reported `skipped`/`unavailable`. */
+  reason?: string;
   changed_pixel_percentage?: number | null;
   mean_absolute_error?: number | null;
   root_mean_squared_error?: number | null;
@@ -438,6 +446,9 @@ export function buildReviewPanelModel(
     diffRows,
     ref,
     assetDiff: assetDiffFromMetadata(file.diff?.metadata),
+    workingTreeImage: typeof file.diff?.metadata?.working_tree_image === "string"
+      ? file.diff.metadata.working_tree_image
+      : undefined,
     semanticBaseText: semanticPair?.baseText,
     semanticModifiedText: semanticPair?.modifiedText,
     semanticGaps: semanticPair?.gaps,
@@ -713,7 +724,9 @@ function renderTextDiffWorkbench(model: ReviewPanelModel): string {
 function renderAssetDiffWorkbench(model: ReviewPanelModel, options: RenderOptions): string {
   const assetDiff = model.assetDiff;
   const hasAssetDiff = assetDiff !== undefined && assetDiff.status === "compared";
-  const hasPreviewAsset = assetDiff !== undefined && assetDiff.status !== "compared";
+  // The engine answered, but with a reason rather than a comparison: an added or deleted image
+  // has no counterpart, dimensions can differ under a strict policy, and a request can fail.
+  const hasEngineVerdict = assetDiff !== undefined && assetDiff.status !== "compared";
   const artifacts = assetDiff?.artifacts ?? {};
   const hotspots = assetDiff?.hotspots ?? [];
   const histograms = assetDiff?.histograms;
@@ -771,25 +784,25 @@ function renderAssetDiffWorkbench(model: ReviewPanelModel, options: RenderOption
             ${assetArtifact("Overlay", artifacts.overlay, options)}
           </div>
         </details>
-      ` : hasPreviewAsset ? `
+      ` : hasEngineVerdict ? `
         <div class="asset-diff-summary asset-preview-summary">
           <div>
             <p class="eyebrow">Image asset review</p>
-            <h2>${escapeHtml(assetDiff?.summary ?? "Image asset changed")}</h2>
+            <h2>${escapeHtml(assetDiff?.summary ?? assetDiff?.reason ?? "No perceptual comparison for this image")}</h2>
           </div>
           <div class="asset-metric-strip" aria-label="Image asset status">
-            ${metricTile("Status", assetDiff?.status ?? "preview")}
+            ${metricTile("Status", assetDiff?.status ?? "unavailable")}
             ${metricTile("File", model.file.relativePath.split("/").pop() ?? model.file.relativePath)}
           </div>
         </div>
-        <div class="asset-review-grid asset-preview-grid" aria-label="Changed image preview">
+        <div class="asset-review-grid asset-preview-grid" aria-label="Changed image">
           <section class="asset-primary-visual">
-            ${assetArtifact("Working tree image", artifacts.changed ?? artifacts.after ?? artifacts.preview, options)}
+            ${assetArtifact("Working tree image", model.workingTreeImage, options)}
           </section>
           <aside class="asset-review-panel">
-            <h3>Perceptual diff pending</h3>
-            <p>This image is tracked by the review, but before/after perceptual artifacts have not been generated yet.</p>
-            <p class="boundary-note">Use the asset diff workflow to add overlay, heatmap, pixel mask, histogram, and hotspot evidence.</p>
+            <h3>${escapeHtml(assetStatusHeading(assetDiff?.status))}</h3>
+            <p>${escapeHtml(assetDiff?.reason ?? assetDiff?.summary ?? "The engine did not return a perceptual comparison for this image.")}</p>
+            <p class="boundary-note">Overlay, heatmap, mask, histogram and hotspot evidence needs both a before and an after image.</p>
           </aside>
         </div>
       ` : `
@@ -797,14 +810,25 @@ function renderAssetDiffWorkbench(model: ReviewPanelModel, options: RenderOption
           <div class="insight-mark">${iconSvg("image")}</div>
           <div>
             <p class="eyebrow">Perceptual asset diff</p>
-            <h2>${isImageLikePath(model.file.relativePath) ? "Perceptual image data unavailable" : "No visual asset selected"}</h2>
-            <p>${isImageLikePath(model.file.relativePath) ? "Run the asset diff command for this image to populate original, changed, overlay, heatmap, hotspot, and histogram data here." : "Open a changed PNG, JPG, JPEG, or WEBP asset to review perceptual diff output here."}</p>
+            <h2>${isImageLikePath(model.file.relativePath) ? "Comparing this image..." : "No visual asset selected"}</h2>
+            <p>${isImageLikePath(model.file.relativePath) ? "The engine is decoding both versions and rendering the overlay, heatmap, mask, hotspot and histogram evidence. This view updates when it answers." : "Open a changed PNG, JPG, JPEG, or WEBP asset to review perceptual diff output here."}</p>
             <p class="boundary-note">This view renders Rust JSON and generated artifacts only. No image-processing logic runs in the VS Code webview.</p>
           </div>
         </div>
       `}
     </section>
   </div>`;
+}
+
+/** Name the engine's non-comparison verdict for what it is, rather than implying more is coming. */
+function assetStatusHeading(status: string | undefined): string {
+  if (status === "skipped") {
+    return "Nothing to compare against";
+  }
+  if (status === "dimension_mismatch") {
+    return "Dimensions changed";
+  }
+  return "Perceptual comparison unavailable";
 }
 
 function dashboardFile(

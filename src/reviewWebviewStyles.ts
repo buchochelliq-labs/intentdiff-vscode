@@ -449,7 +449,13 @@ export function styles(): string {
     .asset-diff-toolbar { border-bottom:1px solid var(--line); }
     .asset-diff-summary { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; padding:16px; border-bottom:1px solid rgba(79,214,255,.16); background:radial-gradient(circle at 86% 12%,rgba(79,214,255,.11),transparent 30%),linear-gradient(180deg,rgba(14,29,49,.8),rgba(8,18,32,.42)); }
     .asset-diff-summary h2 { margin:2px 0 0; font-size:17px; line-height:1.35; color:var(--bright-fg-strong); }
-    .asset-metric-strip { display:grid; grid-template-columns:repeat(4,minmax(84px,1fr)); gap:8px; min-width:min(520px,48vw); }
+    .asset-metric-strip { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(84px,max-content); gap:8px; }
+    /* The strip previously reserved four columns and min-width:min(520px,48vw) regardless of
+       how many tiles it held. The preview variant renders TWO, so in the summary's
+       minmax(0,1fr) auto grid the strip claimed 520px+ and starved the heading beside it down
+       to roughly eight characters — the message wrapped one word per line. Sizing to actual
+       content fixes every variant rather than special-casing this one. (#25) */
+    .asset-diff-summary > div:first-child { min-width:0; }
     .asset-review-grid { min-height:0; display:grid; grid-template-columns:minmax(0,1fr) minmax(250px,28%); gap:12px; padding:14px; }
     .asset-primary-visual { min-width:0; border:1px solid rgba(79,214,255,.22); border-radius:10px; overflow:hidden; background:radial-gradient(circle at 50% 0%,rgba(79,214,255,.1),transparent 32%),var(--bg); }
     .asset-primary-visual .asset-artifact { border:0; border-radius:0; background:transparent; height:100%; }

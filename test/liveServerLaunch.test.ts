@@ -1,5 +1,6 @@
 // #100 Phase C — the native-by-default launch chooser. Pure functions from config.ts (vscode-free).
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import * as path from "node:path";
 
@@ -110,4 +111,53 @@ test("bundledLiveServerPath probes <ext>/native/<exe> with an injected exists", 
     expected,
   );
   assert.equal(bundledLiveServerPath("C:/ext", () => false), undefined);
+});
+
+// The monorepo root, 4 hops up from out/test/. Absent in the extracted intentumdiff-vscode repo
+// (#82 split), where there is no crate or staging script to check against.
+const repoRoot = path.join(__dirname, "..", "..", "..", "..");
+
+/** What `bundledLiveServerPath` actually probes for, asked of the function rather than of a
+ *  copy of its platform expression — a copy would drift with the thing it is meant to pin. */
+function probedBinaryName(): string {
+  let probed = "";
+  bundledLiveServerPath("C:/ext", (candidate) => {
+    probed = candidate;
+    return false;
+  });
+  return path.basename(probed, path.extname(probed));
+}
+
+// This exact mismatch shipped: the staged binary kept its pre-rebrand `intentdiff-` name while
+// the lookup had moved to `intentumdiff-`, so the extension quietly fell back to the python
+// engine and every install believed it was running native.
+test("the bundled binary name is the one the native live-server crate builds", () => {
+  const cargoPath = path.join(repoRoot, "crates", "live-server", "Cargo.toml");
+  if (!existsSync(cargoPath)) {
+    return;
+  }
+  const built = /\[\[bin\]\][\s\S]*?name\s*=\s*"([^"]+)"/.exec(readFileSync(cargoPath, "utf8"));
+  assert.ok(built, "crates/live-server/Cargo.toml declares no [[bin]] name");
+  assert.equal(
+    probedBinaryName(),
+    built[1],
+    "the extension probes for a binary name the live-server crate does not build",
+  );
+});
+
+test("the staging scripts copy the binary name the extension probes for", () => {
+  const scripts = ["sync-local-dev.ps1", "install-vscode-extension.ps1"]
+    .map((name) => path.join(repoRoot, "scripts", name))
+    .filter((candidate) => existsSync(candidate));
+  if (scripts.length === 0) {
+    return;
+  }
+  const expected = `${probedBinaryName()}.exe`;
+  for (const script of scripts) {
+    const source = readFileSync(script, "utf8");
+    assert.ok(
+      source.includes(expected),
+      `${path.basename(script)} does not stage ${expected}`,
+    );
+  }
 });
