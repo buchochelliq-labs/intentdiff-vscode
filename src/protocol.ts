@@ -34,11 +34,20 @@ export interface ReviewFileEnvelope {
   response: LiveResponse;
 }
 
+/** The engine's perceptual manifest for one image, carried through untouched. */
+export interface AssetDiffEnvelope {
+  seq: number;
+  path: string;
+  manifest: Record<string, unknown>;
+  response: LiveResponse;
+}
+
 export type ClientEvent =
   | { kind: "ready"; ready: ReadyMessage }
   | { kind: "diff"; result: DiffResultEnvelope }
   | { kind: "review"; result: ReviewResultEnvelope }
   | { kind: "review_file"; result: ReviewFileEnvelope }
+  | { kind: "asset_diff"; result: AssetDiffEnvelope }
   | { kind: "error"; seq: number; error: { code: string; message: string } }
   | { kind: "malformed"; message: string; line: string };
 
@@ -59,6 +68,7 @@ export class LiveServerClient {
   private readonly seqToPath = new Map<number, string>();
   private readonly seqToDiffKey = new Map<number, string>();
   private readonly seqToDiffPurpose = new Map<number, DiffRequestPurpose>();
+  private readonly seqToAssetPath = new Map<number, string>();
   private latestReviewSeq = 0;
   private readonly listeners: Array<(event: ClientEvent) => void> = [];
   ready: ReadyMessage | undefined;
@@ -113,6 +123,29 @@ export class LiveServerClient {
       ...(options.stream !== undefined ? { stream: options.stream } : {}),
     });
     return nextSeq;
+  }
+
+  /**
+   * Ask the engine for one image's perceptual diff against `ref`.
+   *
+   * Only the path and the ref go over the wire: the *before* bytes live in git's object
+   * store, and materialising them is the engine's job. The extension never opens an image.
+   */
+  assetDiff(path: string, options: { ref?: string } = {}): number {
+    const nextSeq = ++this.seq;
+    this.seqToAssetPath.set(nextSeq, path);
+    this.send({
+      op: "asset_diff",
+      seq: nextSeq,
+      path,
+      ...(options.ref ? { ref: options.ref } : {}),
+    });
+    return nextSeq;
+  }
+
+  /** Forget an asset request once its outcome (result or error) has been handled. */
+  forgetAssetDiff(seq: number): void {
+    this.seqToAssetPath.delete(seq);
   }
 
   cancel(pathOrSeq: string | number): void {
@@ -183,6 +216,19 @@ export class LiveServerClient {
         return;
       }
       this.emit({ kind: "diff", result: { path, seq, purpose, response } });
+      return;
+    }
+
+    if (response.op === "asset_diff" && response.result) {
+      const path = this.seqToAssetPath.get(seq);
+      if (path === undefined) {
+        return;
+      }
+      this.seqToAssetPath.delete(seq);
+      this.emit({
+        kind: "asset_diff",
+        result: { seq, path, manifest: response.result, response },
+      });
       return;
     }
 

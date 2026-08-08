@@ -4,7 +4,6 @@ import { existsSync } from "fs";
 import { writeFile } from "fs/promises";
 import * as vscode from "vscode";
 import { BaseContentProvider } from "./baseContentProvider";
-import { AssetCompareService } from "./assetCompareService";
 import { ReviewTelemetryService } from "./reviewTelemetryService";
 import { ServerSessionManager, type LiveServerFailureDetails, type ServerSession } from "./serverSessionManager";
 import {
@@ -25,7 +24,6 @@ import {
   readReviewGroupingMode,
   readSemanticOnlyOptions,
   resolveExecutableForFolder,
-  settingsForFolder,
   workspaceVenvIntentumDiffCandidates,
   type NativeDiffMode,
 } from "./extensionSettings";
@@ -73,7 +71,13 @@ import {
   statusText,
   summarizeDiff,
 } from "./mapper";
-import { LiveServerClient, type DiffResultEnvelope, type ReviewFileEnvelope, type ReviewResultEnvelope } from "./protocol";
+import {
+  LiveServerClient,
+  type AssetDiffEnvelope,
+  type DiffResultEnvelope,
+  type ReviewFileEnvelope,
+  type ReviewResultEnvelope,
+} from "./protocol";
 import { ProcessLineTransport } from "./processTransport";
 import {
   nextReviewFileGroupingMode,
@@ -191,6 +195,8 @@ import {
   requestKey,
   reviewGroupingModeLabel,
   reviewKey,
+  withAssetDiffFailure,
+  withEngineAssetDiff,
 } from "./reviewAssetDiffs";
 
 interface IncrementalReviewRequest {
@@ -242,14 +248,14 @@ class PysdController implements vscode.Disposable {
   }>();
   private readonly reviewSlowTimers = new Map<string, NodeJS.Timeout>();
   private readonly incrementalReviewRequests = new Map<string, IncrementalReviewRequest>();
+  /** In-flight perceptual asset requests, keyed like every other protocol request. */
+  private readonly assetDiffRequests = new Map<string, {
+    folderUri: string;
+    relativePath: string;
+    generation: number;
+  }>();
   private readonly streamedReviewFiles = new Map<string, Set<string>>();
   private readonly reviewSnapshots = new Map<string, ReviewRefreshSnapshot>();
-  private readonly assetCompare = new AssetCompareService({
-    output: this.output,
-    resolvedCommitFor: (folderUri) => this.reviewSnapshots.get(folderUri.toString())?.resolvedCommit,
-    settingsForFolder: (folder) => settingsForFolder(folder),
-    onCompareReady: () => this.refreshOpenReviewPanel(),
-  });
   private readonly telemetry: ReviewTelemetryService;
   private readonly liveServerWarningKeys = new Set<string>();
   private reviewCrossFileEntries: ReviewCrossFileEntry[] = [];
@@ -405,9 +411,11 @@ class PysdController implements vscode.Disposable {
       onDiff: (folder, result) => this.handleDiff(folder, result),
       onReviewResult: (folder, result) => this.handleReviewResult(folder, result),
       onReviewFile: (folder, result) => this.handleReviewFile(folder, result),
+      onAssetDiff: (folder, result) => this.handleAssetDiff(folder, result),
       onReviewError: (folder, seq, message, code) => this.handleReviewError(folder, seq, message, code),
       onIncrementalReviewError: (folder, seq, message, code) =>
         this.handleIncrementalReviewError(folder, seq, message, code),
+      onAssetDiffError: (folder, seq, message) => this.handleAssetDiffError(folder, seq, message),
       onProtocolError: (error) => this.handleProtocolError(error),
       onFailure: (folder, details) => this.notifyLiveServerFailure(folder, details),
     });
@@ -1583,6 +1591,9 @@ class PysdController implements vscode.Disposable {
           status: "ready",
           diff,
         });
+        // The entry is ready now (the file IS a change); the perceptual comparison arrives
+        // separately so one slow image cannot hold up the rest of the review.
+        this.requestAssetDiff(folder, file.relativePath);
         this.updateReviewTree();
         this.finishReviewIfIdle();
         this.output.appendLine(JSON.stringify({
@@ -1719,8 +1730,7 @@ class PysdController implements vscode.Disposable {
     if (options.preserveRefreshState !== true) {
       this.cancelPendingReviewRefresh();
     }
-    // Invalidate the on-demand asset compare so edited images recompare.
-    this.assetCompare.clear();
+    this.assetDiffRequests.clear();
     this.reviewGeneration += 1;
     for (const request of this.reviewRequests.values()) {
       const session = this.serverSessions.get(request.folderUri);
@@ -1835,7 +1845,11 @@ class PysdController implements vscode.Disposable {
   ): Promise<ReturnType<typeof buildReviewPanelModel> | undefined> {
     const file = this.reviewFiles.get(reviewKey(filePayload.folderUri, filePayload.relativePath));
     if (!file || file.status !== "ready" || !file.diff || file.relativePath === ".intentumdiff-review") {
-      void vscode.window.showInformationMessage("IntentumDiff: custom review panel needs a ready semantic review for this file.");
+      // A review that has not finished is an ordinary, expected state — not something the
+      // user must act on. Raising a notification for it made "not finished yet" and
+      // "something is wrong" look identical, and it is the first thing a new user sees.
+      // A transient status-bar message says the same thing without the alarm. (#24)
+      vscode.window.setStatusBarMessage("IntentumDiff: preparing semantic review…", 3000);
       return undefined;
     }
     const folderUri = vscode.Uri.parse(filePayload.folderUri);
@@ -1855,8 +1869,9 @@ class PysdController implements vscode.Disposable {
     });
     const contextLines = readReviewDiffContextLines();
     if (isImageLikePath(filePayload.relativePath)) {
-      const fileForPanel = this.assetCompare.comparedFileOrPreview(folderUri, filePayload.relativePath, ref, file);
-      return buildReviewPanelModel(fileForPanel, "", "", ref, { contextLines });
+      // The perceptual comparison is already on the review entry (or on its way there via the
+      // engine's asset_diff response); the panel renders what the engine returned.
+      return buildReviewPanelModel(file, "", "", ref, { contextLines });
     }
     const [baseDocument, modifiedDocument] = await Promise.all([
       vscode.workspace.openTextDocument(baseUri),
@@ -2327,6 +2342,88 @@ class PysdController implements vscode.Disposable {
     return true;
   }
 
+  /**
+   * Ask the engine to compare one image against the review ref.
+   *
+   * Only a repo-relative path and the ref go over the wire — the base version lives in git's
+   * object store and the engine materialises it. Nothing here opens, decodes, or describes an
+   * image; the panel shows a comparison only once `handleAssetDiff` has one to show.
+   */
+  private requestAssetDiff(folder: vscode.WorkspaceFolder, relativePath: string): void {
+    const folderUri = folder.uri.toString();
+    for (const [key, request] of this.assetDiffRequests.entries()) {
+      if (request.folderUri === folderUri && request.relativePath === relativePath) {
+        this.assetDiffRequests.delete(key);
+      }
+    }
+    try {
+      const session = this.serverSessions.ensure(folder);
+      const seq = session.client.assetDiff(relativePath, { ref: readLiveServerSettings().ref });
+      this.assetDiffRequests.set(requestKey(folderUri, seq), {
+        folderUri,
+        relativePath,
+        generation: this.reviewGeneration,
+      });
+    } catch (error) {
+      this.applyAssetDiffOutcome(folderUri, relativePath, (diff) =>
+        withAssetDiffFailure(diff, messageOf(error)));
+    }
+  }
+
+  private handleAssetDiff(folder: vscode.WorkspaceFolder, result: AssetDiffEnvelope): void {
+    const key = requestKey(folder.uri.toString(), result.seq);
+    const request = this.assetDiffRequests.get(key);
+    if (!request) {
+      return;
+    }
+    this.assetDiffRequests.delete(key);
+    if (request.generation !== this.reviewGeneration) {
+      return;
+    }
+    this.applyAssetDiffOutcome(request.folderUri, request.relativePath, (diff) =>
+      withEngineAssetDiff(diff, result.manifest));
+    this.output.appendLine(JSON.stringify({
+      assetDiff: {
+        path: request.relativePath,
+        status: result.manifest.status ?? "unknown",
+        artifacts: Object.keys((result.manifest.artifacts as Record<string, unknown>) ?? {}),
+      },
+      workspace: folder.name,
+    }, null, 2));
+  }
+
+  private handleAssetDiffError(folder: vscode.WorkspaceFolder, seq: number, message: string): boolean {
+    const key = requestKey(folder.uri.toString(), seq);
+    const request = this.assetDiffRequests.get(key);
+    if (!request) {
+      return false;
+    }
+    this.assetDiffRequests.delete(key);
+    if (request.generation === this.reviewGeneration) {
+      // A failed perceptual compare does not fail the file's review — the image is still a
+      // reviewable change. Only the perceptual half is unavailable, and it says so.
+      this.applyAssetDiffOutcome(request.folderUri, request.relativePath, (diff) =>
+        withAssetDiffFailure(diff, message));
+    }
+    return true;
+  }
+
+  /** Rewrite a ready image entry's diff in place and refresh whatever is showing it. */
+  private applyAssetDiffOutcome(
+    folderUri: string,
+    relativePath: string,
+    apply: (diff: SemanticDiff) => SemanticDiff,
+  ): void {
+    const key = reviewKey(folderUri, relativePath);
+    const existing = this.reviewFiles.get(key);
+    if (!existing?.diff) {
+      return;
+    }
+    this.reviewFiles.set(key, { ...existing, diff: apply(existing.diff) });
+    this.updateReviewTree();
+    void this.refreshOpenReviewPanel();
+  }
+
   private applyCommitReview(folder: vscode.WorkspaceFolder, commitDiff: CommitDiff): void {
     const folderUri = folder.uri.toString();
     const streamed = this.streamedReviewFiles.get(folderUri);
@@ -2402,7 +2499,8 @@ class PysdController implements vscode.Disposable {
       if (!existing || existing.status !== "pending") {
         continue;
       }
-      const diff = isImageLikePath(file.relativePath)
+      const isImage = isImageLikePath(file.relativePath);
+      const diff = isImage
         ? imageAssetReviewDiff(folder, file)
         : nonTextAssetReviewDiff(file);
       this.reviewFiles.set(key, {
@@ -2412,6 +2510,9 @@ class PysdController implements vscode.Disposable {
         status: "ready",
         diff,
       });
+      if (isImage) {
+        this.requestAssetDiff(folder, file.relativePath);
+      }
     }
   }
 

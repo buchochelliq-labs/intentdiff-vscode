@@ -21,6 +21,7 @@ import {
 import { ProcessLineTransport } from "./processTransport";
 import {
   LiveServerClient,
+  type AssetDiffEnvelope,
   type DiffResultEnvelope,
   type ReviewFileEnvelope,
   type ReviewResultEnvelope,
@@ -43,10 +44,13 @@ export interface ServerSessionHost {
   onDiff(folder: vscode.WorkspaceFolder, result: DiffResultEnvelope): void;
   onReviewResult(folder: vscode.WorkspaceFolder, result: ReviewResultEnvelope): void;
   onReviewFile(folder: vscode.WorkspaceFolder, result: ReviewFileEnvelope): void;
+  onAssetDiff(folder: vscode.WorkspaceFolder, result: AssetDiffEnvelope): void;
   /** Return true when the error belonged to a full-review request. */
   onReviewError(folder: vscode.WorkspaceFolder, seq: number, message: string, code?: string): boolean;
   /** Return true when the error belonged to an incremental request. */
   onIncrementalReviewError(folder: vscode.WorkspaceFolder, seq: number, message: string, code?: string): boolean;
+  /** Return true when the error belonged to a perceptual asset request. */
+  onAssetDiffError(folder: vscode.WorkspaceFolder, seq: number, message: string): boolean;
   onProtocolError(error: { code: string; message: string }): void;
   onFailure(folder: vscode.WorkspaceFolder, details: LiveServerFailureDetails): Promise<void>;
 }
@@ -146,10 +150,18 @@ export class ServerSessionManager {
         this.host.onReviewFile(folder, event.result);
         return;
       }
+      if (event.kind === "asset_diff") {
+        this.host.onAssetDiff(folder, event.result);
+        return;
+      }
       if (event.kind === "error") {
+        // An asset request that failed must be released from the client's in-flight map, or a
+        // later response reusing the seq would be dropped as unknown.
+        client.forgetAssetDiff(event.seq);
         if (
           !this.host.onReviewError(folder, event.seq, event.error.message, event.error.code)
           && !this.host.onIncrementalReviewError(folder, event.seq, event.error.message, event.error.code)
+          && !this.host.onAssetDiffError(folder, event.seq, event.error.message)
         ) {
           this.host.onProtocolError(event.error);
         }

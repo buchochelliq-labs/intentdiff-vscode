@@ -243,15 +243,16 @@ test("image assets are routed to asset review instead of text semantic diff", ()
   assert.match(assetDiffSource, /export function isImageLikePath\(relativePath: string\)/u);
   assert.match(assetDiffSource, /export function imageAssetReviewDiff\(folder: vscode\.WorkspaceFolder, file: ReviewRefreshFile\): SemanticDiff/u);
   assert.match(extensionSource, /if \(isImageLikePath\(file\.relativePath\)\) \{\s+const diff = imageAssetReviewDiff\(folder, file\);/u);
-  // Image panels upgrade the preview to the real perceptual compare on demand,
-  // computed in the background (non-blocking) then refreshed in.
-  // The compare cache/CLI machinery moved to assetCompareService.ts (issue #79
-  // stage 2); extension.ts keeps the synchronous upgrade call site.
-  const assetCompareSource = readFileSync(path.join(__dirname, "..", "..", "src", "assetCompareService.ts"), "utf8");
-  assert.match(extensionSource, /assetCompare\.comparedFileOrPreview\(folderUri, filePayload\.relativePath, ref, file\)/u);
-  assert.match(extensionSource, /return buildReviewPanelModel\(fileForPanel, "", "", ref, \{ contextLines \}\);/u);
-  assert.match(assetCompareSource, /computeInBackground\(folderUri, ref\)/u);
-  assert.match(assetCompareSource, /"assets", "git", "--repo"/u);
+  // The perceptual half comes from the engine over the live-server `asset_diff` op
+  // (intentumdiff-vscode#25). This replaced a CLI-spawning compare service AND a fabricated
+  // `status: "preview"` entry that never called anything — hence the source pins below:
+  // the review must ISSUE the request, and must merge the reply rather than invent one.
+  const protocolSource = readFileSync(path.join(__dirname, "..", "..", "src", "protocol.ts"), "utf8");
+  assert.match(protocolSource, /op: "asset_diff"/u);
+  assert.match(extensionSource, /this\.requestAssetDiff\(folder, file\.relativePath\)/u);
+  assert.match(extensionSource, /withEngineAssetDiff\(diff, result\.manifest\)/u);
+  assert.match(extensionSource, /return buildReviewPanelModel\(file, "", "", ref, \{ contextLines \}\);/u);
+  assert.doesNotMatch(assetDiffSource, /status: "preview"/u);
   // Skipped binary/image assets are reconciled so the streaming review finishes
   // (the engine drops them from commit_diff.file_diffs, so they'd hang "pending").
   assert.match(extensionSource, /reconcileSkippedReviewFiles\(folder, request\.snapshot\)/u);
@@ -263,7 +264,6 @@ test("image assets are routed to asset review instead of text semantic diff", ()
   assert.match(webviewSource, /localResourceRoots: \[folderUri, mediaUri, codiconsRoot\]/u);
   assert.match(webviewSource, /webview\.asWebviewUri\(vscode\.Uri\.file\(resourcePath\)\)/u);
   assert.match(modelSource, /Working tree image/u);
-  assert.match(modelSource, /Perceptual diff pending/u);
 });
 
 test("release media screenshot workflow covers every beta proof surface", () => {
@@ -297,7 +297,11 @@ test("release media screenshot workflow covers every beta proof surface", () => 
   assert.match(recorder, /Resolve-VsCodeDemoReviewView/u);
   assert.match(recorder, /Resolve-VsCodeDemoContentScene/u);
   assert.match(recorder, /intentumdiff\.reviewPanel\.setView/u);
-  assert.match(recorder, /"binary-image" \{ return "semantic" \}/u);
+  // Asserts the scene resolves to the content scene the stager ACCEPTS. This previously
+  // asserted `return "semantic"` — pinning a mapping that no downstream ValidateSet allows,
+  // so the perceptual-diff scene could never stage and the test defended that. A test that
+  // encodes an implementation detail verbatim protects whatever is there, including a bug.
+  assert.match(recorder, /"binary-image" \{ return "binary-image" \}/u);
   assert.match(recorder, /\$openSemanticDiff = \$Scene -notin @\("dashboard", "binary-image"\)/u);
   assert.match(recorder, /executeCommand\("intentumdiff\.openReviewPanel", \{/u);
   assert.match(recorder, /relativePath: diffPath/u);

@@ -551,46 +551,71 @@ function valueCategory(nodeType: string | null | undefined): string | undefined 
  * Change-delta (#69-I): what shifted between the old and new definition, from their privacy-safe
  * facts alone — the most intent-relevant signal for a MODIFICATION. Enum/count/flag only.
  */
-export function computeChangeDelta(before: NodeFacts, after: NodeFacts): string[] {
+/** One structured fact delta as emitted by the engine (`change.fact_delta`, #178). */
+export interface FactDelta {
+  kind: string;
+  from?: number | string;
+  to?: number | string;
+  transition?: string;
+  added?: boolean;
+}
+
+/**
+ * Render engine-emitted fact deltas as English.
+ *
+ * The FINDING is the engine's (crates/rust-core-host, node_facts.rs::compute_fact_delta);
+ * only the WORDING lives here. This function used to do the diffing too, which meant the
+ * Go and Java bindings got none of it — the boundary violation #178 fixed.
+ *
+ * A delta with no recognised phrasing is skipped on purpose: the engine reports
+ * control-shape shifts like looping -> branching as data with no `transition`, because
+ * there is no honest one-liner for them. Staying silent beats inventing a sentence.
+ */
+export function renderFactDelta(deltas: readonly FactDelta[]): string[] {
   const out: string[] = [];
-  const bp = before.param_count;
-  const ap = after.param_count;
-  if (typeof bp === "number" && typeof ap === "number" && bp !== ap) {
-    const d = ap - bp;
-    out.push(
-      d > 0
-        ? `adds ${d} parameter${d === 1 ? "" : "s"}`
-        : `removes ${-d} parameter${-d === 1 ? "" : "s"}`,
-    );
-  }
-  if (!before.is_async && after.is_async) {
-    out.push("becomes async");
-  }
-  if (before.returns !== after.returns || before.return_kind !== after.return_kind) {
-    if (before.returns === "none" && after.returns && after.returns !== "none") {
-      out.push("now returns a value");
-    } else if (after.returns === "none" && before.returns && before.returns !== "none") {
-      out.push("no longer returns a value");
-    } else {
-      out.push("changes what it returns");
+  for (const d of deltas) {
+    switch (d.kind) {
+      case "param_count": {
+        if (typeof d.from === "number" && typeof d.to === "number") {
+          const n = d.to - d.from;
+          out.push(
+            n > 0
+              ? `adds ${n} parameter${n === 1 ? "" : "s"}`
+              : `removes ${-n} parameter${-n === 1 ? "" : "s"}`,
+          );
+        }
+        break;
+      }
+      case "became_async":
+        out.push("becomes async");
+        break;
+      case "returns":
+        out.push(
+          d.transition === "gained_value"
+            ? "now returns a value"
+            : d.transition === "lost_value"
+              ? "no longer returns a value"
+              : "changes what it returns",
+        );
+        break;
+      case "control_shape":
+        if (d.transition === "added_loop") {
+          out.push("adds a loop");
+        } else if (d.transition === "added_branch") {
+          out.push("adds a branch");
+        } else if (d.transition === "removed_control_flow") {
+          out.push("removes control flow");
+        }
+        break;
+      case "error_handling":
+        out.push(d.added ? "adds error handling" : "removes error handling");
+        break;
+      case "side_effects":
+        out.push("adds a side effect");
+        break;
+      default:
+        break; // unknown kind from a newer engine — ignore rather than guess
     }
-  }
-  if (before.control_shape !== after.control_shape) {
-    if (after.control_shape === "looping" && before.control_shape !== "looping") {
-      out.push("adds a loop");
-    } else if (after.control_shape === "branching" && before.control_shape === "linear") {
-      out.push("adds a branch");
-    } else if (after.control_shape === "linear" && before.control_shape !== "linear") {
-      out.push("removes control flow");
-    }
-  }
-  if (!before.has_error_handling && after.has_error_handling) {
-    out.push("adds error handling");
-  } else if (before.has_error_handling && !after.has_error_handling) {
-    out.push("removes error handling");
-  }
-  if (!before.side_effects && after.side_effects) {
-    out.push("adds a side effect");
   }
   return out;
 }
@@ -712,13 +737,11 @@ export function extractFacts(change: SemanticChange, group?: ChangeGroup): Inten
   if (engine?.is_generator) {
     facts.isGenerator = true;
   }
-  // Change-delta (#69-I): what shifted between old and new — the key intent for a MODIFICATION.
-  if (
-    change.change_type === "MODIFICATION" &&
-    change.old_node?.facts &&
-    change.new_node?.facts
-  ) {
-    const delta = computeChangeDelta(change.old_node.facts, change.new_node.facts);
+  // Change-delta (#69-I, moved to the engine in #178): what shifted between old and new —
+  // the key intent for a MODIFICATION. The engine emits `fact_delta` only when both sides
+  // carry facts and something actually moved, so presence alone is meaningful here.
+  if (change.change_type === "MODIFICATION" && change.fact_delta?.length) {
+    const delta = renderFactDelta(change.fact_delta);
     if (delta.length > 0) {
       facts.changeDelta = delta;
     }
