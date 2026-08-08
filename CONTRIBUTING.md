@@ -1,10 +1,88 @@
-# Contributing
+# Contributing to the IntentumDiff VS Code extension
 
-Developer setup for the IntentumDiff VS Code extension. User-facing
-documentation lives at https://buchochelliq-labs.github.io/intentumdiff-docs/.
+Thanks for looking. This covers what the project is, how this repository fits in, and how to
+get a change merged.
 
-Work targets the release-candidate branch, never `main` — see the
-`intentumdiff-release` skill.
+**User documentation:** https://buchochelliq-labs.github.io/intentumdiff-docs/
+
+## What IntentumDiff is
+
+A textual diff compares characters, so it cannot tell a rename from a rewrite. IntentumDiff
+parses both sides of a change, matches the trees, and classifies every difference by what it
+does — **meaningful**, **refactoring**, **moved** or **ignored style**.
+
+## What this repository is
+
+The extension is a **front end**. It does not diff anything: it runs the `intentumdiff`
+engine and renders what comes back.
+
+| Repository | Role |
+|---|---|
+| [intentumdiff-core](https://github.com/buchochelliq-labs/intentumdiff-core) | **The engine.** Rust. All diffing, classification and image processing |
+| [intentumdiff-python](https://github.com/buchochelliq-labs/intentumdiff-python) | The Python API and the `intentumdiff` command this extension runs |
+| **intentumdiff-vscode** (here) | The editor integration |
+| [intentumdiff-ast](https://github.com/buchochelliq-labs/intentumdiff-ast) | The canonical AST vocabulary |
+| [intentumdiff-plugin-sdk](https://github.com/buchochelliq-labs/intentumdiff-plugin-sdk) | The SDK language parsers are built against |
+| 78 `*-parser` repositories | One WebAssembly parser per language |
+| [intentumdiff-docs](https://github.com/buchochelliq-labs/intentumdiff-docs) | The documentation site |
+
+## Two conventions worth knowing before you start
+
+**The native diff editor is primary.** Diffs open with `vscode.diff` — left is a read-only
+`intentumdiff-base:` document, right is the real working-tree file, so it stays editable.
+Intent is surfaced through CodeLens, peek views and decorations. Please do not rebuild a diff
+editor in a webview; that approach was tried and retired.
+
+**Bind to the editor theme.** Chrome uses `--vscode-*` variables and change categories use the
+contributed `intentumdiff.semanticChanges.*` colour IDs. No hardcoded hex, no bundled fonts,
+and it must read correctly in Dark+, Light+ and High Contrast. Icons are codicons.
+
+Image artifacts come from the Rust engine. There is no image processing in the webview.
+
+## Where a change belongs
+
+| Change | Repository |
+|---|---|
+| Classification or diff behaviour | `intentumdiff-core` |
+| CLI or Python API | `intentumdiff-python` |
+| Anything visible in the editor | here |
+| Support for a language | that language's parser repo |
+| Anything a reader sees | `intentumdiff-docs` |
+
+## Making a change
+
+**Branch from the release candidate, not `main`.** `main` is what gets tagged and published.
+
+```bash
+git fetch origin
+git checkout -b feat/my-change origin/release/v0.0.2-rc
+gh pr create --base release/v0.0.2-rc
+```
+
+Approvals are set to zero because this is a solo-maintainer project, but checks must pass.
+
+## What a good pull request looks like
+
+- **A test that fails without the change.** Green CI is not evidence a product works — every
+  0.0.1 defect passed CI and was obvious within thirty seconds of installing the extension
+- **Checked in a clean VS Code profile**, not only an Extension Development Host
+- **Documentation updated in the same change** if a reader would notice
+- Commit messages that say *why*, not just *what*
+
+## Contributions are welcome
+
+Genuinely — not merely tolerated. Good places to start:
+
+- **Bug reports with a reproduction.** A diff classified wrongly is the most useful report we
+  get, because it becomes a test case
+- **A language you care about** — see
+  [extending](https://buchochelliq-labs.github.io/intentumdiff-docs/extending/). Language
+  support is a plugin, so adding one needs no change to the engine
+- **UX problems.** If something was confusing, that is a real bug; say so
+
+You do not need permission to open a pull request, and you do not need to be sure it is right.
+If you are unsure where something belongs, open an issue and ask — that is a perfectly good
+first contribution.
 
 ## Run Locally
 

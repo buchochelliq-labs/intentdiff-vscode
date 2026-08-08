@@ -184,3 +184,14 @@ buffers are still covered by active-file live feedback, but are intentionally
 excluded from cross-file review V1. A custom webview renderer, inline semantic
 comments, and hosted PR review remain future slices.
 
+## Extending
+
+Language support is a **plugin, not a feature of the engine**. Each of the 78 languages is an
+independent, sandboxed WebAssembly component built against a published SDK, so adding one
+needs no change to the engine and no engine release. See
+[extending](https://buchochelliq-labs.github.io/intentumdiff-docs/extending/).
+
+## Contributing
+
+Contributions are welcome — bug reports, languages, UX fixes, docs. See
+[CONTRIBUTING.md](CONTRIBUTING.md). You do not need permission to open a pull request.
