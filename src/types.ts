@@ -80,6 +80,20 @@ export interface SemanticNode {
   facts?: NodeFacts | null;
 }
 
+/**
+ * A structured fact delta emitted by the engine (#178): what MOVED between the old and new
+ * NodeFacts, not what they hold. Rendered to English by `renderFactDelta`; the engine never
+ * emits prose, so wording can differ per surface without touching the core.
+ */
+export interface FactDeltaEntry {
+  kind: string;
+  from?: number | string;
+  to?: number | string;
+  /** Absent when the shift has no honest one-liner (e.g. looping -> branching). */
+  transition?: string;
+  added?: boolean;
+}
+
 export interface SemanticChange {
   change_type: string;
   old_node?: SemanticNode | null;
@@ -88,6 +102,8 @@ export interface SemanticChange {
   confidence?: number;
   description?: string;
   text_diff?: string | null;
+  /** Present only when both sides carry facts AND something moved. */
+  fact_delta?: FactDeltaEntry[];
 }
 
 export interface ChangeGroup {

@@ -4,7 +4,7 @@ import {
   arity,
   bodyFact,
   bodyKind,
-  computeChangeDelta,
+  renderFactDelta,
   gitignoreWhat,
   explainChange,
   explainGroup,
@@ -18,27 +18,48 @@ import {
 } from "../src/intentExplain";
 import type { ChangeGroup, SemanticChange, SemanticNode } from "../src/types";
 
-test("computeChangeDelta reports what shifted between old and new facts (#69-I)", () => {
-  // A linear helper that returned nothing becomes an async, looping, error-handling function.
-  const delta = computeChangeDelta(
-    { param_count: 1, returns: "none", control_shape: "linear" },
-    {
-      param_count: 2,
-      returns: "value",
-      control_shape: "looping",
-      has_error_handling: true,
-      is_async: true,
-    },
-  );
+test("renderFactDelta phrases the engine's structured deltas (#69-I, #178)", () => {
+  // The engine now does the DIFFING (node_facts.rs::compute_fact_delta); this only words it.
+  // Same scenario as before the move: a linear helper that returned nothing becomes an
+  // async, looping, error-handling function.
+  const delta = renderFactDelta([
+    { kind: "param_count", from: 1, to: 2 },
+    { kind: "became_async" },
+    { kind: "returns", transition: "gained_value", from: "none", to: "value" },
+    { kind: "control_shape", transition: "added_loop", from: "linear", to: "looping" },
+    { kind: "error_handling", added: true },
+  ]);
   assert.ok(delta.includes("adds 1 parameter"));
   assert.ok(delta.includes("becomes async"));
   assert.ok(delta.includes("now returns a value"));
   assert.ok(delta.includes("adds a loop"));
   assert.ok(delta.includes("adds error handling"));
-  // No spurious deltas when nothing changed.
+
+  // Nothing moved -> the engine emits no fact_delta at all.
+  assert.deepEqual(renderFactDelta([]), []);
+});
+
+test("renderFactDelta stays silent on shifts the engine declined to name (#178)", () => {
+  // looping -> branching is a real change with no honest one-liner, so the engine reports
+  // it as data with no `transition`. Inventing a sentence here would be worse than silence.
   assert.deepEqual(
-    computeChangeDelta({ param_count: 1, control_shape: "linear" }, { param_count: 1, control_shape: "linear" }),
+    renderFactDelta([{ kind: "control_shape", from: "looping", to: "branching" }]),
     [],
+  );
+  // An unknown kind from a newer engine must not throw or produce garbage.
+  assert.deepEqual(renderFactDelta([{ kind: "some_future_fact", added: true }]), []);
+});
+
+test("renderFactDelta words removals as well as additions (#178)", () => {
+  assert.deepEqual(renderFactDelta([{ kind: "param_count", from: 3, to: 1 }]), [
+    "removes 2 parameters",
+  ]);
+  assert.deepEqual(renderFactDelta([{ kind: "error_handling", added: false }]), [
+    "removes error handling",
+  ]);
+  assert.deepEqual(
+    renderFactDelta([{ kind: "returns", transition: "lost_value", from: "value", to: "none" }]),
+    ["no longer returns a value"],
   );
 });
 
